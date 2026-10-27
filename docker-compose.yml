@@ -1,0 +1,16 @@
+services:
+  sebax:
+    build: .
+    container_name: sebax-agent
+    restart: always
+    ports:
+      - "8000:8000"
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./bridge/auth_info_baileys:/app/bridge/auth_info_baileys
+    environment:
+      - BRIDGE_PORT=3000
+      - AGENT_WEBHOOK_URL=http://127.0.0.1:8000/webhook/whatsapp

@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# WhatsApp Baileys Auth Session (IMPORTANTE: contiene tus credenciales de sesión)
+bridge/auth_info_baileys/
+auth_info_baileys/
+
+# Environment and Data
+.env
+data/
+*.sqlite
+*.log
+*.mp3

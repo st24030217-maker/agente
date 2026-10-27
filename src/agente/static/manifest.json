@@ -1,0 +1,22 @@
+{
+  "name": "Sebax - Agente IA",
+  "short_name": "Sebax",
+  "description": "Tu compañero y orquestador digital inteligente con avatar 3D y control por voz.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f6f9",
+  "theme_color": "#f5f6f9",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/bot.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/bot.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
