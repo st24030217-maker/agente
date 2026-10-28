@@ -1,5 +1,7 @@
 import json
 import re
+import html
+import urllib.parse
 from pathlib import Path
 from datetime import datetime
 from agente.config import DATA_DIR
@@ -246,7 +248,7 @@ def _slugify(text: str) -> str:
     cleaned = re.sub(r"[úùüû]", "u", cleaned)
     cleaned = re.sub(r"[ñ]", "n", cleaned)
     cleaned = re.sub(r"[^a-z0-9]+", "-", cleaned)
-    return cleaned.strip("-")
+    return cleaned.strip("-")[:64]
 
 def _detect_niche_key(niche: str) -> str:
     n = niche.lower()
@@ -337,37 +339,66 @@ def generate_business_demo(
     }
 
 def get_demo(slug: str) -> dict | None:
+    safe_slug = re.sub(r"[^a-z0-9\-]", "", str(slug).lower().strip())[:64]
+    if not safe_slug:
+        return None
     demos = _load_all_demos()
-    return demos.get(slug)
+    return demos.get(safe_slug)
 
 def list_all_demos() -> list[dict]:
     demos = _load_all_demos()
     return list(demos.values())
 
 def render_demo_html(demo: dict) -> str:
-    """Renderiza el documento HTML completo del demo interactivo con carrito a WhatsApp."""
-    items_json = json.dumps(demo["items"], ensure_ascii=False)
-    
+    """Renderiza el documento HTML completo del demo interactivo con carrito a WhatsApp, blindado contra XSS."""
+    safe_business_name = html.escape(str(demo.get("business_name", "")), quote=True)
+    safe_tagline = html.escape(str(demo.get("tagline", "")), quote=True)
+    safe_city = html.escape(str(demo.get("city", "Comarca Lagunera")), quote=True)
+    safe_phone = "".join(filter(str.isdigit, str(demo.get("phone", "5218719164677"))))
+    safe_instagram = html.escape(str(demo.get("agency_instagram", "https://www.instagram.com/ssss.olutions")), quote=True)
+
+    safe_primary = html.escape(str(demo.get("primary_color", "#f59e0b")), quote=True)
+    safe_accent = html.escape(str(demo.get("accent_color", "#d97706")), quote=True)
+    safe_bg = html.escape(str(demo.get("bg_color", "#0c0a09")), quote=True)
+
+    safe_items = []
+    for it in demo.get("items", []):
+        safe_items.append({
+            "id": re.sub(r"[^a-zA-Z0-9_\-]", "", str(it.get("id", ""))),
+            "name": html.escape(str(it.get("name", "")), quote=True),
+            "cat": html.escape(str(it.get("cat", "")), quote=True),
+            "price": float(it.get("price", 0)),
+            "desc": html.escape(str(it.get("desc", "")), quote=True)
+        })
+    def _safe_json_for_script(obj) -> str:
+        return json.dumps(obj, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+
+    items_json = _safe_json_for_script(safe_items)
+
     categories_html = "".join(
-        f'<button class="tab-btn" onclick="filterCategory(\'{cat}\')">{cat}</button>'
-        for cat in demo["categories"]
+        f'<button class="tab-btn" onclick="filterCategory({_safe_json_for_script(cat)})">{html.escape(str(cat))}</button>'
+        for cat in demo.get("categories", [])
     )
+
+    wa_pitch_text = urllib.parse.quote(f"Hola Sebastián, vi el demo interactivo para {demo.get('business_name', '')} y quiero activar mi sistema.")
+    target_phone_json = _safe_json_for_script(safe_phone)
+    business_name_json = _safe_json_for_script(str(demo.get("business_name", "")))
 
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{demo['business_name']} - Menú y Catálogo Digital Interactivo</title>
-  <meta name="description" content="Prototipo interactivo desarrollado para {demo['business_name']} por SSSSolutions.">
+  <title>{safe_business_name} - Menú y Catálogo Digital Interactivo</title>
+  <meta name="description" content="Prototipo interactivo desarrollado para {safe_business_name} por SSSSolutions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {{
-      --primary: {demo['primary_color']};
-      --accent: {demo['accent_color']};
-      --bg: {demo['bg_color']};
+      --primary: {safe_primary};
+      --accent: {safe_accent};
+      --bg: {safe_bg};
       --card-bg: rgba(255, 255, 255, 0.04);
       --card-border: rgba(255, 255, 255, 0.08);
       --text: #f8fafc;
@@ -717,7 +748,7 @@ def render_demo_html(demo: dict) -> str:
       <span class="pulse-dot"></span>
       <span>Prototipo Activo SSSSolutions</span>
     </div>
-    <a href="{demo['agency_instagram']}" target="_blank" class="agency-ribbon-link">
+    <a href="{safe_instagram}" target="_blank" class="agency-ribbon-link">
       @ssss.olutions
     </a>
   </div>
@@ -726,13 +757,13 @@ def render_demo_html(demo: dict) -> str:
   <section class="hero">
     <div class="exclusive-badge">
       <span>Demo Exclusivo para</span>
-      <span>{demo['business_name']}</span>
+      <span>{safe_business_name}</span>
     </div>
-    <h1>{demo['business_name']}</h1>
-    <p>{demo['tagline']}</p>
+    <h1>{safe_business_name}</h1>
+    <p>{safe_tagline}</p>
     <div class="location-tag">
       <span>Ubicación:</span>
-      <strong>{demo['city']}</strong>
+      <strong>{safe_city}</strong>
     </div>
   </section>
 
@@ -754,7 +785,7 @@ def render_demo_html(demo: dict) -> str:
       Este prototipo interactivo fue diseñado a la medida por <strong>SSSSolutions</strong>. 
       Digitalizamos tu catálogo, optimizamos pedidos directos por WhatsApp sin comisiones y aumentamos tus ventas en La Laguna.
     </p>
-    <a href="https://wa.me/{demo['phone']}?text=Hola%20Sebasti%C3%A1n%2C%20vi%20el%20demo%20interactivo%20para%20{demo['business_name']}%20y%20quiero%20activar%20mi%20sistema." class="agency-btn-action" target="_blank">
+    <a href="https://wa.me/{safe_phone}?text={wa_pitch_text}" class="agency-btn-action" target="_blank">
       Contactar a SSSSolutions
     </a>
   </section>
@@ -773,8 +804,8 @@ def render_demo_html(demo: dict) -> str:
   <script>
     const itemsData = {items_json};
     const cart = {{}};
-    const targetPhone = "{demo['phone']}";
-    const businessName = "{demo['business_name']}";
+    const targetPhone = {target_phone_json};
+    const businessName = {business_name_json};
 
     function renderItems(filter = "all") {{
       const container = document.getElementById("items-list");
@@ -869,9 +900,9 @@ def render_demo_html(demo: dict) -> str:
 
       if (orderLines.length === 0) return;
 
-      const message = `Hola ${{businessName}}, quiero realizar el siguiente pedido visto en su menú interactivo:\\n\\n` +
-        orderLines.join("\\n") +
-        `\\n\\nTotal: $${{total}} MXN\\n\\nMi nombre es: \\nDirección de entrega: `;
+      const message = `Hola ${{businessName}}, quiero realizar el siguiente pedido visto en su menú interactivo:\n\n` +
+        orderLines.join("\n") +
+        `\n\nTotal: $${{total}} MXN\n\nMi nombre es: \nDirección de entrega: `;
 
       const waUrl = `https://wa.me/${{targetPhone}}?text=${{encodeURIComponent(message)}}`;
       window.open(waUrl, "_blank");
