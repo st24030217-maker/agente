@@ -163,6 +163,47 @@
       transform: translateY(-1px);
       background: #27272a;
     }
+    .wa-status-pill {
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 5px 11px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      background: #ffffff;
+      font-family: inherit;
+    }
+    .wa-status-pill.connected {
+      background: #ecfdf5;
+      color: #059669;
+      border-color: #a7f3d0;
+    }
+    .wa-status-pill.connected .dot-status {
+      background: #10b981;
+    }
+    .wa-status-pill.disconnected {
+      background: #fffbeb;
+      color: #b45309;
+      border-color: #fde68a;
+    }
+    .wa-status-pill.disconnected .dot-status {
+      background: #f59e0b;
+      animation: pulse-dot 1.8s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+    .dot-status {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
     .icon-btn {
       width: 32px; height: 32px;
       border-radius: 10px;
@@ -778,6 +819,10 @@
         </div>
       </div>
       <div class="top-controls">
+        <button id="wa-status-btn" class="wa-status-pill disconnected" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
+          <span class="dot-status"></span>
+          <span id="wa-status-label">Vincular WhatsApp</span>
+        </button>
         <a href="https://www.instagram.com/ssss.olutions" target="_blank" class="badge-link" title="Instagram oficial de SSSSolutions">
           @ssss.olutions
         </a>
@@ -823,6 +868,7 @@
     <!-- Controles Inferiores -->
     <div class="bottom-controls">
       <div class="quick-actions">
+        <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(0,0,0,0.15); background:#ffffff;">Vincular WhatsApp</div>
         <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreón, Gómez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreón, Gómez y Lerdo</div>
         <div class="pill" onclick="sendQuick('Sebax, busca 3 talleres mecanicos o restaurantes en Torreón, Gómez Palacio o Lerdo y prospectalos por WhatsApp')">Talleres y Restaurantes La Laguna</div>
         <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
@@ -870,6 +916,7 @@
       <div class="sheet-tabs">
         <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos</div>
         <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas & Agenda</div>
+        <div class="sheet-tab" id="tab-btn-whatsapp" onclick="switchTab('whatsapp')">Conectar WhatsApp</div>
       </div>
 
       <div class="sheet-body">
@@ -1011,6 +1058,86 @@
             <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Citas Programadas en Agenda</div>
             <div class="leads-list" id="appointments-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando agenda...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Conexión de WhatsApp -->
+        <div class="tab-content" id="tab-content-whatsapp">
+          <!-- Vista cuando WhatsApp está CONECTADO -->
+          <div id="wa-tab-connected-view" style="display:none; text-align:center; padding:2rem 1rem;">
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:#ecfdf5; color:#059669; font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem;">
+              <span style="width:8px; height:8px; border-radius:50%; background:#10b981;"></span> EN LÍNEA Y OPERATIVO
+            </div>
+            <div style="font-size:1.15rem; font-weight:800; color:#09090b; margin-bottom:0.4rem;">WhatsApp Conectado con Éxito</div>
+            <div style="font-size:0.84rem; color:#71717a; line-height:1.5; max-width:400px; margin:0 auto 1.4rem auto;" id="wa-connected-user-desc">
+              Sebax está activo 24/7 atendiendo clientes y prospectando negocios en Torreón, Gómez Palacio y Lerdo.
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; max-width:320px; margin:0 auto;">
+              <button class="btn-launch" onclick="retryUnsentLeadsUi()" style="padding:12px; border-radius:12px; font-weight:700; background:#09090b; color:#fff;">
+                Reintentar Prospectos Pendientes Ahora
+              </button>
+              <button class="btn-toggle-auto" onclick="resetWhatsAppSessionUi()" style="padding:10px; border-radius:12px; font-size:0.78rem;">
+                Desvincular / Cambiar Número
+              </button>
+            </div>
+          </div>
+
+          <!-- Vista cuando WhatsApp está DESCONECTADO -->
+          <div id="wa-tab-pairing-view">
+            <div class="autopilot-banner" style="background:#fffbeb; border-color:#fde68a; margin-bottom:1.2rem;">
+              <div class="autopilot-left">
+                <div class="autopilot-dot" style="background:#f59e0b;"></div>
+                <div>
+                  <div class="autopilot-title" style="color:#b45309;">WhatsApp Desconectado</div>
+                  <div class="autopilot-desc" style="color:#92400e;">Vincula tu cuenta una sola vez para que Sebax pueda enviar mensajes y reportes 24/7.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sub pestañas Código vs QR -->
+            <div style="display:flex; gap:6px; background:#f1f5f9; padding:4px; border-radius:12px; margin-bottom:1.2rem;">
+              <button type="button" id="subtab-code-btn" class="sheet-tab active" style="flex:1; padding:8px; font-size:0.78rem; text-align:center;" onclick="switchWaSubtab('code')">Código Telefónico (Celular)</button>
+              <button type="button" id="subtab-qr-btn" class="sheet-tab" style="flex:1; padding:8px; font-size:0.78rem; text-align:center;" onclick="switchWaSubtab('qr')">Escanear QR (PC)</button>
+            </div>
+
+            <!-- Opción 1: Código de 8 dígitos para celular -->
+            <div id="wa-subtab-code">
+              <div class="campaign-box" style="margin-bottom:1rem;">
+                <div class="form-row">
+                  <input type="tel" class="form-input" id="wa-sheet-phone" placeholder="Tu número con lada (ej. 8711234567)">
+                  <button class="btn-launch" id="btn-sheet-pairing" onclick="requestSheetPairingCode()">
+                    <span>Obtener Código</span>
+                  </button>
+                </div>
+              </div>
+
+              <div id="wa-sheet-code-box" style="display:none; margin:1rem 0; padding:16px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:16px; text-align:center;">
+                <div style="font-size:0.72rem; color:#64748b; font-weight:600; margin-bottom:6px;">Tu código de vinculación de 8 dígitos:</div>
+                <div id="wa-sheet-code-text" style="font-family:monospace; font-size:1.8rem; font-weight:800; letter-spacing:4px; color:#09090b; margin-bottom:8px;">----</div>
+                <button class="btn-toggle-auto" style="padding:6px 14px; font-size:0.76rem; font-weight:700;" onclick="copySheetCode()">Copiar Código</button>
+              </div>
+
+              <div style="background:#f8fafc; border:1px solid rgba(0,0,0,0.05); border-radius:16px; padding:14px 16px; font-size:0.78rem; color:#3f3f46; line-height:1.55;">
+                <div style="font-weight:700; margin-bottom:6px; color:#09090b;">Instrucciones para vincular en tu celular:</div>
+                <ol style="padding-left:18px; margin:0;">
+                  <li style="margin-bottom:4px;">Abre <b>WhatsApp</b> en este teléfono.</li>
+                  <li style="margin-bottom:4px;">Toca <b>Ajustes</b> &gt; <b>Dispositivos vinculados</b> &gt; <b>Vincular un dispositivo</b>.</li>
+                  <li style="margin-bottom:4px;">Toca abajo en: <b>Vincular con el número de teléfono</b>.</li>
+                  <li>Ingresa el código de 8 dígitos generado arriba.</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Opción 2: QR para computadora -->
+            <div id="wa-subtab-qr" style="display:none; text-align:center;">
+              <div style="background:#ffffff; padding:14px; border-radius:18px; border:1px solid rgba(0,0,0,0.08); display:inline-block; margin-bottom:1rem;">
+                <img id="wa-sheet-qr-img" src="" alt="QR WhatsApp" style="display:none; max-width:240px; border-radius:10px; margin:0 auto;">
+                <div id="wa-sheet-qr-loader" style="padding:40px 20px; font-size:0.8rem; color:#64748b;">Cargando código QR...</div>
+              </div>
+              <div style="background:#f8fafc; border-radius:14px; padding:12px 14px; font-size:0.78rem; color:#64748b; text-align:left;">
+                Apunta la cámara de WhatsApp de tu celular al código QR para vincularlo inmediatamente.
+              </div>
             </div>
           </div>
         </div>
@@ -1237,26 +1364,42 @@
       if (e.target === leadsModal) closeLeadsModal();
     });
 
+    function openWhatsAppTab() {
+      leadsModal.classList.add("active");
+      switchTab("whatsapp");
+    }
+
     function switchTab(tab) {
       const tabBtnLeads = document.getElementById("tab-btn-leads");
       const tabBtnAgenda = document.getElementById("tab-btn-agenda");
+      const tabBtnWhatsapp = document.getElementById("tab-btn-whatsapp");
       const tabContentLeads = document.getElementById("tab-content-leads");
       const tabContentAgenda = document.getElementById("tab-content-agenda");
+      const tabContentWhatsapp = document.getElementById("tab-content-whatsapp");
       const headerTitle = document.getElementById("sheet-header-title");
       const headerSub = document.getElementById("sheet-header-sub");
 
+      tabBtnLeads.classList.remove("active");
+      tabBtnAgenda.classList.remove("active");
+      if (tabBtnWhatsapp) tabBtnWhatsapp.classList.remove("active");
+      tabContentLeads.classList.remove("active");
+      tabContentAgenda.classList.remove("active");
+      if (tabContentWhatsapp) tabContentWhatsapp.classList.remove("active");
+
       if (tab === "agenda") {
-        tabBtnLeads.classList.remove("active");
         tabBtnAgenda.classList.add("active");
-        tabContentLeads.classList.remove("active");
         tabContentAgenda.classList.add("active");
         headerTitle.textContent = "Agenda de Citas SSSSolutions";
         headerSub.textContent = "Reuniones programadas y llamadas de ventas con clientes";
         loadAppointmentsData();
+      } else if (tab === "whatsapp") {
+        if (tabBtnWhatsapp) tabBtnWhatsapp.classList.add("active");
+        if (tabContentWhatsapp) tabContentWhatsapp.classList.add("active");
+        headerTitle.textContent = "Conexión de WhatsApp";
+        headerSub.textContent = "Vinculación directa para envíos y reportes 24/7";
+        checkWhatsAppStatus();
       } else {
-        tabBtnAgenda.classList.remove("active");
         tabBtnLeads.classList.add("active");
-        tabContentAgenda.classList.remove("active");
         tabContentLeads.classList.add("active");
         headerTitle.textContent = "Prospección Comercial SSSSolutions";
         headerSub.textContent = "Piloto automático 24/7 en Torreón, Gómez y Lerdo";
@@ -1264,6 +1407,131 @@
         loadAutopilotStatus();
       }
     }
+
+    function switchWaSubtab(sub) {
+      document.getElementById("subtab-code-btn").classList.toggle("active", sub === "code");
+      document.getElementById("subtab-qr-btn").classList.toggle("active", sub === "qr");
+      document.getElementById("wa-subtab-code").style.display = sub === "code" ? "block" : "none";
+      document.getElementById("wa-subtab-qr").style.display = sub === "qr" ? "block" : "none";
+      if (sub === "qr") loadSheetQrData();
+    }
+
+    async function loadSheetQrData() {
+      try {
+        const res = await fetch("/qr-data");
+        const data = await res.json();
+        const img = document.getElementById("wa-sheet-qr-img");
+        const loader = document.getElementById("wa-sheet-qr-loader");
+        if (data.qr) {
+          img.src = data.qr;
+          img.style.display = "block";
+          loader.style.display = "none";
+        }
+      } catch (e) {}
+    }
+
+    async function requestSheetPairingCode() {
+      const phoneInput = document.getElementById("wa-sheet-phone");
+      const phone = phoneInput.value.trim();
+      const btn = document.getElementById("btn-sheet-pairing");
+      const box = document.getElementById("wa-sheet-code-box");
+      const codeText = document.getElementById("wa-sheet-code-text");
+
+      if (!phone) {
+        alert("Por favor ingresa tu número de WhatsApp con lada.");
+        phoneInput.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Generando código seguro...";
+
+      try {
+        const res = await fetch("/pairing-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+        if (data.already_connected) {
+          checkWhatsAppStatus();
+          return;
+        }
+        if (data.success && data.code) {
+          codeText.textContent = data.code;
+          box.style.display = "block";
+          btn.textContent = "Generar Nuevo Código";
+        } else {
+          alert(data.error || "No se pudo generar el código. Verifica el número.");
+          btn.textContent = "Reintentar";
+        }
+      } catch (e) {
+        alert("Error de conexión: " + e.message);
+        btn.textContent = "Reintentar";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function copySheetCode() {
+      const text = document.getElementById("wa-sheet-code-text").textContent.replace(/-/g, "").trim();
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Código copiado: " + text);
+      }).catch(() => {
+        prompt("Copia este código:", text);
+      });
+    }
+
+    async function retryUnsentLeadsUi() {
+      try {
+        const res = await fetch("/api/autopilot/retry", { method: "POST" });
+        const data = await res.json();
+        alert(data.message || "Reintento de prospectos finalizado.");
+        loadLeadsData();
+      } catch (e) {
+        alert("Error al reintentar: " + e.message);
+      }
+    }
+
+    async function resetWhatsAppSessionUi() {
+      if (!confirm("¿Deseas desvincular la sesión actual de WhatsApp para vincular un nuevo número?")) return;
+      try {
+        await fetch("/api/bridge/reset", { method: "POST" });
+        alert("Sesión reiniciada. Puedes generar un nuevo código ahora.");
+        checkWhatsAppStatus();
+      } catch (e) {
+        alert("Error al reiniciar sesión: " + e.message);
+      }
+    }
+
+    async function checkWhatsAppStatus() {
+      try {
+        const res = await fetch("/api/bridge/status");
+        const data = await res.json();
+        const btn = document.getElementById("wa-status-btn");
+        const label = document.getElementById("wa-status-label");
+        const connectedView = document.getElementById("wa-tab-connected-view");
+        const pairingView = document.getElementById("wa-tab-pairing-view");
+        const userDesc = document.getElementById("wa-connected-user-desc");
+
+        const isOnline = data.status === "open";
+        if (btn && label) {
+          btn.className = isOnline ? "wa-status-pill connected" : "wa-status-pill disconnected";
+          label.textContent = isOnline ? "WhatsApp Activo" : "Vincular WhatsApp";
+        }
+
+        if (connectedView && pairingView) {
+          connectedView.style.display = isOnline ? "block" : "none";
+          pairingView.style.display = isOnline ? "none" : "block";
+          if (isOnline && userDesc && data.user?.id) {
+            userDesc.textContent = "Conectado al número " + data.user.id.split("@")[0] + ". Sebax está activo 24/7 en Torreón, Gómez y Lerdo.";
+          }
+        }
+      } catch (e) {}
+    }
+
+    setInterval(checkWhatsAppStatus, 5000);
+    checkWhatsAppStatus();
 
     async function loadAutopilotStatus() {
       try {

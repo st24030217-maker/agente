@@ -183,6 +183,16 @@ async def post_pairing_code_proxy(request: Request):
         except Exception as e:
             return Response(content=json.dumps({"error": str(e)}), status_code=500, media_type="application/json")
 
+@app.post("/api/bridge/reset")
+async def post_bridge_reset():
+    """Reinicia la sesión del puente de WhatsApp para generar un nuevo código."""
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(f"http://127.0.0.1:{settings.bridge_port}/reset", timeout=10.0)
+            return resp.json()
+        except Exception as e:
+            return {"error": str(e)}
+
 @app.get("/api/status")
 def api_status():
     return {
