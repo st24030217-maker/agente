@@ -2,6 +2,7 @@ import sys
 import re
 import asyncio
 import logging
+import httpx
 from datetime import datetime
 from pathlib import Path
 import uvicorn
