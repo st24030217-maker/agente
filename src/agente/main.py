@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 import uvicorn
 import edge_tts
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -35,7 +35,8 @@ from agente.tools.autopilot import (
     get_autopilot_config,
     toggle_autopilot,
     run_autopilot_cycle,
-    send_daily_morning_report
+    send_daily_morning_report,
+    retry_unsent_leads
 )
 
 logging.basicConfig(
@@ -155,6 +156,32 @@ async def get_bridge_status():
             return resp.json()
         except Exception:
             return {"status": "starting"}
+
+@app.get("/qr-data")
+async def get_qr_data_proxy():
+    """Proxy para datos del QR en tiempo real."""
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr-data", timeout=5.0)
+            return resp.json()
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+@app.post("/pairing-code")
+@app.post("/api/bridge/pairing-code")
+async def post_pairing_code_proxy(request: Request):
+    """Proxy para solicitar código de vinculación de 8 dígitos."""
+    body = await request.json()
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.post(
+                f"http://127.0.0.1:{settings.bridge_port}/pairing-code",
+                json=body,
+                timeout=15.0
+            )
+            return Response(content=resp.content, status_code=resp.status_code, media_type="application/json")
+        except Exception as e:
+            return Response(content=json.dumps({"error": str(e)}), status_code=500, media_type="application/json")
 
 @app.get("/api/status")
 def api_status():
@@ -278,6 +305,12 @@ async def send_autopilot_report_api():
     """Compila y envía el reporte diario consolidado al WhatsApp personal de Sebastián Salinas."""
     report = await asyncio.to_thread(send_daily_morning_report)
     return {"success": True, "report": report}
+
+@app.post("/api/autopilot/retry")
+async def retry_autopilot_leads_api():
+    """Reintenta el envío de mensajes a prospectos pendientes con error de envío."""
+    res = await asyncio.to_thread(retry_unsent_leads)
+    return res
 
 @app.get("/api/appointments")
 def get_appointments_api():

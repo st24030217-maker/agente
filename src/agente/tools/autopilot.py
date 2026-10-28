@@ -185,6 +185,40 @@ def send_daily_morning_report() -> str:
         logger.error("Error al enviar reporte diario a Sebastián: %s", e)
         return f"Error al enviar reporte: {e}"
 
+def retry_unsent_leads() -> dict:
+    """Reintenta el envío a todos los prospectos con estado 'error_envio'."""
+    leads = _load_leads()
+    failed_leads = [l for l in leads if l.get("status") == "error_envio"]
+    if not failed_leads:
+        return {"executed": True, "retried": 0, "message": "No hay prospectos pendientes"}
+
+    retried_count = 0
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    for item in failed_leads:
+        phone = item.get("phone")
+        pitch = item.get("pitch")
+        if not phone or not pitch:
+            continue
+        res = send_whatsapp_message(to_number=phone, message=pitch)
+        if "éxito" in res.lower() or "success" in res.lower():
+            item["status"] = "contactado"
+            item["contacted_at"] = now_str
+            item["notes"] = (item.get("notes", "") + f" | Reintento exitoso: {now_str}").strip()
+            retried_count += 1
+            time.sleep(10)
+        else:
+            item["notes"] = (item.get("notes", "") + f" | Error reintento: {res}").strip()
+            if "conectado" in res.lower() or "connect" in res.lower():
+                break
+
+    _save_leads(leads)
+    return {
+        "executed": True,
+        "retried": retried_count,
+        "total_pending": len(failed_leads),
+        "message": f"Se enviaron con éxito {retried_count} de {len(failed_leads)} prospectos pendientes."
+    }
+
 async def autopilot_background_worker():
     """Bucle asíncrono permanente de piloto automático que corre 24/7 en segundo plano."""
     logger.info("Iniciando trabajador 24/7 de Piloto Automático Sebax...")
@@ -219,6 +253,7 @@ async def autopilot_background_worker():
 
                 if should_run:
                     logger.info("Ejecutando ciclo automático de prospección 24/7...")
+                    await asyncio.to_thread(retry_unsent_leads)
                     await asyncio.to_thread(run_autopilot_cycle)
 
         except Exception as e:
