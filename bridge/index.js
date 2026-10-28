@@ -54,19 +54,43 @@ app.get("/qr", async (req, res) => {
   if (connectionState === "open") {
     return res.send(`
       <!DOCTYPE html>
-      <html>
-      <head><title>WhatsApp Agent Conectado</title><meta charset="utf-8">
-      <style>
-        body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0f172a; color: #f8fafc; }
-        .card { text-align: center; padding: 2rem; background: #1e293b; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; background: #22c55e; color: #fff; font-weight: bold; margin-bottom: 1rem; }
-      </style>
+      <html lang="es">
+      <head>
+        <title>WhatsApp Conectado | SSSSolutions</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: #f8fafc; color: #09090b; padding: 20px;
+          }
+          .card {
+            text-align: center; padding: 2.5rem 2rem; background: #ffffff;
+            border-radius: 28px; border: 1px solid rgba(0,0,0,0.07);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.04); max-width: 420px; width: 100%;
+          }
+          .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px; border-radius: 20px;
+            background: #ecfdf5; color: #059669; font-weight: 700; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1.2rem;
+          }
+          .dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+          h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 0.5rem; }
+          p { font-size: 0.88rem; color: #71717a; line-height: 1.5; }
+          .agency { margin-top: 1.5rem; font-size: 0.74rem; font-weight: 600; color: #a1a1aa; }
+        </style>
       </head>
       <body>
         <div class="card">
-          <div class="badge">CONECTADO</div>
-          <h2>Tu agente de WhatsApp está activo</h2>
-          <p>Ya puedes enviarle mensajes desde tu cuenta de WhatsApp.</p>
+          <div class="badge"><span class="dot"></span> CONECTADO</div>
+          <h2>WhatsApp Vinculado con Éxito</h2>
+          <p>Sebax está en línea y operando de forma continua las 24 horas.</p>
+          <div class="agency">SSSSolutions • @ssss.olutions</div>
         </div>
       </body>
       </html>
@@ -76,42 +100,95 @@ app.get("/qr", async (req, res) => {
   if (!currentQR) {
     return res.send(`
       <!DOCTYPE html>
-      <html>
-      <head><meta http-equiv="refresh" content="3"><title>Iniciando...</title><meta charset="utf-8">
-      <style>body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0f172a; color: #94a3b8; }</style>
+      <html lang="es">
+      <head>
+        <meta http-equiv="refresh" content="3">
+        <title>Iniciando Sebax WhatsApp...</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+        <style>
+          body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: #f8fafc; color: #71717a; margin: 0;
+          }
+          .box { text-align: center; }
+          .spinner { width: 32px; height: 32px; border: 3px solid rgba(0,0,0,0.1); border-top-color: #09090b; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1rem auto; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
       </head>
       <body>
-        <h3>Iniciando sesión y generando código QR...</h3>
+        <div class="box">
+          <div class="spinner"></div>
+          <p style="font-size:0.9rem; font-weight:600; color:#09090b;">Generando código QR seguro...</p>
+        </div>
       </body>
       </html>
     `);
   }
 
   try {
-    const qrDataUrl = await QRCode.toDataURL(currentQR, { width: 340, margin: 2 });
+    const qrDataUrl = await QRCode.toDataURL(currentQR, { width: 320, margin: 2 });
     res.send(`
       <!DOCTYPE html>
-      <html>
+      <html lang="es">
       <head>
-        <title>Escanear WhatsApp QR - Agente</title>
+        <title>Vincular WhatsApp | SSSSolutions</title>
         <meta charset="utf-8">
-        <meta http-equiv="refresh" content="20">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="refresh" content="25">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-          body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0f172a; color: #f8fafc; }
-          .card { text-align: center; padding: 2.5rem; background: #1e293b; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 420px; }
-          img { border-radius: 12px; border: 4px solid #38bdf8; margin: 1.5rem 0; }
-          ol { text-align: left; font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: #f8fafc; color: #09090b; padding: 20px;
+          }
+          .card {
+            text-align: center; padding: 2.2rem 1.8rem; background: #ffffff;
+            border-radius: 28px; border: 1px solid rgba(0,0,0,0.07);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.04); max-width: 400px; width: 100%;
+          }
+          .brand {
+            font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: #71717a; margin-bottom: 0.4rem;
+          }
+          h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 0.3rem; color: #09090b; }
+          p.subtitle { font-size: 0.8rem; color: #71717a; margin-bottom: 1.2rem; }
+          .qr-wrapper {
+            background: #ffffff; padding: 12px; border-radius: 20px;
+            display: inline-block; border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04); margin-bottom: 1.2rem;
+          }
+          .qr-wrapper img { display: block; border-radius: 12px; max-width: 100%; height: auto; }
+          .steps {
+            text-align: left; background: #f8fafc; border-radius: 16px;
+            padding: 14px 16px; font-size: 0.78rem; color: #3f3f46; line-height: 1.5;
+            border: 1px solid rgba(0,0,0,0.04);
+          }
+          .steps ol { padding-left: 18px; margin: 0; }
+          .steps li { margin-bottom: 4px; }
+          .steps li:last-child { margin-bottom: 0; }
         </style>
       </head>
       <body>
         <div class="card">
-          <h2 style="margin-top:0;">Vincular WhatsApp</h2>
-          <img src="${qrDataUrl}" alt="QR Code">
-          <ol>
-            <li>Abre WhatsApp en tu teléfono</li>
-            <li>Toca <b>Menú</b> o <b>Configuración</b> &gt; <b>Dispositivos vinculados</b></li>
-            <li>Toca <b>Vincular un dispositivo</b> y apunta la cámara a este código</li>
-          </ol>
+          <div class="brand">SSSSolutions</div>
+          <h2>Vincular WhatsApp</h2>
+          <p class="subtitle">Escanea este código para activar a Sebax 24/7</p>
+          <div class="qr-wrapper">
+            <img src="${qrDataUrl}" alt="Código QR WhatsApp">
+          </div>
+          <div class="steps">
+            <ol>
+              <li>Abre <b>WhatsApp</b> en tu celular</li>
+              <li>Toca <b>Ajustes</b> &gt; <b>Dispositivos vinculados</b></li>
+              <li>Toca <b>Vincular un dispositivo</b> y apunta la cámara</li>
+            </ol>
+          </div>
         </div>
       </body>
       </html>
@@ -175,7 +252,7 @@ async function startWhatsApp() {
     if (qr) {
       currentQR = qr;
       connectionState = "qr_ready";
-      console.log("\n📲 CÓDIGO QR GENERADO: http://localhost:" + PORT + "/qr\n");
+      console.log("\n CÓDIGO QR GENERADO: http://localhost:" + PORT + "/qr\n");
       qrcodeTerminal.generate(qr, { small: true });
     }
 
@@ -199,9 +276,9 @@ async function startWhatsApp() {
     } else if (connection === "open") {
       connectionState = "open";
       currentQR = null;
-      console.log("\n✅ ¡WhatsApp conectado exitosamente!");
-      console.log(`👤 Usuario conectado: ${sock.user?.id} (${sock.user?.name || "Sin nombre"})`);
-      console.log(`🤖 El agente está listo exclusivamente en tu chat personal.\n`);
+      console.log("\n ¡WhatsApp conectado exitosamente!");
+      console.log(` Usuario conectado: ${sock.user?.id} (${sock.user?.name || "Sin nombre"})`);
+      console.log(` El agente está listo exclusivamente en tu chat personal.\n`);
     }
   });
 
@@ -250,7 +327,7 @@ async function startWhatsApp() {
                 if (sent?.key?.id) {
                   botSentMessageIds.add(sent.key.id);
                 }
-                console.log(`📤 [Sebax respondió automáticamente al prospecto ${remoteJid}] -> "${data.reply}"`);
+                console.log(` [Sebax respondió automáticamente al prospecto ${remoteJid}] -> "${data.reply}"`);
               }
             }
           } catch (e) {
@@ -269,7 +346,7 @@ async function startWhatsApp() {
 
       if (!text || text.trim() === "") return;
 
-      console.log(`📩 [Chat Personal (Tú) | ${remoteJid}] -> "${text}"`);
+      console.log(` [Chat Personal (Tú) | ${remoteJid}] -> "${text}"`);
 
       // Enviar webhook al agente Python con timeout generoso de 90s
       let replyText = "";
@@ -304,7 +381,7 @@ async function startWhatsApp() {
             botSentMessageIds.delete(first);
           }
         }
-        console.log(`📤 ¡Respuesta enviada con éxito a tu WhatsApp!`);
+        console.log(` ¡Respuesta enviada con éxito a tu WhatsApp!`);
       }
     } catch (err) {
       console.error("Error al procesar mensaje entrante:", err);
@@ -313,6 +390,6 @@ async function startWhatsApp() {
 }
 
 app.listen(PORT, () => {
-  console.log(`🌐 Servidor WhatsApp Bridge iniciado en http://localhost:${PORT}`);
+  console.log(` Servidor WhatsApp Bridge iniciado en http://localhost:${PORT}`);
   startWhatsApp();
 });

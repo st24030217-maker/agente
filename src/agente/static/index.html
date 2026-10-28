@@ -9,19 +9,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f5f6f9;
+      --bg: #f8fafc;
       --card-bg: rgba(255, 255, 255, 0.88);
-      --card-border: rgba(0, 0, 0, 0.08);
+      --card-border: rgba(0, 0, 0, 0.07);
       --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
-      --primary: #18181b;
+      --primary: #09090b;
       --text: #09090b;
       --text-dim: #71717a;
       --accent: #2563eb;
       --online: #10b981;
       --warning: #f59e0b;
-      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
       --transition-fast: 0.15s ease;
       --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -87,14 +90,17 @@
       justify-content: space-between;
       align-items: center;
       background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
       border: 1px solid var(--card-border);
       border-radius: 22px;
       padding: 9px 16px;
       pointer-events: auto;
       box-shadow: 0 4px 20px rgba(0,0,0,0.03);
       animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
     }
     .agent-identity {
       display: flex;
@@ -250,6 +256,9 @@
       flex-direction: column;
       gap: 10px;
       animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
     }
 
     /* Acciones Rápidas */
@@ -348,15 +357,22 @@
     .leads-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(9, 9, 11, 0.4);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: rgba(9, 9, 11, 0.45);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       z-index: 100;
       display: none;
       align-items: flex-end;
       justify-content: center;
       opacity: 0;
       transition: opacity var(--transition-normal);
+      padding: 0;
+    }
+    @media (min-width: 640px) {
+      .leads-modal {
+        align-items: center;
+        padding: 24px;
+      }
     }
     .leads-modal.active {
       display: flex;
@@ -364,8 +380,8 @@
     }
     .leads-sheet {
       width: 100%;
-      max-width: 600px;
-      max-height: 85vh;
+      max-width: 620px;
+      max-height: 88dvh;
       background: #ffffff;
       border-radius: 28px 28px 0 0;
       border: 1px solid var(--card-border);
@@ -376,8 +392,29 @@
       transform: translateY(100%);
       transition: transform var(--transition-normal);
     }
+    @media (min-width: 640px) {
+      .leads-sheet {
+        border-radius: 28px;
+        max-height: 84vh;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        transform: translateY(20px) scale(0.98);
+      }
+    }
     .leads-modal.active .leads-sheet {
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+    }
+    .sheet-drag-handle {
+      width: 36px;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.14);
+      border-radius: 4px;
+      margin: 10px auto 2px auto;
+      flex-shrink: 0;
+    }
+    @media (min-width: 640px) {
+      .sheet-drag-handle {
+        display: none;
+      }
     }
     .sheet-header {
       display: flex;
@@ -581,8 +618,14 @@
     }
     .form-row {
       display: grid;
-      grid-template-columns: 1.2fr 1fr 70px;
+      grid-template-columns: 1.3fr 1.1fr 70px;
       gap: 8px;
+    }
+    @media (max-width: 520px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
     }
     .form-input, .form-select {
       background: #ffffff;
@@ -675,14 +718,15 @@
     }
     .lead-actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-top: 4px;
+      flex-wrap: wrap;
     }
     .lead-btn {
       background: #f4f4f5;
       border: 1px solid var(--card-border);
       border-radius: 10px;
-      padding: 5px 10px;
+      padding: 6px 11px;
       font-size: 0.72rem;
       font-weight: 600;
       color: #18181b;
@@ -695,6 +739,14 @@
     }
     .lead-btn:hover {
       background: #e4e4e7;
+    }
+    .lead-btn-wa {
+      background: #ecfdf5;
+      color: #059669;
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .lead-btn-wa:hover {
+      background: #d1fae5;
     }
 
     @keyframes fade-slide-up {
@@ -1308,7 +1360,7 @@
               <span>${escapeHtml(l.city || "La Laguna")}</span>
             </div>
             <div class="lead-actions">
-              <a href="${waLink}" target="_blank" class="lead-btn">
+              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 WhatsApp
               </a>
@@ -1374,7 +1426,7 @@
             ${a.notes ? `<div style="font-size:0.75rem; color:#4b5563; margin-top:2px;">${escapeHtml(a.notes)}</div>` : ''}
             <div class="lead-actions">
               ${a.phone ? `
-                <a href="${waLink}" target="_blank" class="lead-btn">
+                <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                   Contactar por WhatsApp
                 </a>
