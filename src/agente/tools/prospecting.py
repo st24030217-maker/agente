@@ -84,7 +84,7 @@ def _save_leads(leads: list):
 def _clean_business_name(title: str, href: str, niche: str) -> str:
     """Limpia y da formato profesional al nombre del negocio extraído."""
     name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", title).strip()
-    name = re.sub(r"(?i)\b(directorio|telefonos?|contactos?|whatsapp|mexico|coahuila|durango|laguna|comarca lagunera|torreon|gomez palacio|gomez|lerdo|cd lerdo|nuevo leon|portal|pagina|oficial|horario|opiniones)\b", "", name).strip()
+    name = re.sub(r"(?i)\b(directorio|telefonos?|contactos?|whatsapp|facebook|fb|mexico|coahuila|durango|laguna|comarca lagunera|torreon|gomez palacio|gomez|lerdo|cd lerdo|nuevo leon|portal|pagina|oficial|horario|opiniones)\b", "", name).strip()
     if len(name) < 4 or name.lower() in ["inicio", "home", "contacto", "principal", "bienvenido", "sucursal", "telefono", "teléfono", "telefonos", "directorio", "whatsapp"]:
         match = re.search(r"https?://(?:www\.)?([^/.]+)", href)
         if match and match.group(1) not in ["google", "facebook", "instagram", "doctoralia", "seccionamarilla", "guiatel"]:
@@ -145,9 +145,10 @@ def discover_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerd
                         break
 
                     queries = [
-                        f"{current_niche} {current_city} telefono",
-                        f"{current_niche} en {current_city} whatsapp contacto",
-                        f"{current_niche} {current_city} directorio"
+                        f"{current_niche} {current_city} whatsapp pedidos",
+                        f"facebook {current_niche} {current_city} whatsapp",
+                        f"{current_niche} en {current_city} telefono",
+                        f"facebook {current_niche} {current_city} telefono 871"
                     ]
 
                     for q in queries:
