@@ -15,7 +15,7 @@
   <style>
     :root {
       --bg: #070709;
-      --card-bg: rgba(18, 18, 24, 0.82);
+      --card-bg: rgba(18, 18, 24, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
       --card-border-hover: rgba(255, 255, 255, 0.18);
       --card-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
@@ -51,7 +51,7 @@
       position: relative;
     }
 
-    /* Fondos ambientales de estudio Onyx y Titanio */
+    /* Fondos ambientales de estudio Onyx */
     .bg-blobs {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -63,32 +63,32 @@
       position: absolute;
       border-radius: 50%;
       filter: blur(100px);
-      opacity: 0.5;
+      opacity: 0.45;
       animation: drift 22s infinite alternate ease-in-out;
     }
     .blob-1 {
-      top: -100px;
-      right: -80px;
-      width: 360px;
-      height: 360px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(7, 7, 9, 0) 70%);
-    }
-    .blob-2 {
-      bottom: -100px;
-      left: -80px;
+      top: 10%;
+      left: 10%;
       width: 420px;
       height: 420px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(7, 7, 9, 0) 70%);
+    }
+    .blob-2 {
+      bottom: 5%;
+      right: 10%;
+      width: 460px;
+      height: 460px;
       background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(7, 7, 9, 0) 70%);
       animation-duration: 20s;
     }
-    .studio-spotlight {
+    .studio-spotlight-left {
       position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 740px;
-      height: 520px;
-      background: radial-gradient(ellipse at center, rgba(32, 36, 54, 0.3) 0%, rgba(7, 7, 9, 0) 75%);
+      top: 20%;
+      left: 15%;
+      transform: translate(-50%, -20%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(7, 7, 9, 0) 75%);
       pointer-events: none;
       z-index: 0;
     }
@@ -113,7 +113,7 @@
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      padding: max(14px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)) 16px;
+      padding: max(14px, env(safe-area-inset-top)) 20px max(14px, env(safe-area-inset-bottom)) 20px;
     }
 
     /* Capsula Dynamic Island Superior */
@@ -131,10 +131,11 @@
       pointer-events: auto;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
-      max-width: 720px;
+      max-width: 1240px;
       width: 100%;
       margin: 0 auto;
       transition: all var(--transition-fast);
+      flex-shrink: 0;
     }
     .top-bar:hover {
       border-color: var(--card-border-hover);
@@ -333,50 +334,135 @@
     }
     .icon-btn svg { width: 15px; height: 15px; }
 
-    /* Burbuja de Dialogo Central Onyx */
-    .center-hud {
+    /* CONTENEDOR PRINCIPAL SPLIT (Izquierda: Avatar 3D | Derecha: Centro de Mando) */
+    .main-split-container {
+      display: grid;
+      grid-template-columns: 1fr 1.18fr;
+      gap: 28px;
+      flex: 1;
+      align-items: center;
+      max-width: 1240px;
+      width: 100%;
+      margin: 14px auto 0 auto;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Columna Izquierda: Espacio de la Cabeza 3D */
+    .left-avatar-zone {
       display: flex;
       flex-direction: column;
+      justify-content: flex-end;
       align-items: center;
+      padding-bottom: 24px;
+      height: 100%;
       pointer-events: none;
-      margin-bottom: auto;
-      margin-top: 18px;
     }
-    .speech-bubble {
-      max-width: 90%;
+    .avatar-pedestal-badge {
+      background: rgba(18, 18, 24, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      animation: fade-slide-up 0.8s var(--ease-smooth) forwards;
+    }
+    .pedestal-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+    .pedestal-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #e4e4e7;
+    }
+
+    /* Columna Derecha: Panel de Conversacion y Controles */
+    .right-chat-panel {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 580px;
+      width: 100%;
+      margin-left: auto;
+      justify-content: center;
+      animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
+    }
+
+    /* Tarjeta de Dialogo / Respuesta de Sebax */
+    .speech-card {
       background: var(--card-bg);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
       border: 1px solid var(--card-border);
       border-radius: 22px;
-      padding: 14px 20px;
-      font-size: 0.92rem;
-      line-height: 1.5;
-      color: #f4f4f6;
+      padding: 16px 20px;
       box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transform: translateY(14px);
-      opacity: 0;
-      transition: all var(--transition-normal);
-      pointer-events: auto;
-      max-height: 220px;
-      overflow-y: auto;
-      text-align: center;
-      animation: float-hero-card 6s ease-in-out infinite alternate;
+      transition: all var(--transition-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .speech-bubble.visible {
-      transform: translateY(0);
-      opacity: 1;
+    .speech-card:hover {
+      border-color: var(--card-border-hover);
+    }
+    .speech-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+    .sb-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sb-badge-agent {
+      font-weight: 800;
+      font-size: 0.74rem;
+      letter-spacing: 0.8px;
+      color: #38bdf8;
+      text-transform: uppercase;
+    }
+    .sb-state-badge {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+    .speech-bubble {
+      font-size: 0.92rem;
+      line-height: 1.54;
+      color: #f4f4f6;
+      max-height: 240px;
+      overflow-y: auto;
+      word-wrap: break-word;
+    }
+    .speech-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 4px;
     }
     .mini-voice-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-top: 10px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 5px 12px;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: #ffffff;
       cursor: pointer;
@@ -396,24 +482,21 @@
       box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
     .mini-voice-btn svg { width: 13px; height: 13px; }
-    @keyframes float-hero-card {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(-5px); }
-    }
-
-    /* Controles Inferiores */
-    .bottom-controls {
-      pointer-events: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
-      max-width: 720px;
-      width: 100%;
-      margin: 0 auto;
-    }
 
     /* Acciones Rapidas Glassmorphic */
+    .quick-actions-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .quick-actions-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      padding-left: 4px;
+    }
     .quick-actions {
       display: flex;
       gap: 8px;
@@ -429,14 +512,15 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--card-border);
       border-radius: 20px;
-      padding: 7px 14px;
-      font-size: 0.76rem;
+      padding: 7px 13px;
+      font-size: 0.74rem;
       font-weight: 600;
       color: #d4d4d8;
       white-space: nowrap;
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       transition: all var(--transition-fast);
+      flex-shrink: 0;
     }
     .pill:hover {
       background: rgba(35, 35, 48, 0.95);
@@ -452,10 +536,10 @@
       align-items: center;
       gap: 8px;
       background: var(--card-bg);
-      backdrop-filter: blur(32px) saturate(180%);
-      -webkit-backdrop-filter: blur(32px) saturate(180%);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
       border: 1px solid var(--card-border);
-      border-radius: 26px;
+      border-radius: 24px;
       padding: 6px 8px 6px 16px;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       transition: border-color var(--transition-fast);
@@ -469,7 +553,7 @@
       border: none;
       outline: none;
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       color: #ffffff;
     }
     .input-bar input::placeholder {
@@ -477,7 +561,7 @@
     }
 
     .btn-action {
-      width: 40px; height: 40px;
+      width: 38px; height: 38px;
       border-radius: 50%;
       border: none;
       background: #ffffff;
@@ -515,11 +599,50 @@
       50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
     }
 
+    /* Adaptabilidad Movil (Pantallas Pequenas) */
+    @media (max-width: 859px) {
+      .hud {
+        padding: max(10px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom)) 14px;
+      }
+      .main-split-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 8px;
+      }
+      .left-avatar-zone {
+        height: 32vh;
+        min-height: 180px;
+        padding-bottom: 8px;
+      }
+      .avatar-pedestal-badge {
+        padding: 4px 10px;
+      }
+      .pedestal-title {
+        font-size: 0.62rem;
+      }
+      .right-chat-panel {
+        max-width: 100%;
+        margin-left: 0;
+        gap: 10px;
+      }
+      .speech-bubble {
+        max-height: 140px;
+      }
+      .top-controls {
+        gap: 5px;
+      }
+      .voice-select {
+        display: none;
+      }
+    }
+
     /* Modal / Drawer de Prospeccion SSSSolutions Onyx */
     .leads-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 5, 8, 0.72);
+      background: rgba(5, 5, 8, 0.75);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       z-index: 100;
@@ -1001,7 +1124,7 @@
   <div class="bg-blobs">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
-    <div class="studio-spotlight"></div>
+    <div class="studio-spotlight-left"></div>
   </div>
 
   <div id="canvas-container"></div>
@@ -1010,7 +1133,7 @@
   <audio id="voice-player" playsinline preload="auto"></audio>
 
   <div class="hud">
-    <!-- Dynamic Island Superior -->
+    <!-- Capsula Dynamic Island Superior -->
     <div class="top-bar">
       <div class="agent-identity">
         <div class="status-dot"></div>
@@ -1066,40 +1189,80 @@
       </div>
     </div>
 
-    <!-- Burbuja de Dialogo Central -->
-    <div class="center-hud">
-      <div class="speech-bubble" id="speech-bubble">
-        Sebax en linea. Toca el microfono para dictar o escribe una orden para comenzar.
-      </div>
-    </div>
-
-    <!-- Controles Inferiores -->
-    <div class="bottom-controls">
-      <div class="quick-actions">
-        <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(255,255,255,0.2); background:rgba(30,30,42,0.95); color:#ffffff;">Vincular WhatsApp</div>
-        <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreon, Gomez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreon, Gomez y Lerdo</div>
-        <div class="pill" onclick="sendQuick('Sebax, busca 3 cafeterias, dulcerias o florerias en Torreon, Gomez Palacio o Lerdo y prospectalos por WhatsApp')">Cafeterias, Dulcerias y Florerias La Laguna</div>
-        <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
-        <div class="pill" onclick="openAgendaModal()">Agenda y Citas</div>
-        <div class="pill" onclick="sendQuick('Muestra la lista de prospectos registrados en el sistema')">Ver prospectos</div>
+    <!-- CONTENEDOR PRINCIPAL SPLIT -->
+    <div class="main-split-container">
+      <!-- Columna Izquierda: Espacio de la Cabeza 3D -->
+      <div class="left-avatar-zone">
+        <div class="avatar-pedestal-badge">
+          <span class="pedestal-dot"></span>
+          <span class="pedestal-title">SEBAX AI - SSSSOLUTIONS</span>
+        </div>
       </div>
 
-      <div class="input-bar">
-        <input type="text" id="user-input" placeholder="Escribe una orden para Sebax..." autocomplete="off">
-        <button class="btn-action" id="mic-btn" title="Hablar por voz">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </button>
-        <button class="btn-action" id="send-btn" title="Enviar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
+      <!-- Columna Derecha: Centro de Mando, Dialogo y Controles -->
+      <div class="right-chat-panel">
+        <!-- Tarjeta de Dialogo / Respuesta de Sebax -->
+        <div class="speech-card">
+          <div class="speech-card-header">
+            <div class="sb-header-left">
+              <span class="sb-badge-agent">SEBAX</span>
+              <span class="sb-state-badge" id="panel-agent-state">Asistente Comercial</span>
+            </div>
+            <div class="audio-waveform" id="panel-waveform" title="Monitor de audio">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          </div>
+
+          <div class="speech-bubble" id="speech-bubble">
+            Sebax en linea. Toca el microfono para dictar o escribe una orden para comenzar.
+          </div>
+
+          <div class="speech-card-footer">
+            <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <span class="btn-text">Escuchar voz</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Acciones Rapidas -->
+        <div class="quick-actions-panel">
+          <div class="quick-actions-title">Acciones y Prospeccion Rapida</div>
+          <div class="quick-actions">
+            <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(16,185,129,0.35); background:rgba(16,185,129,0.12); color:#34d399;">Vincular WhatsApp</div>
+            <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreon, Gomez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreon, Gomez y Lerdo</div>
+            <div class="pill" onclick="sendQuick('Sebax, busca 3 cafeterias, dulcerias o florerias en Torreon, Gomez Palacio o Lerdo y prospectalos por WhatsApp')">Cafeterias, Dulcerias y Florerias</div>
+            <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
+            <div class="pill" onclick="openAgendaModal()">Agenda y Citas</div>
+            <div class="pill" onclick="sendQuick('Muestra la lista de prospectos registrados en el sistema')">Ver prospectos</div>
+          </div>
+        </div>
+
+        <!-- Barra de Entrada Titanio -->
+        <div class="input-bar">
+          <input type="text" id="user-input" placeholder="Escribe una orden para Sebax..." autocomplete="off">
+          <button class="btn-action" id="mic-btn" title="Hablar por voz">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <button class="btn-action" id="send-btn" title="Enviar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1359,6 +1522,7 @@
   <script>
     const speechBubble = document.getElementById("speech-bubble");
     const agentState = document.getElementById("agent-state");
+    const panelAgentState = document.getElementById("panel-agent-state");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
     const micBtn = document.getElementById("mic-btn");
@@ -1366,6 +1530,7 @@
     const voiceSelect = document.getElementById("voice-select");
     const voicePlayer = document.getElementById("voice-player");
     const hudWaveform = document.getElementById("hud-waveform");
+    const panelWaveform = document.getElementById("panel-waveform");
 
     // Modal de Leads
     const leadsModal = document.getElementById("leads-modal");
@@ -1378,8 +1543,7 @@
 
     // Actualizador visual de Ondas de Audio
     function updateWaveformUI(active, mode = "speaking") {
-      const bubbleWaveform = document.getElementById("bubble-waveform");
-      [hudWaveform, bubbleWaveform].forEach(wf => {
+      [hudWaveform, panelWaveform].forEach(wf => {
         if (!wf) return;
         wf.classList.remove("speaking", "listening");
         if (active) {
@@ -1405,8 +1569,6 @@
       if (!voiceEnabled) stopVoice();
     });
 
-    speechBubble.classList.add("visible");
-
     function stopVoice() {
       if (voicePlayer) {
         voicePlayer.pause();
@@ -1430,7 +1592,7 @@
     }
 
     function extractSpokenText(text) {
-      const clean = text.replace(/[*_#`~•]/g, '').replace(/https?:\/\/\S+/g, '').trim();
+      const clean = text.replace(/[*_#`~\u2022]/g, '').replace(/https?:\/\/\S+/g, '').trim();
       const sentences = clean.split(/(?<=[.?!])\s+/);
       let spoken = sentences[0] || clean;
       if (sentences[1] && (spoken + " " + sentences[1]).length < 240) {
@@ -1509,26 +1671,7 @@
     function setBubble(text, shouldSpeak = true) {
       lastMessageText = text;
       const formatted = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
-      const actionHtml = `
-        <div style="margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:10px;">
-          <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            </svg>
-            <span class="btn-text">Escuchar voz</span>
-          </button>
-          <div class="audio-waveform" id="bubble-waveform" style="height:14px;">
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-          </div>
-        </div>
-      `;
-      speechBubble.innerHTML = formatted + actionHtml;
-      speechBubble.classList.add("visible");
+      speechBubble.innerHTML = formatted;
       speechBubble.scrollTop = 0;
 
       if (shouldSpeak) {
@@ -1548,7 +1691,8 @@
       if (!text || text.trim() === "") return;
       prewarmAudio();
       userInput.value = "";
-      agentState.textContent = "Procesando orden...";
+      if (agentState) agentState.textContent = "Procesando orden...";
+      if (panelAgentState) panelAgentState.textContent = "Procesando...";
       if (window.avatar) window.avatar.setThinking(true);
       setBubble(`Procesando: "${text}"...`, false);
 
@@ -1561,10 +1705,12 @@
         const data = await res.json();
         const reply = data.reply || "Orden ejecutada.";
         setBubble(reply, true);
-        agentState.textContent = "Listo";
+        if (agentState) agentState.textContent = "Listo";
+        if (panelAgentState) panelAgentState.textContent = "Listo";
       } catch (err) {
         setBubble("Error al comunicar con el nucleo: " + err.message, false);
-        agentState.textContent = "Error";
+        if (agentState) agentState.textContent = "Error";
+        if (panelAgentState) panelAgentState.textContent = "Error";
       } finally {
         if (window.avatar) window.avatar.setThinking(false);
       }
@@ -2124,7 +2270,8 @@
       recognition.onstart = () => {
         isListening = true;
         micBtn.classList.add("listening");
-        agentState.textContent = "Escuchando...";
+        if (agentState) agentState.textContent = "Escuchando...";
+        if (panelAgentState) panelAgentState.textContent = "Escuchando...";
         updateWaveformUI(true, "listening");
         prewarmAudio();
       };
@@ -2138,7 +2285,8 @@
       recognition.onerror = () => {
         isListening = false;
         micBtn.classList.remove("listening");
-        agentState.textContent = "Listo";
+        if (agentState) agentState.textContent = "Listo";
+        if (panelAgentState) panelAgentState.textContent = "Listo";
         updateWaveformUI(false);
       };
 
