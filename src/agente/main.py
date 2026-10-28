@@ -101,16 +101,65 @@ def health_check():
         "workspace": settings.workspace_dir
     }
 
-@app.post("/webhook/whatsapp", response_model=WhatsAppWebhookResponse)
-async def whatsapp_webhook(payload: WhatsAppWebhookRequest):
-    sender = payload.sender.strip()
-    message = payload.message.strip()
+@app.get("/webhook/whatsapp")
+@app.get("/api/webhook/whatsapp")
+async def verify_meta_webhook(request: Request):
+    """Verificación oficial requerida por Meta para registrar el Webhook de WhatsApp Cloud API."""
+    mode = request.query_params.get("hub.mode")
+    token = request.query_params.get("hub.verify_token")
+    challenge = request.query_params.get("hub.challenge")
 
-    logger.info("Mensaje recibido de [%s]: %s", sender, message)
+    verify_token = settings.meta_wa_verify_token or "sebax_ssssolutions_2026"
+    if mode == "subscribe" and token == verify_token:
+        logger.info("Meta WhatsApp Cloud Webhook verificado con éxito.")
+        return Response(content=challenge, media_type="text/plain")
 
-    # Verificación de lista blanca de números si está configurada
+    logger.warning("Verificación de Webhook de Meta rechazada por token inválido.")
+    return Response(content="Forbidden", status_code=403)
+
+@app.post("/webhook/whatsapp")
+@app.post("/api/webhook/whatsapp")
+async def whatsapp_webhook(request: Request):
+    """Receptor unificado para Meta WhatsApp Cloud API y el conector Baileys."""
+    try:
+        data = await request.json()
+    except Exception:
+        return Response(content="Invalid JSON", status_code=400)
+
+    # 1. Caso: Evento oficial de Meta WhatsApp Cloud API
+    if "object" in data and "entry" in data:
+        try:
+            for entry in data.get("entry", []):
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
+                    messages = value.get("messages", [])
+                    for msg in messages:
+                        if msg.get("type") == "text":
+                            sender = msg.get("from", "")
+                            text_body = msg.get("text", {}).get("body", "").strip()
+                            if sender and text_body:
+                                logger.info("Meta WA Cloud recibido de [%s]: %s", sender, text_body)
+                                if text_body.lower() in ["/reset", "/reiniciar", "/clear"]:
+                                    coordinator.reset_chat(sender)
+                                    send_whatsapp_message(to_number=sender, message="Conversación y contexto reiniciados exitosamente.")
+                                else:
+                                    reply = await coordinator.process_message(chat_id=sender, message=text_body)
+                                    if reply:
+                                        send_whatsapp_message(to_number=sender, message=reply)
+        except Exception as e:
+            logger.error("Error al procesar evento de Meta WhatsApp Cloud: %s", e)
+        return Response(content="EVENT_RECEIVED", status_code=200)
+
+    # 2. Caso: Puente Baileys local
+    sender = str(data.get("sender", "")).strip()
+    message = str(data.get("message", "")).strip()
+
+    if not sender or not message:
+        return {"reply": ""}
+
+    logger.info("Mensaje Baileys recibido de [%s]: %s", sender, message)
+
     if settings.allowed_numbers:
-        # Extraer dígitos del número para comparación flexible
         sender_digits = "".join(filter(str.isdigit, sender))
         is_allowed = any(
             "".join(filter(str.isdigit, allowed)) in sender_digits
@@ -118,18 +167,14 @@ async def whatsapp_webhook(payload: WhatsAppWebhookRequest):
         )
         if not is_allowed:
             logger.warning("Mensaje ignorado del remitente no autorizado: %s", sender)
-            return WhatsAppWebhookResponse(reply="")
+            return {"reply": ""}
 
-    if not message:
-        return WhatsAppWebhookResponse(reply="")
-
-    # Comandos especiales
     if message.lower() in ["/reset", "/reiniciar", "/clear"]:
         coordinator.reset_chat(sender)
-        return WhatsAppWebhookResponse(reply="Conversacion y contexto reiniciados exitosamente.")
+        return {"reply": "Conversacion y contexto reiniciados exitosamente."}
 
     reply = await coordinator.process_message(chat_id=sender, message=message)
-    return WhatsAppWebhookResponse(reply=reply)
+    return {"reply": reply}
 
 @app.post("/chat")
 @app.post("/api/chat")

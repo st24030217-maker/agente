@@ -23,5 +23,9 @@ class Settings(BaseModel):
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
+    # Meta WhatsApp Cloud API Oficial
+    meta_wa_token: str = os.getenv("META_WA_TOKEN", "")
+    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "")
+    meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
 
 settings = Settings()
