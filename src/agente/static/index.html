@@ -932,6 +932,7 @@
               </div>
             </div>
             <div class="autopilot-actions">
+              <button class="btn-report-auto" id="btn-run-now" onclick="triggerAutopilotNowUi()" title="Ejecutar una ronda de prospección en vivo">Buscar Ahora</button>
               <button class="btn-toggle-auto" id="btn-toggle-auto" onclick="toggleAutopilotUi()">Pausar</button>
               <button class="btn-report-auto" onclick="requestDailyReportUi()" title="Enviar reporte inmediato a tu WhatsApp">Reporte</button>
             </div>
@@ -1548,7 +1549,11 @@
           tag.textContent = "ACTIVO";
           tag.className = "autopilot-tag";
           btn.textContent = "Pausar";
-          desc.textContent = `Prospectando cada ${cfg.interval_minutes || 25} min en Torreón, Gómez y Lerdo. Contactados hoy: ${cfg.sent_today || 0}.`;
+          const lastTime = cfg.last_run ? `Última búsqueda: ${cfg.last_run}` : "Iniciando ciclo...";
+          desc.textContent = `Prospectando cada ${cfg.interval_minutes || 25} min en Torreón, Gómez y Lerdo. Contactados hoy: ${cfg.sent_today || 0}. ${lastTime}.`;
+          if (agentState && (agentState.textContent.includes("espera") || agentState.textContent.includes("línea"))) {
+            agentState.textContent = `En línea 24/7 • ${cfg.sent_today || 0} contactados hoy`;
+          }
         } else {
           dot.classList.remove("active");
           tag.textContent = "EN PAUSA";
@@ -1560,6 +1565,39 @@
         console.error("Error al cargar estado del piloto automático:", e);
       }
     }
+
+    async function triggerAutopilotNowUi() {
+      const btn = document.getElementById("btn-run-now");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Buscando...";
+      }
+      try {
+        const res = await fetch("/api/autopilot/run", { method: "POST" });
+        const data = await res.json();
+        if (data.executed && data.sent > 0) {
+          alert(`Ronda completada con éxito. Se enviaron propuestas a ${data.sent} negocios de ${data.niche} y se envió un reporte a tu WhatsApp.`);
+        } else {
+          alert(data.message || "Ronda ejecutada.");
+        }
+        loadAutopilotStatus();
+        loadLeadsData();
+      } catch (e) {
+        alert("Error al ejecutar ronda: " + e.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Buscar Ahora";
+        }
+      }
+    }
+
+    setInterval(() => {
+      if (leadsModal.classList.contains("active")) {
+        loadAutopilotStatus();
+        loadLeadsData();
+      }
+    }, 15000);
 
     async function toggleAutopilotUi() {
       try {
