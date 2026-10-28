@@ -54,8 +54,8 @@ class DirectChatRequest(BaseModel):
     chat_id: str = "cli_default"
 
 class CampaignRequest(BaseModel):
-    niche: str = "clínicas dentales"
-    city: str = "Torreón"
+    niche: str = "Cualquier negocio"
+    city: str = "Torreón, Gómez Palacio y Lerdo"
     count: int = 3
     auto_send: bool = True
 

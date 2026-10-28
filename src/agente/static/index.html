@@ -683,8 +683,8 @@
     <!-- Controles Inferiores -->
     <div class="bottom-controls">
       <div class="quick-actions">
-        <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreón y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar cualquier negocio</div>
-        <div class="pill" onclick="sendQuick('Sebax, busca 3 talleres mecanicos o restaurantes en Torreon y prospectalos por WhatsApp')">Talleres y Restaurantes</div>
+        <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreón, Gómez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreón, Gómez y Lerdo</div>
+        <div class="pill" onclick="sendQuick('Sebax, busca 3 talleres mecanicos o restaurantes en Torreón, Gómez Palacio o Lerdo y prospectalos por WhatsApp')">Talleres y Restaurantes La Laguna</div>
         <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
         <div class="pill" onclick="openAgendaModal()">Agenda & Citas</div>
         <div class="pill" onclick="sendQuick('Muestra la lista de prospectos registrados en el sistema')">Ver prospectos</div>
@@ -772,7 +772,13 @@
                 <option value="Escuelas y academias">
                 <option value="Salones de eventos">
               </datalist>
-              <input type="text" class="form-input" id="camp-city" value="Torreón" placeholder="Ciudad">
+              <input type="text" class="form-input" id="camp-city" list="cities-list" value="Torreón, Gómez Palacio y Lerdo" placeholder="Zona o Ciudad">
+              <datalist id="cities-list">
+                <option value="Torreón, Gómez Palacio y Lerdo">
+                <option value="Torreón">
+                <option value="Gómez Palacio">
+                <option value="Lerdo">
+              </datalist>
               <select class="form-select" id="camp-count">
                 <option value="1">1</option>
                 <option value="3" selected>3</option>
@@ -1297,7 +1303,7 @@
       if (niche.toLowerCase().includes("cualquier") || niche.toLowerCase().includes("todos")) {
         niche = "";
       }
-      const city = document.getElementById("camp-city").value.trim() || "Torreón";
+      const city = document.getElementById("camp-city").value.trim() || "Torreón, Gómez Palacio y Lerdo";
       const count = parseInt(document.getElementById("camp-count").value, 10) || 3;
       const autoSend = document.getElementById("camp-auto-send").checked;
       const btn = document.getElementById("btn-start-campaign");

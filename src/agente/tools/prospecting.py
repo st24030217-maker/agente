@@ -35,6 +35,28 @@ DIVERSE_NICHES = [
     "salones de belleza y barberias"
 ]
 
+# Ciudades de la Comarca Lagunera por defecto
+LAGUNA_CITIES = ["Torreón", "Gómez Palacio", "Ciudad Lerdo"]
+
+def _resolve_target_cities(city_input: str) -> list:
+    """Resuelve la lista de ciudades a prospectar, priorizando la Comarca Lagunera (Torreón, Gómez Palacio y Lerdo)."""
+    c = (city_input or "").lower().strip()
+    if not c or any(w in c for w in ["laguna", "comarca", "triada", "tríada", "metro", "todos", "general"]):
+        return LAGUNA_CITIES
+
+    matched = []
+    if "torreon" in c or "torreón" in c:
+        matched.append("Torreón")
+    if "gomez" in c or "gómez" in c:
+        matched.append("Gómez Palacio")
+    if "lerdo" in c:
+        matched.append("Ciudad Lerdo")
+
+    if matched:
+        return matched
+
+    return [city_input.strip()]
+
 def _load_leads() -> list:
     if not LEADS_FILE.exists():
         return []
@@ -51,7 +73,7 @@ def _save_leads(leads: list):
 def _clean_business_name(title: str, href: str, niche: str) -> str:
     """Limpia y da formato profesional al nombre del negocio extraído."""
     name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", title).strip()
-    name = re.sub(r"(?i)\b(directorio|telefonos?|contactos?|whatsapp|mexico|coahuila|nuevo leon|portal|pagina|oficial|horario|opiniones)\b", "", name).strip()
+    name = re.sub(r"(?i)\b(directorio|telefonos?|contactos?|whatsapp|mexico|coahuila|durango|laguna|comarca lagunera|torreon|gomez palacio|gomez|lerdo|cd lerdo|nuevo leon|portal|pagina|oficial|horario|opiniones)\b", "", name).strip()
     if len(name) < 4 or name.lower() in ["inicio", "home", "contacto", "principal", "bienvenido", "sucursal"]:
         match = re.search(r"https?://(?:www\.)?([^/.]+)", href)
         if match and match.group(1) not in ["google", "facebook", "instagram", "doctoralia", "seccionamarilla", "guiatel"]:
@@ -75,12 +97,12 @@ def normalize_mx_phone(raw: str) -> str:
         return "521" + digits[3:13]
     return digits
 
-def discover_leads(niche: str = "", city: str = "Torreón", max_leads: int = 5) -> list:
-    """Explora la web, directorios y mapas locales para identificar prospectos de CUALQUIER tipo de negocio con teléfono.
+def discover_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerdo", max_leads: int = 5) -> list:
+    """Explora la web, directorios y mapas locales para identificar prospectos de CUALQUIER tipo de negocio con teléfono en Torreón, Gómez Palacio y Lerdo.
     
     Args:
         niche: Giro o categoría (ej. 'talleres mecánicos', 'restaurantes', 'arquitectura', 'abogados', 'gimnasios', 'mueblerías', etc.). Si está vacío o es 'cualquiera', busca en giros variados.
-        city: Ciudad o región a prospectar (ej. 'Torreón', 'Monterrey', 'Saltillo', 'Ciudad de México').
+        city: Ciudad o región a prospectar (por defecto busca en la Comarca Lagunera: Torreón, Gómez Palacio y Lerdo).
         max_leads: Número de prospectos a identificar.
     """
     existing_leads = _load_leads()
@@ -95,103 +117,109 @@ def discover_leads(niche: str = "", city: str = "Torreón", max_leads: int = 5) 
     else:
         target_niches = [clean_niche_input]
 
+    target_cities = _resolve_target_cities(city)
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
     }
 
     try:
         with DDGS() as ddgs:
-            for current_niche in target_niches:
+            for current_city in target_cities:
                 if len(discovered) >= max_leads:
                     break
 
-                queries = [
-                    f"{current_niche} {city} telefono directorio",
-                    f"{current_niche} en {city} whatsapp contacto"
-                ]
-
-                for q in queries:
+                for current_niche in target_niches:
                     if len(discovered) >= max_leads:
                         break
-                    try:
-                        results = list(ddgs.text(q, max_results=6))
-                    except Exception:
-                        continue
 
-                    for r in results:
+                    queries = [
+                        f"{current_niche} {current_city} telefono",
+                        f"{current_niche} en {current_city} whatsapp contacto",
+                        f"{current_niche} {current_city} directorio"
+                    ]
+
+                    for q in queries:
                         if len(discovered) >= max_leads:
                             break
+                        try:
+                            results = list(ddgs.text(q, max_results=6))
+                        except Exception:
+                            continue
 
-                        title = r.get("title", "")
-                        body = r.get("body", "")
-                        href = r.get("href", "")
+                        for r in results:
+                            if len(discovered) >= max_leads:
+                                break
 
-                        # 1. Extraccion directa de telefonos en el snippet
-                        raw_phones = re.findall(r"(?:(?:\+?52\s?)?(?:\(?\d{2,3}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{4})", body)
-                        for rp in raw_phones:
-                            norm = normalize_mx_phone(rp)
-                            if len(norm) == 13 and norm not in seen_phones:
-                                seen_phones.add(norm)
-                                b_name = _clean_business_name(title, href, current_niche)
-                                discovered.append({
-                                    "name": b_name,
-                                    "phone": norm,
-                                    "city": city,
-                                    "niche": current_niche,
-                                    "source": href,
-                                    "notes": f"Negocio de {current_niche} detectado en directorio web. Oportunidad de desarrollo digital.",
-                                    "status": "nuevo",
-                                    "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                })
-                                if len(discovered) >= max_leads:
-                                    break
+                            title = r.get("title", "")
+                            body = r.get("body", "")
+                            href = r.get("href", "")
 
-                        # 2. Si el enlace es de directorios con fichas (guiatel, cercademiubicacion, doctoralia, seccionamarilla, etc.)
-                        if len(discovered) < max_leads and any(d in href for d in ["guiatel", "cercademiubicacion", "seccionamarilla", "buscodentista", "arquimex", "pymes.org"]):
-                            try:
-                                with httpx.Client(timeout=6.0, follow_redirects=True, verify=False) as client:
-                                    resp = client.get(href, headers=headers)
-                                if resp.status_code == 200:
-                                    soup = BeautifulSoup(resp.text, "html.parser")
-                                    # Buscar tarjetas de negocio
-                                    for elem in soup.find_all(["h2", "h3", "strong"]):
-                                        if len(discovered) >= max_leads:
-                                            break
-                                        parent = elem.find_parent(["div", "li", "article", "tr"])
-                                        parent_text = parent.get_text(separator=" ", strip=True) if parent else ""
-                                        page_phones = re.findall(r"(?:(?:\+?52\s?)?(?:\(?\d{2,3}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{4})", parent_text)
-                                        for ph in page_phones:
-                                            norm_ph = normalize_mx_phone(ph)
-                                            if len(norm_ph) == 13 and norm_ph not in seen_phones:
-                                                h_raw = elem.get_text().strip()
-                                                if len(h_raw) > 3 and not any(ign in h_raw.lower() for ign in ["telefono", "directorio", "buscar", "contacto", "horario"]):
-                                                    seen_phones.add(norm_ph)
-                                                    h_name = _clean_business_name(h_raw, href, current_niche)
-                                                    discovered.append({
-                                                        "name": h_name,
-                                                        "phone": norm_ph,
-                                                        "city": city,
-                                                        "niche": current_niche,
-                                                        "source": href,
-                                                        "notes": f"Ficha comercial de {current_niche} sin plataforma web moderna detectada.",
-                                                        "status": "nuevo",
-                                                        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                                    })
-                                                    if len(discovered) >= max_leads:
-                                                        break
-                            except Exception:
-                                continue
+                            # 1. Extracción directa de teléfonos en el snippet
+                            raw_phones = re.findall(r"(?:(?:\+?52\s?)?(?:\(?\d{2,3}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{4})", body)
+                            for rp in raw_phones:
+                                norm = normalize_mx_phone(rp)
+                                if len(norm) == 13 and norm not in seen_phones:
+                                    seen_phones.add(norm)
+                                    b_name = _clean_business_name(title, href, current_niche)
+                                    discovered.append({
+                                        "name": b_name,
+                                        "phone": norm,
+                                        "city": current_city,
+                                        "niche": current_niche,
+                                        "source": href,
+                                        "notes": f"Negocio de {current_niche} en {current_city} detectado en directorio web.",
+                                        "status": "nuevo",
+                                        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    })
+                                    if len(discovered) >= max_leads:
+                                        break
+
+                            # 2. Si el enlace es de directorios con fichas
+                            if len(discovered) < max_leads and any(d in href for d in ["guiatel", "cercademiubicacion", "seccionamarilla", "buscodentista", "arquimex", "pymes.org"]):
+                                try:
+                                    with httpx.Client(timeout=6.0, follow_redirects=True, verify=False) as client:
+                                        resp = client.get(href, headers=headers)
+                                    if resp.status_code == 200:
+                                        soup = BeautifulSoup(resp.text, "html.parser")
+                                        for elem in soup.find_all(["h2", "h3", "strong"]):
+                                            if len(discovered) >= max_leads:
+                                                break
+                                            parent = elem.find_parent(["div", "li", "article", "tr"])
+                                            parent_text = parent.get_text(separator=" ", strip=True) if parent else ""
+                                            page_phones = re.findall(r"(?:(?:\+?52\s?)?(?:\(?\d{2,3}\)?[\s.-]?)?\d{3,4}[\s.-]?\d{4})", parent_text)
+                                            for ph in page_phones:
+                                                norm_ph = normalize_mx_phone(ph)
+                                                if len(norm_ph) == 13 and norm_ph not in seen_phones:
+                                                    h_raw = elem.get_text().strip()
+                                                    if len(h_raw) > 3 and not any(ign in h_raw.lower() for ign in ["telefono", "directorio", "buscar", "contacto", "horario"]):
+                                                        seen_phones.add(norm_ph)
+                                                        h_name = _clean_business_name(h_raw, href, current_niche)
+                                                        discovered.append({
+                                                            "name": h_name,
+                                                            "phone": norm_ph,
+                                                            "city": current_city,
+                                                            "niche": current_niche,
+                                                            "source": href,
+                                                            "notes": f"Ficha comercial de {current_niche} en {current_city} sin plataforma web moderna.",
+                                                            "status": "nuevo",
+                                                            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                                        })
+                                                        if len(discovered) >= max_leads:
+                                                            break
+                                except Exception:
+                                    continue
     except Exception as e:
         logger.error("Error durante prospeccion web: %s", e)
 
     return discovered
 
-def search_business_leads(niche: str = "", city: str = "Torreón", max_results: int = 5) -> str:
-    """Busca cualquier tipo de negocio local en internet y directorios para encontrar prospectos de desarrollo y diseño web.
+def search_business_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerdo", max_results: int = 5) -> str:
+    """Busca cualquier tipo de negocio local en Torreón, Gómez Palacio y Lerdo para encontrar prospectos de desarrollo y diseño web.
     
     Args:
         niche: Opcional, tipo de negocio (ej. 'talleres mecánicos', 'restaurantes', 'arquitectura', 'abogados', 'gimnasios', 'mueblerías', etc.). Si se omite o es 'cualquiera', busca en variedad de giros.
-        city: Ciudad o región (ej. 'Torreón', 'Monterrey', 'Saltillo', 'Ciudad de México').
+        city: Ciudad o región (por defecto 'Torreón, Gómez Palacio y Lerdo').
         max_results: Cantidad de prospectos a identificar.
     """
     niche_label = niche if niche else "cualquier tipo de negocio"
@@ -201,8 +229,8 @@ def search_business_leads(niche: str = "", city: str = "Torreón", max_results: 
 
     lines = [f"Prospectos de negocios identificados en [{city}] ({niche_label}):"]
     for i, l in enumerate(leads, 1):
-        lines.append(f"{i}. {l['name']} | Tel WhatsApp: {l['phone']} | Giro: {l.get('niche', 'comercial')} | Fuente: {l.get('source', '')[:60]}")
-    lines.append("\nPuedes guardar estos prospectos con save_lead o ejecutar run_autonomous_campaign para contactarlos automáticamente por WhatsApp.")
+        lines.append(f"{i}. {l['name']} | Tel WhatsApp: {l['phone']} | Ciudad: {l.get('city', 'La Laguna')} | Giro: {l.get('niche', 'comercial')} | Fuente: {l.get('source', '')[:60]}")
+    lines.append("\nPuedes guardar estos prospectos con save_lead o ejecutar run_autonomous_campaign para contactarlos automáticamente por WhatsApp con prototipo web en vivo.")
     return "\n".join(lines)
 
 def generate_pitch(business_name: str, niche: str = "", contact_name: str = "", mockup_url: str = "") -> str:
@@ -326,12 +354,12 @@ def update_lead_status(lead_id: int, status: str, notes: str = "") -> str:
             return f"Prospecto ID {lead_id} [{l['name']}] actualizado a estado '{status}'."
     return f"No se encontró ningún prospecto con ID {lead_id}."
 
-def run_autonomous_campaign(niche: str = "", city: str = "Torreón", count: int = 3, auto_send: bool = True) -> str:
-    """Ejecuta una campaña autónoma de prospección para CUALQUIER tipo de negocio: busca negocios locales con teléfono, genera la propuesta personalizada con el Instagram y portafolio de SSSSolutions, y les envía el mensaje por WhatsApp de forma segura.
+def run_autonomous_campaign(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerdo", count: int = 3, auto_send: bool = True) -> str:
+    """Ejecuta una campaña autónoma de prospección para CUALQUIER tipo de negocio en Torreón, Gómez Palacio y Lerdo: busca negocios locales con teléfono, genera el concepto web interactivo exclusivo, la propuesta personalizada con el Instagram y portafolio de SSSSolutions, y les envía el mensaje por WhatsApp de forma segura.
     
     Args:
         niche: Giro o categoría (ej. 'talleres mecánicos', 'restaurantes', 'mueblerías', 'arquitectura', 'abogados', 'gimnasios', etc.). Si está vacío o es 'cualquiera', busca en variedad de giros.
-        city: Ciudad o municipio donde buscar (ej. 'Torreón', 'Monterrey', 'Saltillo', 'Ciudad de México').
+        city: Ciudades a prospectar (por defecto 'Torreón, Gómez Palacio y Lerdo').
         count: Número de prospectos a contactar en esta campaña (recomendado entre 1 y 5).
         auto_send: Si es True, envía el mensaje por WhatsApp inmediatamente con espaciado de seguridad. Si es False, solo genera y guarda los prospectos y propuestas.
     """
