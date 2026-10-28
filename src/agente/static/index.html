@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sebax - Agente de Inteligencia Artificial | SSSSolutions</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#070709">
+  <meta name="theme-color" content="#050608">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -14,34 +14,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070709;
-      --card-bg: rgba(18, 18, 24, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-border-hover: rgba(255, 255, 255, 0.18);
-      --card-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+      --bg: #050608;
+      --card-bg: transparent;
+      --card-border: transparent;
       --primary: #ffffff;
-      --text: #f4f4f6;
-      --text-dim: #94949e;
-      --text-muted: #62626e;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+      --text-muted: #64748b;
       --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-glow: rgba(56, 189, 248, 0.3);
       --online: #10b981;
-      --online-glow: rgba(16, 185, 129, 0.35);
+      --online-glow: rgba(16, 185, 129, 0.45);
       --warning: #f59e0b;
       --danger: #ef4444;
-      --surface-dark: #0f0f14;
-      --surface-sheet: rgba(15, 15, 20, 0.96);
-      --input-bg: rgba(12, 12, 16, 0.88);
+      --surface-sheet: rgba(12, 13, 18, 0.94);
+      --input-bg: rgba(255, 255, 255, 0.06);
       --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-fast: 0.15s ease;
-      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-fast: 0.18s ease;
+      --transition-normal: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    /* Fondo Dinamico con Gradientes Vivos en Movimiento */
     body {
       background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 12% 22%, rgba(56, 189, 248, 0.16) 0%, transparent 45%),
+        radial-gradient(circle at 88% 78%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 48% 85%, rgba(16, 185, 129, 0.09) 0%, transparent 55%),
+        radial-gradient(circle at 75% 15%, rgba(14, 165, 233, 0.1) 0%, transparent 45%);
+      background-size: 150% 150%;
+      animation: dynamic-nebula 22s ease-in-out infinite alternate;
       color: var(--text);
       font-family: var(--font);
       overflow: hidden;
@@ -51,7 +56,13 @@
       position: relative;
     }
 
-    /* Fondos ambientales de estudio Onyx */
+    @keyframes dynamic-nebula {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 50% 100%; }
+    }
+
+    /* Brillo de nebulosa ambiental */
     .bg-blobs {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -63,40 +74,29 @@
       position: absolute;
       border-radius: 50%;
       filter: blur(100px);
-      opacity: 0.45;
-      animation: drift 22s infinite alternate ease-in-out;
+      opacity: 0.4;
+      animation: drift-slow 24s infinite alternate ease-in-out;
     }
     .blob-1 {
-      top: 10%;
-      left: 10%;
-      width: 420px;
-      height: 420px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(7, 7, 9, 0) 70%);
+      top: 15%;
+      left: 8%;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, transparent 70%);
     }
     .blob-2 {
-      bottom: 5%;
-      right: 10%;
-      width: 460px;
-      height: 460px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(7, 7, 9, 0) 70%);
-      animation-duration: 20s;
-    }
-    .studio-spotlight-left {
-      position: absolute;
-      top: 20%;
-      left: 15%;
-      transform: translate(-50%, -20%);
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, rgba(7, 7, 9, 0) 75%);
-      pointer-events: none;
-      z-index: 0;
+      bottom: 10%;
+      right: 12%;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.16) 0%, transparent 70%);
+      animation-duration: 26s;
     }
 
-    @keyframes drift {
+    @keyframes drift-slow {
       0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(30px, -25px) scale(1.06); }
-      100% { transform: translate(-20px, 20px) scale(0.95); }
+      50% { transform: translate(40px, -30px) scale(1.08); }
+      100% { transform: translate(-30px, 30px) scale(0.94); }
     }
 
     #canvas-container {
@@ -113,32 +113,25 @@
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      padding: max(14px, env(safe-area-inset-top)) 20px max(14px, env(safe-area-inset-bottom)) 20px;
+      padding: max(16px, env(safe-area-inset-top)) 24px max(16px, env(safe-area-inset-bottom)) 24px;
     }
 
-    /* Capsula Dynamic Island Superior */
+    /* Barra Superior Completamente Transparente (Sin Bloques ni Bordes) */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      background: var(--card-bg);
-      backdrop-filter: blur(32px) saturate(190%);
-      -webkit-backdrop-filter: blur(32px) saturate(190%);
-      border: 1px solid var(--card-border);
-      border-radius: 26px;
-      padding: 8px 16px;
+      gap: 16px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 4px 0;
       pointer-events: auto;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
-      max-width: 1240px;
+      animation: fade-in 0.8s var(--ease-smooth) forwards;
+      max-width: 1260px;
       width: 100%;
       margin: 0 auto;
-      transition: all var(--transition-fast);
       flex-shrink: 0;
-    }
-    .top-bar:hover {
-      border-color: var(--card-border-hover);
     }
 
     .agent-identity {
@@ -167,11 +160,12 @@
     }
     .agent-name {
       font-weight: 800;
-      font-size: 0.88rem;
-      letter-spacing: 1px;
+      font-size: 0.92rem;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
       color: #ffffff;
       line-height: 1.1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.6);
     }
     .agent-status {
       font-size: 0.68rem;
@@ -193,18 +187,18 @@
     .audio-waveform .wave-bar {
       width: 2.5px;
       height: 4px;
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.3);
       border-radius: 99px;
       transition: all 0.2s ease;
     }
     .audio-waveform.speaking .wave-bar {
       background: linear-gradient(180deg, #38bdf8, #10b981);
-      box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
       animation: wave-bar-dance 0.9s ease-in-out infinite alternate;
     }
     .audio-waveform.listening .wave-bar {
       background: linear-gradient(180deg, #f43f5e, #fb923c);
-      box-shadow: 0 0 6px rgba(244, 63, 94, 0.6);
+      box-shadow: 0 0 8px rgba(244, 63, 94, 0.8);
       animation: wave-bar-dance 0.7s ease-in-out infinite alternate;
     }
     .audio-waveform .wave-bar:nth-child(1) { animation-delay: 0.05s; }
@@ -215,88 +209,53 @@
 
     @keyframes wave-bar-dance {
       0% { height: 4px; }
-      50% { height: 16px; }
+      50% { height: 18px; }
       100% { height: 6px; }
     }
 
     .top-controls {
       display: flex;
-      gap: 7px;
+      gap: 8px;
       align-items: center;
       flex-shrink: 0;
     }
 
-    .voice-select {
-      background: rgba(25, 25, 34, 0.85);
-      color: #e4e4e7;
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 5px 8px;
-      font-size: 0.72rem;
+    /* Elementos flotantes transparentes sin bordes duros */
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: none;
+      border-radius: 18px;
+      padding: 6px 13px;
+      font-size: 0.74rem;
       font-weight: 600;
-      outline: none;
+      color: #f1f5f9;
       cursor: pointer;
-      transition: border-color var(--transition-fast);
-    }
-    .voice-select:hover {
-      border-color: var(--card-border-hover);
-    }
-    .voice-select option {
-      background: #121216;
-      color: #ffffff;
-    }
-
-    .badge-link {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      text-decoration: none;
-      padding: 5px 11px;
-      border-radius: 12px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: -0.2px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
       transition: all var(--transition-fast);
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .badge-link:hover {
-      transform: translateY(-1px);
-      background: rgba(255, 255, 255, 0.14);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .wa-status-pill {
-      border: 1px solid var(--card-border);
-      padding: 5px 11px;
-      border-radius: 12px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: -0.2px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      background: rgba(25, 25, 34, 0.85);
-      color: #f4f4f6;
+      text-decoration: none;
       font-family: inherit;
     }
+    .glass-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+      color: #ffffff;
+    }
+
     .wa-status-pill.connected {
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.15);
       color: #34d399;
-      border-color: rgba(16, 185, 129, 0.35);
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
     }
     .wa-status-pill.connected .dot-status {
       background: #10b981;
-      box-shadow: 0 0 6px #10b981;
+      box-shadow: 0 0 8px #10b981;
     }
     .wa-status-pill.disconnected {
-      background: rgba(245, 158, 11, 0.12);
+      background: rgba(245, 158, 11, 0.15);
       color: #fbbf24;
-      border-color: rgba(245, 158, 11, 0.35);
     }
     .wa-status-pill.disconnected .dot-status {
       background: #f59e0b;
@@ -309,193 +268,197 @@
       flex-shrink: 0;
     }
 
-    .icon-btn {
-      width: 32px; height: 32px;
-      border-radius: 10px;
-      border: 1px solid var(--card-border);
-      background: rgba(25, 25, 34, 0.85);
-      color: #e4e4e7;
+    .icon-glass-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: #e2e8f0;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all var(--transition-fast);
     }
-    .icon-btn:hover {
-      background: rgba(40, 40, 52, 0.9);
-      border-color: var(--card-border-hover);
+    .icon-glass-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: #ffffff;
-      transform: translateY(-1px);
+      transform: scale(1.06);
     }
-    .icon-btn.active {
-      background: #ffffff;
+    .icon-glass-btn.active {
+      background: rgba(255, 255, 255, 0.95);
       color: #09090b;
-      border-color: #ffffff;
     }
-    .icon-btn svg { width: 15px; height: 15px; }
+    .icon-glass-btn svg { width: 16px; height: 16px; }
 
-    /* CONTENEDOR PRINCIPAL SPLIT (Izquierda: Avatar 3D | Derecha: Centro de Mando) */
+    .voice-select-transparent {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: #e2e8f0;
+      border: none;
+      border-radius: 18px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .voice-select-transparent:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+    .voice-select-transparent option {
+      background: #111217;
+      color: #ffffff;
+    }
+
+    /* CONTENEDOR PRINCIPAL SPLIT TRANSPARENTE */
     .main-split-container {
       display: grid;
-      grid-template-columns: 1fr 1.18fr;
-      gap: 28px;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 36px;
       flex: 1;
       align-items: center;
-      max-width: 1240px;
+      max-width: 1260px;
       width: 100%;
-      margin: 14px auto 0 auto;
+      margin: 10px auto 0 auto;
       overflow: hidden;
       min-height: 0;
     }
 
-    /* Columna Izquierda: Espacio de la Cabeza 3D */
+    /* Columna Izquierda: Espacio para la Cabeza 3D Flotante */
     .left-avatar-zone {
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
-      padding-bottom: 24px;
+      padding-bottom: 20px;
       height: 100%;
       pointer-events: none;
     }
     .avatar-pedestal-badge {
-      background: rgba(18, 18, 24, 0.75);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 6px 14px;
-      border-radius: 20px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      animation: fade-slide-up 0.8s var(--ease-smooth) forwards;
+      background: transparent;
+      border: none;
+      padding: 4px 0;
+      opacity: 0.65;
     }
     .pedestal-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #38bdf8;
-      box-shadow: 0 0 8px #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
     }
     .pedestal-title {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       font-weight: 800;
-      letter-spacing: 1.2px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: #e4e4e7;
+      color: #94a3b8;
     }
 
-    /* Columna Derecha: Panel de Conversacion y Controles */
+    /* Columna Derecha: Panel de Conversacion y Controles (Totalmente Transparente) */
     .right-chat-panel {
       pointer-events: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 18px;
       max-width: 580px;
       width: 100%;
       margin-left: auto;
       justify-content: center;
-      animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
+      animation: fade-slide-up 0.7s var(--ease-smooth) forwards;
     }
 
-    /* Tarjeta de Dialogo / Respuesta de Sebax */
-    .speech-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(32px) saturate(190%);
-      -webkit-backdrop-filter: blur(32px) saturate(190%);
-      border: 1px solid var(--card-border);
-      border-radius: 22px;
-      padding: 16px 20px;
-      box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: all var(--transition-fast);
+    /* Dialogo y Respuesta de Sebax (Sin Cajas ni Bordes, Puro Texto Flotante) */
+    .speech-container {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
+      background: transparent;
+      border: none;
     }
-    .speech-card:hover {
-      border-color: var(--card-border-hover);
-    }
-    .speech-card-header {
+    .speech-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 8px;
-    }
-    .sb-header-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding-bottom: 2px;
     }
     .sb-badge-agent {
       font-weight: 800;
-      font-size: 0.74rem;
-      letter-spacing: 0.8px;
+      font-size: 0.76rem;
+      letter-spacing: 1.5px;
       color: #38bdf8;
       text-transform: uppercase;
-    }
-    .sb-state-badge {
-      font-size: 0.68rem;
-      color: var(--text-dim);
+      text-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
     }
     .speech-bubble {
-      font-size: 0.92rem;
-      line-height: 1.54;
-      color: #f4f4f6;
-      max-height: 240px;
+      font-size: 1.08rem;
+      font-weight: 500;
+      line-height: 1.62;
+      color: #f8fafc;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85);
+      max-height: 280px;
       overflow-y: auto;
       word-wrap: break-word;
     }
-    .speech-card-footer {
+    .speech-bubble b, .speech-bubble strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .speech-footer {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-top: 4px;
+      gap: 8px;
     }
     .mini-voice-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 5px 12px;
-      font-size: 0.72rem;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: none;
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 0.74rem;
       font-weight: 600;
-      color: #ffffff;
+      color: #f1f5f9;
       cursor: pointer;
       transition: all var(--transition-fast);
     }
     .mini-voice-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.14);
       transform: translateY(-1px);
-    }
-    .mini-voice-btn:active {
-      transform: scale(0.95);
+      color: #ffffff;
     }
     .mini-voice-btn.playing {
-      background: #10b981;
-      color: #ffffff;
-      border-color: #10b981;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
     }
     .mini-voice-btn svg { width: 13px; height: 13px; }
 
-    /* Acciones Rapidas Glassmorphic */
+    /* Acciones Rapidas Transparentes */
     .quick-actions-panel {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
     .quick-actions-title {
       font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: var(--text-dim);
-      padding-left: 4px;
+      letter-spacing: 1.2px;
+      color: rgba(255, 255, 255, 0.45);
+      padding-left: 2px;
     }
     .quick-actions {
       display: flex;
@@ -507,45 +470,44 @@
     }
     .quick-actions::-webkit-scrollbar { display: none; }
     .pill {
-      background: rgba(20, 20, 28, 0.85);
+      background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--card-border);
+      border: none;
       border-radius: 20px;
-      padding: 7px 13px;
-      font-size: 0.74rem;
+      padding: 8px 15px;
+      font-size: 0.76rem;
       font-weight: 600;
-      color: #d4d4d8;
+      color: #e2e8f0;
       white-space: nowrap;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       transition: all var(--transition-fast);
       flex-shrink: 0;
     }
     .pill:hover {
-      background: rgba(35, 35, 48, 0.95);
-      border-color: var(--card-border-hover);
+      background: rgba(255, 255, 255, 0.14);
       color: #ffffff;
       transform: translateY(-2px);
     }
     .pill:active { transform: scale(0.96); }
 
-    /* Barra de Entrada Titanio */
+    /* Barra de Entrada Flotante Sin Bordes */
     .input-bar {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: var(--card-bg);
-      backdrop-filter: blur(32px) saturate(190%);
-      -webkit-backdrop-filter: blur(32px) saturate(190%);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 6px 8px 6px 16px;
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-      transition: border-color var(--transition-fast);
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: none;
+      border-radius: 32px;
+      padding: 8px 10px 8px 20px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+      transition: background var(--transition-fast), box-shadow var(--transition-fast);
     }
     .input-bar:focus-within {
-      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.09);
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 189, 248, 0.15);
     }
     .input-bar input {
       flex: 1;
@@ -553,15 +515,15 @@
       border: none;
       outline: none;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.94rem;
       color: #ffffff;
     }
     .input-bar input::placeholder {
-      color: #71717a;
+      color: #94a3b8;
     }
 
     .btn-action {
-      width: 38px; height: 38px;
+      width: 40px; height: 40px;
       border-radius: 50%;
       border: none;
       background: #ffffff;
@@ -574,77 +536,71 @@
       flex-shrink: 0;
     }
     .btn-action:hover {
-      transform: scale(1.05);
-      background: #f4f4f5;
+      transform: scale(1.06);
+      background: #f8fafc;
     }
     .btn-action:active { transform: scale(0.94); }
 
     #mic-btn {
       background: rgba(255, 255, 255, 0.08);
       color: #ffffff;
-      border: 1px solid var(--card-border);
+      border: none;
     }
     #mic-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.16);
     }
     #mic-btn.listening {
       background: #ef4444;
       color: #ffffff;
-      border-color: #ef4444;
       animation: pulse-mic 1.2s infinite;
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
     }
     @keyframes pulse-mic {
       0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
       50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
     }
 
-    /* Adaptabilidad Movil (Pantallas Pequenas) */
+    /* Adaptabilidad Movil */
     @media (max-width: 859px) {
       .hud {
-        padding: max(10px, env(safe-area-inset-top)) 14px max(10px, env(safe-area-inset-bottom)) 14px;
+        padding: max(12px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom)) 16px;
       }
       .main-split-container {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         gap: 12px;
-        margin-top: 8px;
+        margin-top: 4px;
       }
       .left-avatar-zone {
         height: 32vh;
-        min-height: 180px;
-        padding-bottom: 8px;
-      }
-      .avatar-pedestal-badge {
-        padding: 4px 10px;
-      }
-      .pedestal-title {
-        font-size: 0.62rem;
+        min-height: 170px;
+        padding-bottom: 4px;
       }
       .right-chat-panel {
         max-width: 100%;
         margin-left: 0;
-        gap: 10px;
+        gap: 12px;
       }
       .speech-bubble {
-        max-height: 140px;
+        max-height: 130px;
+        font-size: 0.96rem;
       }
       .top-controls {
         gap: 5px;
       }
-      .voice-select {
+      .voice-select-transparent {
         display: none;
       }
     }
 
-    /* Modal / Drawer de Prospeccion SSSSolutions Onyx */
+    /* Modal / Drawer de Prospeccion */
     .leads-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(5, 5, 8, 0.75);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      background: rgba(5, 6, 8, 0.8);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
       z-index: 100;
       display: none;
       align-items: flex-end;
@@ -669,7 +625,7 @@
       max-height: 88dvh;
       background: var(--surface-sheet);
       border-radius: 28px 28px 0 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 -12px 50px rgba(0, 0, 0, 0.7);
       display: flex;
       flex-direction: column;
@@ -706,7 +662,7 @@
       justify-content: space-between;
       align-items: center;
       padding: 18px 22px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       background: rgba(18, 18, 24, 0.7);
     }
     .sheet-title {
@@ -723,7 +679,7 @@
     .btn-close {
       width: 32px; height: 32px;
       border-radius: 50%;
-      border: 1px solid var(--card-border);
+      border: none;
       background: rgba(255, 255, 255, 0.08);
       color: #ffffff;
       display: flex;
@@ -746,7 +702,7 @@
 
     .autopilot-banner {
       background: linear-gradient(135deg, rgba(24, 28, 40, 0.95), rgba(12, 14, 20, 0.95));
-      border: 1px solid rgba(56, 189, 248, 0.25);
+      border: 1px solid rgba(56, 189, 248, 0.2);
       color: #ffffff;
       border-radius: 18px;
       padding: 14px 16px;
@@ -842,7 +798,7 @@
       display: flex;
       gap: 6px;
       padding: 0 22px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       background: rgba(12, 12, 16, 0.8);
     }
     .sheet-tab {
@@ -870,7 +826,7 @@
       gap: 16px;
     }
 
-    /* Tarjetas de Metricas Titanio */
+    /* Tarjetas de Metricas */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -878,7 +834,7 @@
     }
     .stat-card {
       background: rgba(22, 22, 30, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 16px;
       padding: 12px;
       text-align: center;
@@ -936,10 +892,6 @@
       color: #ffffff;
       outline: none;
       font-family: inherit;
-      transition: border-color var(--transition-fast);
-    }
-    .form-input:focus, .form-select:focus {
-      border-color: rgba(56, 189, 248, 0.5);
     }
     .form-select option {
       background: #121216;
@@ -977,7 +929,7 @@
       transform: translateY(-1px);
     }
 
-    /* Lista de Prospectos Mejorada */
+    /* Lista de Prospectos */
     .leads-list {
       display: flex;
       flex-direction: column;
@@ -993,10 +945,6 @@
       gap: 8px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       transition: all var(--transition-fast);
-    }
-    .lead-card:hover {
-      border-color: rgba(56, 189, 248, 0.35);
-      background: rgba(26, 26, 36, 0.9);
     }
     .lead-top {
       display: flex;
@@ -1026,17 +974,14 @@
     .badge-nuevo {
       background: rgba(56, 189, 248, 0.15);
       color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.3);
     }
     .badge-contactado {
       background: rgba(16, 185, 129, 0.15);
       color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
     }
     .badge-respondio {
       background: rgba(245, 158, 11, 0.15);
       color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
     }
 
     .channel-badge {
@@ -1052,22 +997,18 @@
     .channel-fb {
       background: rgba(24, 119, 242, 0.18);
       color: #60a5fa;
-      border: 1px solid rgba(24, 119, 242, 0.35);
     }
     .channel-ig {
       background: rgba(225, 48, 108, 0.18);
       color: #f472b6;
-      border: 1px solid rgba(225, 48, 108, 0.35);
     }
     .channel-maps {
       background: rgba(16, 185, 129, 0.18);
       color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.35);
     }
     .channel-web {
       background: rgba(148, 163, 184, 0.15);
       color: #cbd5e1;
-      border: 1px solid rgba(148, 163, 184, 0.25);
     }
 
     .lead-meta {
@@ -1085,7 +1026,7 @@
     }
     .lead-btn {
       background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: none;
       border-radius: 10px;
       padding: 6px 11px;
       font-size: 0.72rem;
@@ -1101,21 +1042,23 @@
     }
     .lead-btn:hover {
       background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.2);
     }
     .lead-btn-wa {
-      background: rgba(16, 185, 129, 0.16);
+      background: rgba(16, 185, 129, 0.18);
       color: #34d399;
-      border-color: rgba(16, 185, 129, 0.35);
     }
     .lead-btn-wa:hover {
-      background: rgba(16, 185, 129, 0.28);
+      background: rgba(16, 185, 129, 0.3);
       color: #ffffff;
     }
 
     @keyframes fade-slide-up {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1124,7 +1067,6 @@
   <div class="bg-blobs">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
-    <div class="studio-spotlight-left"></div>
   </div>
 
   <div id="canvas-container"></div>
@@ -1133,7 +1075,7 @@
   <audio id="voice-player" playsinline preload="auto"></audio>
 
   <div class="hud">
-    <!-- Capsula Dynamic Island Superior -->
+    <!-- Barra Superior Flotante y Transparente -->
     <div class="top-bar">
       <div class="agent-identity">
         <div class="status-dot"></div>
@@ -1141,23 +1083,16 @@
           <div class="agent-name">SEBAX</div>
           <div class="agent-status" id="agent-state">En espera de instrucciones</div>
         </div>
-        <div class="audio-waveform" id="hud-waveform" title="Monitor de voz">
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-        </div>
       </div>
       <div class="top-controls">
-        <button id="wa-status-btn" class="wa-status-pill disconnected" onclick="openWhatsAppTab()" title="Conexion de WhatsApp">
+        <button id="wa-status-btn" class="glass-pill wa-status-pill disconnected" onclick="openWhatsAppTab()" title="Conexion de WhatsApp">
           <span class="dot-status"></span>
           <span id="wa-status-label">Vincular WhatsApp</span>
         </button>
-        <a href="https://www.instagram.com/ssss.olutions" target="_blank" class="badge-link" title="Instagram oficial de SSSSolutions">
+        <a href="https://www.instagram.com/ssss.olutions" target="_blank" class="glass-pill" title="Instagram oficial de SSSSolutions">
           @ssss.olutions
         </a>
-        <button class="icon-btn" id="btn-open-leads" title="Panel de Prospeccion y Clientes">
+        <button class="icon-glass-btn" id="btn-open-leads" title="Panel de Prospeccion y Clientes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
@@ -1165,7 +1100,7 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </button>
-        <button class="icon-btn" id="btn-open-agenda" title="Agenda y Citas" onclick="openAgendaModal()">
+        <button class="icon-glass-btn" id="btn-open-agenda" title="Agenda y Citas" onclick="openAgendaModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
             <line x1="16" y1="2" x2="16" y2="6"/>
@@ -1173,13 +1108,13 @@
             <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
         </button>
-        <select id="voice-select" class="voice-select" title="Voz de Sebax">
+        <select id="voice-select" class="voice-select-transparent" title="Voz de Sebax">
           <option value="es-MX-JorgeNeural">Jorge (Mexico)</option>
           <option value="es-MX-PelayoNeural">Pelayo (Dinamico)</option>
           <option value="es-ES-AlvaroNeural">Alvaro (Jarvis)</option>
           <option value="es-MX-DaliaNeural">Dalia (Mexico)</option>
         </select>
-        <button class="icon-btn active" id="btn-toggle-voice" title="Alternar audio">
+        <button class="icon-glass-btn active" id="btn-toggle-voice" title="Alternar audio">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
@@ -1189,9 +1124,9 @@
       </div>
     </div>
 
-    <!-- CONTENEDOR PRINCIPAL SPLIT -->
+    <!-- CONTENEDOR PRINCIPAL SPLIT TRANSPARENTE -->
     <div class="main-split-container">
-      <!-- Columna Izquierda: Espacio de la Cabeza 3D -->
+      <!-- Columna Izquierda: Cabeza 3D Flotante con Halo -->
       <div class="left-avatar-zone">
         <div class="avatar-pedestal-badge">
           <span class="pedestal-dot"></span>
@@ -1199,16 +1134,12 @@
         </div>
       </div>
 
-      <!-- Columna Derecha: Centro de Mando, Dialogo y Controles -->
+      <!-- Columna Derecha: Dialogo Flotante, Ondas y Controles Sin Bordes -->
       <div class="right-chat-panel">
-        <!-- Tarjeta de Dialogo / Respuesta de Sebax -->
-        <div class="speech-card">
-          <div class="speech-card-header">
-            <div class="sb-header-left">
-              <span class="sb-badge-agent">SEBAX</span>
-              <span class="sb-state-badge" id="panel-agent-state">Asistente Comercial</span>
-            </div>
-            <div class="audio-waveform" id="panel-waveform" title="Monitor de audio">
+        <div class="speech-container">
+          <div class="speech-header">
+            <span class="sb-badge-agent">SEBAX AI</span>
+            <div class="audio-waveform" id="panel-waveform" title="Monitor de voz">
               <span class="wave-bar"></span>
               <span class="wave-bar"></span>
               <span class="wave-bar"></span>
@@ -1221,7 +1152,7 @@
             Sebax en linea. Toca el microfono para dictar o escribe una orden para comenzar.
           </div>
 
-          <div class="speech-card-footer">
+          <div class="speech-footer">
             <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -1232,11 +1163,11 @@
           </div>
         </div>
 
-        <!-- Acciones Rapidas -->
+        <!-- Acciones Rapidas Transparentes -->
         <div class="quick-actions-panel">
           <div class="quick-actions-title">Acciones y Prospeccion Rapida</div>
           <div class="quick-actions">
-            <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(16,185,129,0.35); background:rgba(16,185,129,0.12); color:#34d399;">Vincular WhatsApp</div>
+            <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; background:rgba(16,185,129,0.18); color:#34d399;">Vincular WhatsApp</div>
             <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreon, Gomez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreon, Gomez y Lerdo</div>
             <div class="pill" onclick="sendQuick('Sebax, busca 3 cafeterias, dulcerias o florerias en Torreon, Gomez Palacio o Lerdo y prospectalos por WhatsApp')">Cafeterias, Dulcerias y Florerias</div>
             <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
@@ -1245,7 +1176,7 @@
           </div>
         </div>
 
-        <!-- Barra de Entrada Titanio -->
+        <!-- Barra de Entrada Flotante Sin Bordes -->
         <div class="input-bar">
           <input type="text" id="user-input" placeholder="Escribe una orden para Sebax..." autocomplete="off">
           <button class="btn-action" id="mic-btn" title="Hablar por voz">
@@ -1439,7 +1370,7 @@
         <div class="tab-content" id="tab-content-whatsapp">
           <!-- Vista cuando WhatsApp esta CONECTADO -->
           <div id="wa-tab-connected-view" style="display:none; text-align:center; padding:2rem 1rem;">
-            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:rgba(16,185,129,0.15); color:#34d399; font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem; border:1px solid rgba(16,185,129,0.35);">
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:rgba(16,185,129,0.15); color:#34d399; font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem;">
               <span style="width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span> EN LINEA Y OPERATIVO
             </div>
             <div style="font-size:1.15rem; font-weight:800; color:#ffffff; margin-bottom:0.4rem;">WhatsApp Conectado con Exito</div>
@@ -1522,14 +1453,12 @@
   <script>
     const speechBubble = document.getElementById("speech-bubble");
     const agentState = document.getElementById("agent-state");
-    const panelAgentState = document.getElementById("panel-agent-state");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-btn");
     const micBtn = document.getElementById("mic-btn");
     const voiceToggleBtn = document.getElementById("btn-toggle-voice");
     const voiceSelect = document.getElementById("voice-select");
     const voicePlayer = document.getElementById("voice-player");
-    const hudWaveform = document.getElementById("hud-waveform");
     const panelWaveform = document.getElementById("panel-waveform");
 
     // Modal de Leads
@@ -1543,13 +1472,11 @@
 
     // Actualizador visual de Ondas de Audio
     function updateWaveformUI(active, mode = "speaking") {
-      [hudWaveform, panelWaveform].forEach(wf => {
-        if (!wf) return;
-        wf.classList.remove("speaking", "listening");
-        if (active) {
-          wf.classList.add(mode === "listening" ? "listening" : "speaking");
-        }
-      });
+      if (!panelWaveform) return;
+      panelWaveform.classList.remove("speaking", "listening");
+      if (active) {
+        panelWaveform.classList.add(mode === "listening" ? "listening" : "speaking");
+      }
     }
 
     // Activar audio en moviles en el primer toque de usuario
@@ -1692,7 +1619,6 @@
       prewarmAudio();
       userInput.value = "";
       if (agentState) agentState.textContent = "Procesando orden...";
-      if (panelAgentState) panelAgentState.textContent = "Procesando...";
       if (window.avatar) window.avatar.setThinking(true);
       setBubble(`Procesando: "${text}"...`, false);
 
@@ -1706,11 +1632,9 @@
         const reply = data.reply || "Orden ejecutada.";
         setBubble(reply, true);
         if (agentState) agentState.textContent = "Listo";
-        if (panelAgentState) panelAgentState.textContent = "Listo";
       } catch (err) {
         setBubble("Error al comunicar con el nucleo: " + err.message, false);
         if (agentState) agentState.textContent = "Error";
-        if (panelAgentState) panelAgentState.textContent = "Error";
       } finally {
         if (window.avatar) window.avatar.setThinking(false);
       }
@@ -1898,7 +1822,7 @@
 
         const isOnline = data.status === "open";
         if (btn && label) {
-          btn.className = isOnline ? "wa-status-pill connected" : "wa-status-pill disconnected";
+          btn.className = isOnline ? "glass-pill wa-status-pill connected" : "glass-pill wa-status-pill disconnected";
           label.textContent = isOnline ? "WhatsApp Activo" : "Vincular WhatsApp";
         }
 
@@ -2116,7 +2040,7 @@
 
       container.innerHTML = appointments.map(a => {
         const isConfirmed = a.status === "confirmada";
-        const badgeStyle = isConfirmed ? "background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3);" : "background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3);";
+        const badgeStyle = isConfirmed ? "background:rgba(16,185,129,0.15); color:#34d399;" : "background:rgba(245,158,11,0.15); color:#fbbf24;";
         const statusLabel = isConfirmed ? "Confirmada" : (a.status === "en_negociacion" ? "En Negociacion" : a.status);
         const waLink = a.phone ? `https://wa.me/${a.phone}` : "#";
 
@@ -2271,7 +2195,6 @@
         isListening = true;
         micBtn.classList.add("listening");
         if (agentState) agentState.textContent = "Escuchando...";
-        if (panelAgentState) panelAgentState.textContent = "Escuchando...";
         updateWaveformUI(true, "listening");
         prewarmAudio();
       };
@@ -2286,7 +2209,6 @@
         isListening = false;
         micBtn.classList.remove("listening");
         if (agentState) agentState.textContent = "Listo";
-        if (panelAgentState) panelAgentState.textContent = "Listo";
         updateWaveformUI(false);
       };
 

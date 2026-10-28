@@ -1,26 +1,26 @@
-// 3D Avatar Engine - Sebax Head Unit (Solo Cabeza en Zona Izquierda)
+// 3D Avatar Engine - Sebax Head Unit con Fondo Dinamico de Particulas
 (function () {
   const container = document.getElementById("canvas-container");
   if (!container) return;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x070709);
-  scene.fog = new THREE.FogExp2(0x070709, 0.035);
+  scene.background = new THREE.Color(0x050608);
+  scene.fog = new THREE.FogExp2(0x050608, 0.028);
 
   const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 0, 3.4);
+  camera.position.set(0, 0, 3.8);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
+  renderer.toneMappingExposure = 1.25;
   container.appendChild(renderer.domElement);
 
-  // Iluminacion Studio Onyx y Titanio
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.95);
+  // Iluminacion de Estudio
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x121318, 0.95);
   scene.add(hemiLight);
 
   const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
@@ -38,9 +38,56 @@
   rimLight.position.set(-2, 3, -3);
   scene.add(rimLight);
 
-  const backLight = new THREE.DirectionalLight(0xe2e8f0, 0.8);
-  backLight.position.set(0, 3, -4);
-  scene.add(backLight);
+  // Luces orbitales dinamicas que barren el espacio suavemente
+  const orbitLight1 = new THREE.PointLight(0x38bdf8, 1.4, 14);
+  orbitLight1.position.set(-3, 1, 1);
+  scene.add(orbitLight1);
+
+  const orbitLight2 = new THREE.PointLight(0x6366f1, 1.1, 15);
+  orbitLight2.position.set(3, -1, 0);
+  scene.add(orbitLight2);
+
+  // ----------------------------------------------------
+  // FONDO DINAMICO DE PARTICULAS (Starfield / Cyber Dust)
+  // ----------------------------------------------------
+  const particleCount = 280;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePos = new Float32Array(particleCount * 3);
+  const particleSpeeds = new Float32Array(particleCount);
+
+  for (let i = 0; i < particleCount; i++) {
+    particlePos[i * 3] = (Math.random() - 0.5) * 16;
+    particlePos[i * 3 + 1] = (Math.random() - 0.5) * 12;
+    particlePos[i * 3 + 2] = (Math.random() - 0.5) * 8 - 1;
+    particleSpeeds[i] = Math.random() * 0.4 + 0.15;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+
+  // Textura suave de particula circular
+  const pCanvas = document.createElement("canvas");
+  pCanvas.width = 64;
+  pCanvas.height = 64;
+  const pCtx = pCanvas.getContext("2d");
+  const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  pGrad.addColorStop(0, "rgba(255, 255, 255, 1)");
+  pGrad.addColorStop(0.25, "rgba(56, 189, 248, 0.85)");
+  pGrad.addColorStop(0.65, "rgba(99, 102, 241, 0.3)");
+  pGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+  pCtx.fillStyle = pGrad;
+  pCtx.fillRect(0, 0, 64, 64);
+
+  const particleTexture = new THREE.CanvasTexture(pCanvas);
+  const particleMat = new THREE.PointsMaterial({
+    size: 0.18,
+    map: particleTexture,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+
+  const particles = new THREE.Points(particleGeo, particleMat);
+  scene.add(particles);
 
   // Materiales de alta fidelidad al diseno de Sebax
   const whiteMat = new THREE.MeshStandardMaterial({
@@ -69,8 +116,9 @@
     color: 0x38bdf8, // Celeste neon brillante al hablar
   });
 
-  // Raiz del Personaje Sebax (Unidad de Cabeza)
+  // Raiz del Personaje Sebax (Escalada a 0.82 para ajuste perfecto)
   const robot = new THREE.Group();
+  robot.scale.set(0.82, 0.82, 0.82);
   scene.add(robot);
 
   // ----------------------------------------------------
@@ -110,18 +158,16 @@
   rightEye.position.set(0.25, -0.02, 0.515);
   headGroup.add(rightEye);
 
-  // Orejeras / Auriculares laterales (Izquierda y Derecha)
+  // Orejeras / Auriculares laterales
   function createEar(isRight) {
     const earGroup = new THREE.Group();
     const sign = isRight ? 1 : -1;
     earGroup.position.set(sign * 0.72, -0.02, 0);
 
-    // Marco exterior blanco
     const earWhite = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.45, 0.42), whiteMat);
     earWhite.castShadow = true;
     earGroup.add(earWhite);
 
-    // Nucleo negro interno
     const earBlack = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.32, 0.3), blackMat);
     earBlack.position.x = sign * 0.02;
     earGroup.add(earBlack);
@@ -131,7 +177,7 @@
   headGroup.add(createEar(false));
   headGroup.add(createEar(true));
 
-  // Antena asimetrica en la parte superior izquierda de la cabeza
+  // Antena asimetrica
   const antennaGroup = new THREE.Group();
   antennaGroup.position.set(0.35, 0.575, -0.05);
 
@@ -149,7 +195,7 @@
 
   headGroup.add(antennaGroup);
 
-  // Vistas traseras de la cabeza: Ranuras horizontales
+  // Ranuras traseras
   const backVent1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.04), whiteMat);
   backVent1.position.set(0, 0.12, -0.49);
   headGroup.add(backVent1);
@@ -158,20 +204,20 @@
   backVent2.position.set(0, -0.06, -0.49);
   headGroup.add(backVent2);
 
-  // Base / Cuello flotante minimalista en la base de la cabeza
+  // Cuello minimalista flotante
   const baseRing = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.1, 24), blackMat);
   baseRing.position.y = -0.62;
   headGroup.add(baseRing);
 
-  // Sombra de halo inferior flotante
+  // Halo inferior de luz suave
   const shadowCanvas = document.createElement("canvas");
   shadowCanvas.width = 128;
   shadowCanvas.height = 128;
   const sCtx = shadowCanvas.getContext("2d");
   const sGrad = sCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
   sGrad.addColorStop(0, "rgba(56, 189, 248, 0.35)");
-  sGrad.addColorStop(0.35, "rgba(16, 185, 129, 0.15)");
-  sGrad.addColorStop(1, "rgba(7, 7, 9, 0)");
+  sGrad.addColorStop(0.35, "rgba(99, 102, 241, 0.18)");
+  sGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
   sCtx.fillStyle = sGrad;
   sCtx.fillRect(0, 0, 128, 128);
   const glowTexture = new THREE.CanvasTexture(shadowCanvas);
@@ -181,7 +227,7 @@
     new THREE.MeshBasicMaterial({ map: glowTexture, transparent: true, opacity: 0.65, depthWrite: false })
   );
   glowPlane.rotation.x = -Math.PI / 2;
-  glowPlane.position.y = -0.95;
+  glowPlane.position.y = -0.92;
   headGroup.add(glowPlane);
 
   // ----------------------------------------------------
@@ -191,7 +237,7 @@
   let isThinking = false;
   let targetRotation = { x: 0, y: 0 };
   let currentRotation = { x: 0, y: 0 };
-  let baseY = 0.0;
+  let baseY = -0.06;
 
   // Seguimiento inteligente del cursor hacia el panel derecho
   function onPointerMove(e) {
@@ -200,10 +246,9 @@
     const normX = (clientX / window.innerWidth) * 2 - 1;
     const normY = -(clientY / window.innerHeight) * 2 + 1;
 
-    const isMobile = window.innerWidth < 768;
+    const isMobile = window.innerWidth < 860;
     const robotCenterNormX = isMobile ? 0 : -0.48;
 
-    // Calcular el giro relativo para que mire hacia donde esta el mouse o texto
     targetRotation.y = (normX - robotCenterNormX) * 0.48;
     targetRotation.x = -normY * 0.32;
   }
@@ -214,26 +259,27 @@
   function updateLayout() {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const isMobile = width < 768;
+    const isMobile = width < 860;
 
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 
     if (isMobile) {
-      baseY = 0.42;
+      baseY = 0.32;
+      robot.scale.set(0.72, 0.72, 0.72);
       robot.position.set(0, baseY, 0);
-      camera.position.set(0, baseY, 3.4);
+      camera.position.set(0, baseY, 3.8);
     } else {
-      baseY = 0.05;
+      baseY = -0.06;
+      robot.scale.set(0.82, 0.82, 0.82);
       const fovRad = (camera.fov * Math.PI) / 180;
-      const visibleHeight = 2 * Math.tan(fovRad / 2) * 3.4;
+      const visibleHeight = 2 * Math.tan(fovRad / 2) * 3.8;
       const visibleWidth = visibleHeight * camera.aspect;
 
-      // Centrar la cabeza exactamente en la mitad de la columna izquierda (aprox 24% del ancho total)
       const targetX = -(visibleWidth * 0.25);
       robot.position.set(targetX, baseY, 0);
-      camera.position.set(0, baseY, 3.4);
+      camera.position.set(0, baseY, 3.8);
     }
   }
   window.addEventListener("resize", updateLayout);
@@ -256,6 +302,29 @@
     // Flotacion y respiracion ritmica
     const bob = Math.sin(time * 2.2) * 0.035;
     robot.position.y = baseY + bob;
+
+    // Movimiento orbital de luces dinamicas
+    orbitLight1.position.x = -2.5 + Math.sin(time * 0.7) * 1.5;
+    orbitLight1.position.y = 0.5 + Math.cos(time * 0.6) * 1.2;
+
+    orbitLight2.position.x = 2.5 + Math.cos(time * 0.5) * 1.8;
+    orbitLight2.position.y = -0.5 + Math.sin(time * 0.8) * 1.4;
+
+    // Movimiento fluido de particulas flotantes
+    const positions = particleGeo.attributes.position.array;
+    const speedMult = isSpeaking ? 1.8 : 1.0;
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3 + 1] += particleSpeeds[i] * 0.008 * speedMult;
+      positions[i * 3] += Math.sin(time * 0.4 + i) * 0.002;
+
+      if (positions[i * 3 + 1] > 6) {
+        positions[i * 3 + 1] = -6;
+        positions[i * 3] = (Math.random() - 0.5) * 16;
+      }
+    }
+    particleGeo.attributes.position.needsUpdate = true;
+    particles.rotation.y = currentRotation.y * 0.15;
+    particles.rotation.x = currentRotation.x * 0.1;
 
     // Parpadeo periodico natural
     const blinkCycle = Math.sin(time * 1.3);
