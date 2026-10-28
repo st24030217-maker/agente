@@ -186,13 +186,13 @@ async def whatsapp_webhook(request: Request):
         coordinator.reset_chat(sender)
         return {"reply": "Conversacion y contexto reiniciados exitosamente."}
 
-    reply = await coordinator.process_message(chat_id=sender, message=message)
+    reply = await coordinator.process_message(chat_id=sender, message=message, is_admin=False)
     return {"reply": reply}
 
 @app.post("/chat")
 @app.post("/api/chat")
 async def chat_direct(payload: DirectChatRequest):
-    reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message)
+    reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=False)
     return {"reply": reply}
 
 @app.get("/demo/{slug}", response_class=Response)

@@ -5,7 +5,7 @@ from google import genai
 from google.genai import types
 
 from agente.config import settings
-from agente.tools import AGENT_TOOLS
+from agente.tools import AGENT_TOOLS, COMMERCIAL_TOOLS, ADMIN_TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -64,14 +64,16 @@ class AgentCoordinator:
             self.locks[chat_id] = asyncio.Lock()
         return self.locks[chat_id]
 
-    def get_or_create_chat(self, chat_id: str):
+    def get_or_create_chat(self, chat_id: str, is_admin: bool = False):
         if not self.client:
             raise ValueError("GEMINI_API_KEY no está configurada. Por favor define la clave en tu archivo .env.")
+
+        selected_tools = ADMIN_TOOLS if is_admin else COMMERCIAL_TOOLS
 
         if chat_id not in self.chats:
             config = types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
-                tools=AGENT_TOOLS,
+                tools=selected_tools,
                 temperature=0.7,
             )
             chat = self.client.chats.create(
@@ -86,10 +88,12 @@ class AgentCoordinator:
         if chat_id in self.chats:
             del self.chats[chat_id]
 
-    async def process_message(self, chat_id: str, message: str) -> str:
+    async def process_message(self, chat_id: str, message: str, is_admin: bool = False) -> str:
         """Procesa un mensaje del usuario y devuelve la respuesta del agente con reintentos y fallback de modelo."""
         if not self.api_key:
             return "Falta configurar tu GEMINI_API_KEY en el archivo .env. Por favor agregala y reinicia el agente."
+
+        selected_tools = ADMIN_TOOLS if is_admin else COMMERCIAL_TOOLS
 
         async with self.get_lock(chat_id):
             candidate_models = [settings.gemini_model, "gemini-3.5-flash-lite"]
@@ -102,7 +106,7 @@ class AgentCoordinator:
                         if chat_id not in self.chats:
                             config = types.GenerateContentConfig(
                                 system_instruction=SYSTEM_PROMPT,
-                                tools=AGENT_TOOLS,
+                                tools=selected_tools,
                                 temperature=0.7,
                             )
                             self.chats[chat_id] = self.client.chats.create(
