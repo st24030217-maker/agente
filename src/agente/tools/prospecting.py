@@ -20,19 +20,31 @@ PORTFOLIO_LINKS = {
     "instagram": "https://www.instagram.com/ssss.olutions"
 }
 
-# Giros comerciales diversos para prospección abierta
+# Giros comerciales enfocados en gastronomia, retail, regalos y consumo local
 DIVERSE_NICHES = [
-    "restaurantes y cafeterias",
-    "talleres mecanicos y refacciones",
-    "despachos de arquitectura y constructoras",
-    "gimnasios y centros deportivos",
-    "mueblerias y decoracion",
-    "despachos de abogados y contadores",
-    "salones de eventos y banquetes",
-    "escuelas y academias",
-    "clinicas y consultorios",
-    "salones de belleza y barberias"
+    "cafeterias y coffee shops",
+    "restaurantes y comida",
+    "dulcerias y confiterias",
+    "florerias y arreglos florales",
+    "pastelerias y reposteria",
+    "panaderias artesanales",
+    "neverias y heladerias",
+    "pizzerias y hamburgueserias",
+    "boutiques y tiendas de regalos",
+    "salones de eventos y banquetes"
 ]
+
+# Giros y palabras clave estrictamente excluidos por orden de Sebastian
+EXCLUDED_KEYWORDS = [
+    "taller", "mecanic", "mecánic", "automotriz", "refaccion", "refacción",
+    "llanta", "freno", "afinacion", "afinación", "hojalater", "suspension", "autolavado",
+    "dental", "dentist", "odontol", "clinica dental", "clínica dental", "dientes", "ortodon"
+]
+
+def _is_excluded_business(name: str, niche: str, text: str = "") -> bool:
+    """Verifica si un negocio pertenece a giros excluidos (talleres mecanicos o clinicas dentales)."""
+    target = f"{name} {niche} {text}".lower()
+    return any(w in target for w in EXCLUDED_KEYWORDS)
 
 # Ciudades de la Comarca Lagunera por defecto
 LAGUNA_CITIES = ["Torreón", "Gómez Palacio", "Ciudad Lerdo"]
@@ -73,7 +85,7 @@ def _clean_business_name(title: str, href: str, niche: str) -> str:
     """Limpia y da formato profesional al nombre del negocio extraído."""
     name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", title).strip()
     name = re.sub(r"(?i)\b(directorio|telefonos?|contactos?|whatsapp|mexico|coahuila|durango|laguna|comarca lagunera|torreon|gomez palacio|gomez|lerdo|cd lerdo|nuevo leon|portal|pagina|oficial|horario|opiniones)\b", "", name).strip()
-    if len(name) < 4 or name.lower() in ["inicio", "home", "contacto", "principal", "bienvenido", "sucursal"]:
+    if len(name) < 4 or name.lower() in ["inicio", "home", "contacto", "principal", "bienvenido", "sucursal", "telefono", "teléfono", "telefonos", "directorio", "whatsapp"]:
         match = re.search(r"https?://(?:www\.)?([^/.]+)", href)
         if match and match.group(1) not in ["google", "facebook", "instagram", "doctoralia", "seccionamarilla", "guiatel"]:
             domain_name = match.group(1).replace("-", " ").replace("_", " ").title()
@@ -159,8 +171,10 @@ def discover_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerd
                             for rp in raw_phones:
                                 norm = normalize_mx_phone(rp)
                                 if len(norm) == 13 and norm not in seen_phones:
-                                    seen_phones.add(norm)
                                     b_name = _clean_business_name(title, href, current_niche)
+                                    if _is_excluded_business(b_name, current_niche, body):
+                                        continue
+                                    seen_phones.add(norm)
                                     discovered.append({
                                         "name": b_name,
                                         "phone": norm,
@@ -192,8 +206,10 @@ def discover_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerd
                                                 if len(norm_ph) == 13 and norm_ph not in seen_phones:
                                                     h_raw = elem.get_text().strip()
                                                     if len(h_raw) > 3 and not any(ign in h_raw.lower() for ign in ["telefono", "directorio", "buscar", "contacto", "horario"]):
-                                                        seen_phones.add(norm_ph)
                                                         h_name = _clean_business_name(h_raw, href, current_niche)
+                                                        if _is_excluded_business(h_name, current_niche, parent_text):
+                                                            continue
+                                                        seen_phones.add(norm_ph)
                                                         discovered.append({
                                                             "name": h_name,
                                                             "phone": norm_ph,
@@ -244,24 +260,24 @@ def generate_pitch(business_name: str, niche: str = "", contact_name: str = "") 
     niche_lower = (niche or "").lower()
 
     # Personalización del beneficio según la industria del negocio
-    if any(k in niche_lower for k in ["restauran", "comida", "cafe", "bar", "pizza", "taco", "gastronom"]):
-        benefit = "atraer nuevos clientes, exhibir su menú de forma visual y recibir reservaciones o pedidos directamente en su WhatsApp"
-    elif any(k in niche_lower for k in ["taller", "mecanic", "auto", "refaccion", "llant", "freno", "electrico"]):
-        benefit = "recibir solicitudes de cotizaciones de clientes, agendar citas mecánicas en línea y mostrar sus servicios y refacciones de forma profesional"
-    elif any(k in niche_lower for k in ["arqui", "inmob", "construc", "diseño interior", "bienes raic", "propied"]):
-        benefit = "exhibir su portafolio de proyectos de alto valor con una estética visual de primer nivel que genere máxima confianza en inversionistas y compradores"
-    elif any(k in niche_lower for k in ["dent", "salud", "medic", "clinic", "dental", "odontolog", "veterinar", "optica", "spa", "belleza"]):
-        benefit = "permitir que los pacientes agenden citas fácilmente desde su teléfono móvil y conozcan a detalle sus tratamientos y testimonios"
-    elif any(k in niche_lower for k in ["gym", "gimnasio", "fit", "crossfit", "deport", "entrenam"]):
-        benefit = "mostrar sus planes de membresías, horarios interactivos de clases y captar nuevos suscriptores directamente en su zona"
-    elif any(k in niche_lower for k in ["abogad", "legal", "juridic", "contador", "fiscal", "notar", "consultor"]):
-        benefit = "transmitir total autoridad y prestigio corporativo, explicando sus áreas de práctica y captando clientes calificados que buscan asesoría profesional"
-    elif any(k in niche_lower for k in ["muebl", "tienda", "boutique", "ferreter", "comercio", "zapater", "ropa"]):
-        benefit = "contar con un catálogo visual digital donde los clientes puedan explorar sus productos y solicitar disponibilidad y precios al instante"
-    elif any(k in niche_lower for k in ["escuela", "colegio", "academi", "curso", "guarder"]):
-        benefit = "facilitar que los padres de familia y alumnos conozcan su oferta educativa, fechas de admisión y programas escolares de forma moderna"
+    if any(k in niche_lower for k in ["cafe", "cafeter", "coffee"]):
+        benefit = "atraer nuevos clientes, exhibir sus bebidas y especialidades de forma visual y recibir pedidos para llevar o a domicilio directamente en su WhatsApp"
+    elif any(k in niche_lower for k in ["dulce", "dulcer", "confiter", "botan", "snack"]):
+        benefit = "mostrar su catálogo de dulces, botanas y paquetes para fiestas y recibir pedidos por mayoreo o menudeo directamente en su WhatsApp"
+    elif any(k in niche_lower for k in ["flor", "florer", "arreglo", "ramo", "planta"]):
+        benefit = "exhibir su catálogo de ramos y arreglos florales de temporada, facilitando que los clientes elijan y coordinen envíos a domicilio al instante"
+    elif any(k in niche_lower for k in ["pastel", "reposter", "panader", "horno", "pan"]):
+        benefit = "mostrar su galería de pasteles personalizados y repostería artesanal, permitiendo a los clientes cotizar y encargar sus pedidos para eventos fácilmente"
+    elif any(k in niche_lower for k in ["nieve", "helad", "palet", "postre"]):
+        benefit = "exhibir sus sabores de temporada, promociones y especialidades de forma visual y atractiva para atraer clientes locales"
+    elif any(k in niche_lower for k in ["restauran", "comida", "bar", "pizza", "taco", "hamburgues", "gastronom", "cocina"]):
+        benefit = "atraer nuevos comensales, exhibir su menú interactivo de forma visual y recibir reservaciones o pedidos directamente en su WhatsApp"
+    elif any(k in niche_lower for k in ["boutique", "regalo", "tienda", "ropa", "joyer", "accesorio"]):
+        benefit = "contar con un catálogo visual digital donde los clientes puedan explorar sus colecciones y consultar disponibilidad y precios al instante"
+    elif any(k in niche_lower for k in ["salon", "evento", "banquet", "fiesta"]):
+        benefit = "exhibir sus paquetes para eventos, galerías de montajes y recibir solicitudes de cotización y fechas disponibles directamente en su WhatsApp"
     else:
-        benefit = "contar con una plataforma web profesional, ultra rápida y optimizada para dispositivos móviles que posicione su marca e impulse sus ventas"
+        benefit = "contar con una plataforma web profesional, ultra rápida y optimizada para dispositivos móviles que posicione su marca e impulse sus ventas y pedidos por WhatsApp"
 
     portfolio_url = PORTFOLIO_LINKS["portfolio"]
     ig_url = PORTFOLIO_LINKS["instagram"]
