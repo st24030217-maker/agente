@@ -1136,6 +1136,26 @@
       micBtn.title = "Reconocimiento de voz no soportado";
     }
 
+    // Manejo de acciones directas desde widgets y accesos directos
+    window.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get("action");
+      if (action === "leads") {
+        setTimeout(openLeadsModal, 500);
+      } else if (action === "campaign") {
+        setTimeout(() => {
+          openLeadsModal();
+          const nicheInput = document.getElementById("camp-niche");
+          if (nicheInput) nicheInput.focus();
+        }, 500);
+      } else if (action === "voice" && micBtn) {
+        setTimeout(() => {
+          prewarmAudio();
+          micBtn.click();
+        }, 800);
+      }
+    });
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
