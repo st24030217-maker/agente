@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 
 from agente.config import DATA_DIR
@@ -18,6 +18,13 @@ from agente.tools.prospecting import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Zona horaria de la Comarca Lagunera (UTC-6)
+LAGUNA_TZ = timezone(timedelta(hours=-6))
+
+def get_laguna_now() -> datetime:
+    """Devuelve la fecha y hora actual en la Comarca Lagunera."""
+    return datetime.now(LAGUNA_TZ)
 
 AUTOPILOT_FILE = DATA_DIR / "autopilot.json"
 
@@ -126,6 +133,23 @@ def run_autopilot_cycle() -> dict:
     cfg["sent_today"] = cfg.get("sent_today", 0) + contacted_count
     save_autopilot_config(cfg)
 
+    # Notificar inmediatamente a Sebastián a su WhatsApp personal sobre el lote enviado
+    if contacted_count > 0:
+        batch_summary_lines = "\n".join([f"• {b}" for b in results])
+        batch_notice = (
+            f"SEBAX PILOTO AUTOMÁTICO - ENVÍO REALIZADO\n\n"
+            f"Giro: {niche.title()}\n"
+            f"Negocios contactados ({contacted_count}):\n"
+            f"{batch_summary_lines}\n\n"
+            f"Enlaces enviados: Portafolio e Instagram.\n"
+            f"Total acumulado hoy: {cfg.get('sent_today', 0)}\n\n"
+            f"Sebax continúa activo 24/7 en Torreón, Gómez y Lerdo."
+        )
+        try:
+            send_whatsapp_message(to_number="self", message=batch_notice)
+        except Exception as e:
+            logger.warning("Fallo al enviar notificación de lote a Sebastián: %s", e)
+
     logger.info("Piloto automático completó ciclo: %d contactados en giro [%s]", contacted_count, niche)
     return {
         "executed": True,
@@ -136,7 +160,7 @@ def run_autopilot_cycle() -> dict:
 
 def send_daily_morning_report() -> str:
     """Compila y envía el reporte diario consolidado al WhatsApp personal de Sebastián Salinas."""
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_str = get_laguna_now().strftime("%Y-%m-%d")
     leads = _load_leads()
     appointments = _load_appointments()
 
@@ -193,7 +217,7 @@ def retry_unsent_leads() -> dict:
         return {"executed": True, "retried": 0, "message": "No hay prospectos pendientes"}
 
     retried_count = 0
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = get_laguna_now().strftime("%Y-%m-%d %H:%M:%S")
     for item in failed_leads:
         phone = item.get("phone")
         pitch = item.get("pitch")
@@ -228,10 +252,10 @@ async def autopilot_background_worker():
     while True:
         try:
             cfg = get_autopilot_config()
-            now = datetime.now()
+            now = get_laguna_now()
             today_str = now.strftime("%Y-%m-%d")
 
-            # 1. Verificar si corresponde enviar el reporte matutino (09:00 AM o primera hora del día)
+            # 1. Verificar si corresponde enviar el reporte matutino (09:00 AM hora de La Laguna)
             if now.hour >= 9 and cfg.get("last_daily_report") != today_str:
                 await asyncio.to_thread(send_daily_morning_report)
 
@@ -244,7 +268,7 @@ async def autopilot_background_worker():
                     should_run = True
                 else:
                     try:
-                        last_run_dt = datetime.strptime(last_run_str, "%Y-%m-%d %H:%M:%S")
+                        last_run_dt = datetime.strptime(last_run_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=LAGUNA_TZ)
                         diff_minutes = (now - last_run_dt).total_seconds() / 60
                         if diff_minutes >= cfg.get("interval_minutes", 25):
                             should_run = True
@@ -258,6 +282,9 @@ async def autopilot_background_worker():
 
         except Exception as e:
             logger.error("Error en bucle de piloto automático: %s", e)
+
+        # Dormir 60 segundos antes de la siguiente verificación
+        await asyncio.sleep(60)
 
         # Dormir 60 segundos antes de la siguiente verificación
         await asyncio.sleep(60)
