@@ -30,7 +30,6 @@ REGLAS DE OPERACIÓN:
   * Cuando se envíen mensajes de WhatsApp, el sistema utiliza pausas automáticas para cuidar la reputación del número de Sebastián.
 - Herramientas a tu disposición:
   * run_autonomous_campaign, search_business_leads, save_lead, list_leads, update_lead_status, generate_pitch
-  * generate_business_mockup: crea un prototipo web visual interactivo con Tailwind CSS personalizado para cualquier negocio y devuelve la URL para enviársela al cliente.
   * add_appointment, list_appointments, update_appointment_status: gestión completa de citas y reuniones de negocios para Sebastián.
   * send_whatsapp_message
   * run_command, read_file, write_file, list_directory

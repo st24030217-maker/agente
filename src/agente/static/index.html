@@ -416,6 +416,94 @@
       gap: 16px;
     }
 
+    .autopilot-banner {
+      background: #09090b;
+      color: #ffffff;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .autopilot-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .autopilot-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #71717a;
+      flex-shrink: 0;
+    }
+    .autopilot-dot.active {
+      background: #10b981;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+      animation: pulse-dot 2s infinite;
+    }
+    .autopilot-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .autopilot-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      text-transform: uppercase;
+    }
+    .autopilot-tag.paused {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+    .autopilot-desc {
+      font-size: 0.72rem;
+      color: #a1a1aa;
+      margin-top: 2px;
+    }
+    .autopilot-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-toggle-auto {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+    .btn-toggle-auto:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+    .btn-report-auto {
+      background: #2563eb;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+    .btn-report-auto:hover {
+      background: #1d4ed8;
+    }
+
     .sheet-tabs {
       display: flex;
       gap: 6px;
@@ -715,8 +803,8 @@
     <div class="leads-sheet">
       <div class="sheet-header">
         <div>
-          <div class="sheet-title" id="sheet-header-title">Centro Comercial SSSSolutions</div>
-          <div class="sheet-subtitle" id="sheet-header-sub">Prospección autónoma, prototipos web en vivo y agenda de citas</div>
+          <div class="sheet-title" id="sheet-header-title">Prospección & Ventas SSSSolutions</div>
+          <div class="sheet-subtitle" id="sheet-header-sub">Piloto automático 24/7 en Torreón, Gómez Palacio y Lerdo</div>
         </div>
         <button class="btn-close" id="btn-close-leads">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -728,13 +816,28 @@
 
       <!-- Pestañas del Modal -->
       <div class="sheet-tabs">
-        <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos & Mockups</div>
+        <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos</div>
         <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas & Agenda</div>
       </div>
 
       <div class="sheet-body">
         <!-- Pestaña 1: Prospectos & Campañas -->
         <div class="tab-content active" id="tab-content-leads">
+          <!-- Banner de Piloto Automático 24/7 -->
+          <div class="autopilot-banner">
+            <div class="autopilot-left">
+              <div class="autopilot-dot active" id="autopilot-dot"></div>
+              <div>
+                <div class="autopilot-title">Piloto Automático 24/7 <span class="autopilot-tag" id="autopilot-tag">ACTIVO</span></div>
+                <div class="autopilot-desc" id="autopilot-desc">Prospectando continuamente en Torreón, Gómez y Lerdo. Reportes diarios a tu WhatsApp.</div>
+              </div>
+            </div>
+            <div class="autopilot-actions">
+              <button class="btn-toggle-auto" id="btn-toggle-auto" onclick="toggleAutopilotUi()">Pausar</button>
+              <button class="btn-report-auto" onclick="requestDailyReportUi()" title="Enviar reporte inmediato a tu WhatsApp">Reporte</button>
+            </div>
+          </div>
+
           <!-- Métricas -->
           <div class="stats-row">
             <div class="stat-card">
@@ -754,7 +857,7 @@
           <!-- Formulario de Campaña Rápida -->
           <div class="campaign-box">
             <div class="campaign-box-title">
-              <span>Lanzar Campaña con Prototipos Web en Vivo</span>
+              <span>Lanzar Campaña Rápida</span>
               <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="campaign-status-msg"></span>
             </div>
             <div class="form-row">
@@ -787,19 +890,19 @@
             </div>
             <label class="toggle-row">
               <input type="checkbox" id="camp-auto-send" checked>
-              <span>Generar prototipo web exclusivo y enviar WhatsApp automáticamente</span>
+              <span>Enviar WhatsApp con portafolio e Instagram automáticamente</span>
             </label>
             <button class="btn-launch" id="btn-start-campaign" onclick="launchCampaign()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
-              <span>Iniciar Prospección y Enviar Mockups</span>
+              <span>Iniciar Prospección y Enviar Mensajes</span>
             </button>
           </div>
 
           <!-- Registro de Prospectos -->
           <div>
-            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Registro de Negocios y Conceptos Web</div>
+            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Registro de Negocios Prospectados</div>
             <div class="leads-list" id="leads-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
             </div>
@@ -1061,11 +1164,12 @@
       sendCommand(q);
     }
 
-    // Modal de Leads, Mockups & Agenda
+    // Modal de Leads, Piloto Automático & Agenda
     function openLeadsModal() {
       leadsModal.classList.add("active");
       switchTab("leads");
       loadLeadsData();
+      loadAutopilotStatus();
     }
     function openAgendaModal() {
       leadsModal.classList.add("active");
@@ -1102,9 +1206,66 @@
         tabBtnLeads.classList.add("active");
         tabContentAgenda.classList.remove("active");
         tabContentLeads.classList.add("active");
-        headerTitle.textContent = "Prospección & Mockups Web";
-        headerSub.textContent = "Pipeline autónomo de clientes y conceptos visuales en vivo";
+        headerTitle.textContent = "Prospección Comercial SSSSolutions";
+        headerSub.textContent = "Piloto automático 24/7 en Torreón, Gómez y Lerdo";
         loadLeadsData();
+        loadAutopilotStatus();
+      }
+    }
+
+    async function loadAutopilotStatus() {
+      try {
+        const res = await fetch("/api/autopilot");
+        if (!res.ok) return;
+        const cfg = await res.json();
+        const dot = document.getElementById("autopilot-dot");
+        const tag = document.getElementById("autopilot-tag");
+        const btn = document.getElementById("btn-toggle-auto");
+        const desc = document.getElementById("autopilot-desc");
+
+        if (cfg.enabled) {
+          dot.classList.add("active");
+          tag.textContent = "ACTIVO";
+          tag.className = "autopilot-tag";
+          btn.textContent = "Pausar";
+          desc.textContent = `Prospectando cada ${cfg.interval_minutes || 25} min en Torreón, Gómez y Lerdo. Contactados hoy: ${cfg.sent_today || 0}.`;
+        } else {
+          dot.classList.remove("active");
+          tag.textContent = "EN PAUSA";
+          tag.className = "autopilot-tag paused";
+          btn.textContent = "Reanudar";
+          desc.textContent = "El piloto automático está en pausa temporalmente.";
+        }
+      } catch (e) {
+        console.error("Error al cargar estado del piloto automático:", e);
+      }
+    }
+
+    async function toggleAutopilotUi() {
+      try {
+        const res = await fetch("/api/autopilot/toggle", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({})
+        });
+        if (res.ok) {
+          loadAutopilotStatus();
+        }
+      } catch (e) {
+        alert("Error al alternar piloto automático: " + e.message);
+      }
+    }
+
+    async function requestDailyReportUi() {
+      try {
+        const btn = event.target;
+        btn.textContent = "Enviando...";
+        const res = await fetch("/api/autopilot/report", { method: "POST" });
+        const data = await res.json();
+        alert("Reporte diario consolidado enviado a tu WhatsApp personal.");
+        btn.textContent = "Reporte";
+      } catch (e) {
+        alert("Error al enviar reporte: " + e.message);
       }
     }
 
@@ -1126,7 +1287,7 @@
     function renderLeadsList(leads) {
       const container = document.getElementById("leads-container");
       if (!leads || leads.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay prospectos registrados aún. Lanza una prospección para comenzar.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay prospectos registrados aún. El piloto automático comenzará a prospectar en breve.</div>`;
         return;
       }
 
@@ -1134,7 +1295,6 @@
         const badgeClass = l.status === "contactado" ? "badge-contactado" : (l.status === "respondio" ? "badge-respondio" : "badge-nuevo");
         const statusLabel = l.status === "contactado" ? "Contactado" : (l.status === "respondio" ? "Respondió" : "Nuevo");
         const waLink = `https://wa.me/${l.phone}`;
-        const previewUrl = l.mockup_url || `/preview/${escapeHtml(l.mockup_slug || '')}`;
 
         return `
           <div class="lead-card">
@@ -1145,53 +1305,25 @@
             <div class="lead-meta">
               <span>Tel: ${escapeHtml(l.phone)}</span>
               <span>Giro: ${escapeHtml(l.niche || "General")}</span>
-              <span>${escapeHtml(l.city || "México")}</span>
+              <span>${escapeHtml(l.city || "La Laguna")}</span>
             </div>
             <div class="lead-actions">
-              ${l.mockup_url ? `
-                <a href="${l.mockup_url}" target="_blank" class="lead-btn" style="color:#4f46e5; border-color:rgba(79,70,229,0.3); background:#eef2ff;">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                  Ver Mockup Web
-                </a>
-              ` : `
-                <button class="lead-btn" onclick="generateMockupForLead(${l.id}, '${escapeHtml(l.name)}', '${escapeHtml(l.niche || '')}', '${escapeHtml(l.city || 'Torreón')}', '${l.phone}')">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                  Crear Mockup Web
-                </button>
-              `}
               <a href="${waLink}" target="_blank" class="lead-btn">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 WhatsApp
               </a>
               <button class="lead-btn" onclick="scheduleForLead('${escapeHtml(l.name)}', '${l.phone}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-                Agendar
+                Agendar Cita
               </button>
               <button class="lead-btn" onclick="sendDirectLead(${l.id}, '${l.phone}', '${escapeHtml(l.name)}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Reenviar
+                Reenviar Propuesta
               </button>
             </div>
           </div>
         `;
       }).join("");
-    }
-
-    async function generateMockupForLead(leadId, name, niche, city, phone) {
-      try {
-        const res = await fetch("/api/leads/mockup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lead_id: leadId, business_name: name, niche: niche, city: city, phone: phone })
-        });
-        const data = await res.json();
-        if (data.url) {
-          window.open(data.url, "_blank");
-          loadLeadsData();
-        }
-      } catch (err) {
-        alert("Error generando prototipo: " + err.message);
-      }
     }
 
     function scheduleForLead(name, phone) {

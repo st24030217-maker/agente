@@ -24,12 +24,18 @@ from agente.tools.prospecting import (
     normalize_mx_phone
 )
 from agente.tools.whatsapp import send_whatsapp_message
-from agente.tools.mockup import generate_business_mockup, PREVIEWS_DIR, slugify
 from agente.tools.agenda import (
     add_appointment,
     list_appointments,
     update_appointment_status,
     get_appointments_stats
+)
+from agente.tools.autopilot import (
+    autopilot_background_worker,
+    get_autopilot_config,
+    toggle_autopilot,
+    run_autopilot_cycle,
+    send_daily_morning_report
 )
 
 logging.basicConfig(
@@ -81,12 +87,8 @@ class AppointmentUpdateRequest(BaseModel):
     status: str
     notes: str = ""
 
-class GenerateMockupRequest(BaseModel):
-    business_name: str
-    niche: str = ""
-    city: str = "Torreón"
-    phone: str = ""
-    lead_id: int | None = None
+class AutopilotToggleRequest(BaseModel):
+    enabled: bool | None = None
 
 @app.get("/health")
 def health_check():
@@ -255,50 +257,27 @@ async def check_incoming_lead_api(payload: LeadIncomingCheck):
 
     return {"is_lead": False}
 
-@app.get("/preview/{slug}")
-async def get_preview_page(slug: str):
-    """Muestra el prototipo web interactivo generado para un negocio."""
-    preview_file = PREVIEWS_DIR / f"{slug}.html"
-    if not preview_file.exists():
-        # Intentar buscar en leads para autogenerar
-        leads = _load_leads()
-        found_lead = None
-        for l in leads:
-            if slugify(l.get("name", "")) == slug or l.get("mockup_slug") == slug:
-                found_lead = l
-                break
-        if found_lead:
-            res = generate_business_mockup(
-                business_name=found_lead.get("name", "Negocio"),
-                niche=found_lead.get("niche", "general"),
-                city=found_lead.get("city", "Torreón"),
-                phone=found_lead.get("phone", "")
-            )
-            preview_file = Path(res["file_path"])
-        else:
-            raise HTTPException(status_code=404, detail="Prototipo web no encontrado.")
+@app.get("/api/autopilot")
+def get_autopilot_api():
+    """Devuelve la configuración y estado actual del piloto automático 24/7."""
+    return get_autopilot_config()
 
-    content = preview_file.read_text(encoding="utf-8")
-    return Response(content=content, media_type="text/html")
+@app.post("/api/autopilot/toggle")
+def toggle_autopilot_api(payload: AutopilotToggleRequest):
+    """Activa o pausa el piloto automático 24/7."""
+    return toggle_autopilot(payload.enabled)
 
-@app.post("/api/leads/mockup")
-async def create_mockup_api(payload: GenerateMockupRequest):
-    """Genera un prototipo web bajo demanda y actualiza el prospecto si existe."""
-    res = generate_business_mockup(
-        business_name=payload.business_name,
-        niche=payload.niche,
-        city=payload.city,
-        phone=payload.phone
-    )
-    if payload.lead_id:
-        leads = _load_leads()
-        for l in leads:
-            if l.get("id") == payload.lead_id:
-                l["mockup_url"] = res["url"]
-                l["mockup_slug"] = res["slug"]
-                _save_leads(leads)
-                break
+@app.post("/api/autopilot/run")
+async def run_autopilot_now_api():
+    """Ejecuta inmediatamente un ciclo de prospección automática en Torreón, Gómez y Lerdo."""
+    res = await asyncio.to_thread(run_autopilot_cycle)
     return res
+
+@app.post("/api/autopilot/report")
+async def send_autopilot_report_api():
+    """Compila y envía el reporte diario consolidado al WhatsApp personal de Sebastián Salinas."""
+    report = await asyncio.to_thread(send_daily_morning_report)
+    return {"success": True, "report": report}
 
 @app.get("/api/appointments")
 def get_appointments_api():
@@ -357,8 +336,9 @@ async def get_tts(text: str, voice: str = "es-MX-JorgeNeural"):
 
 @app.on_event("startup")
 async def startup_event():
-    """Inicia tareas de fondo como el heartbeat para mantener despierto el contenedor en la nube."""
+    """Inicia tareas de fondo: keep-alive y el piloto automático 24/7 de prospección continua."""
     asyncio.create_task(render_keepalive_loop())
+    asyncio.create_task(autopilot_background_worker())
 
 async def render_keepalive_loop():
     """Envía un ping periódico al endpoint health para evitar la suspensión en Render free tier."""

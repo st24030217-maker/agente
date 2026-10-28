@@ -10,7 +10,6 @@ from ddgs import DDGS
 
 from agente.config import DATA_DIR
 from agente.tools.whatsapp import send_whatsapp_message
-from agente.tools.mockup import generate_business_mockup
 
 logger = logging.getLogger(__name__)
 
@@ -230,17 +229,16 @@ def search_business_leads(niche: str = "", city: str = "Torreón, Gómez Palacio
     lines = [f"Prospectos de negocios identificados en [{city}] ({niche_label}):"]
     for i, l in enumerate(leads, 1):
         lines.append(f"{i}. {l['name']} | Tel WhatsApp: {l['phone']} | Ciudad: {l.get('city', 'La Laguna')} | Giro: {l.get('niche', 'comercial')} | Fuente: {l.get('source', '')[:60]}")
-    lines.append("\nPuedes guardar estos prospectos con save_lead o ejecutar run_autonomous_campaign para contactarlos automáticamente por WhatsApp con prototipo web en vivo.")
+    lines.append("\nPuedes guardar estos prospectos con save_lead o ejecutar run_autonomous_campaign para contactarlos automáticamente por WhatsApp.")
     return "\n".join(lines)
 
-def generate_pitch(business_name: str, niche: str = "", contact_name: str = "", mockup_url: str = "") -> str:
-    """Genera una propuesta personalizada y elegante adaptada específicamente al giro de CUALQUIER negocio, mostrando el concepto web en vivo, el portafolio y el Instagram oficial de SSSSolutions.
+def generate_pitch(business_name: str, niche: str = "", contact_name: str = "") -> str:
+    """Genera una propuesta personalizada y elegante adaptada específicamente al giro de CUALQUIER negocio, mostrando exclusivamente el portafolio y el Instagram oficial de SSSSolutions.
     
     Args:
         business_name: Nombre del negocio prospecto.
         niche: Giro o actividad del negocio (ej. 'restaurante', 'taller mecánico', 'arquitectura', 'gimnasio', 'abogados', 'mueblería', 'clínica').
         contact_name: Opcional, nombre de la persona o encargado si se conoce.
-        mockup_url: Opcional, URL del prototipo web interactivo generado para el negocio.
     """
     greeting = f"Hola {contact_name}," if contact_name else f"Hola equipo de {business_name},"
     niche_lower = (niche or "").lower()
@@ -268,20 +266,15 @@ def generate_pitch(business_name: str, niche: str = "", contact_name: str = "", 
     portfolio_url = PORTFOLIO_LINKS["portfolio"]
     ig_url = PORTFOLIO_LINKS["instagram"]
 
-    mockup_section = ""
-    if mockup_url:
-        mockup_section = f"Les preparamos un concepto visual en vivo y adaptado a su negocio para que puedan explorarlo:\n• Prototipo Web: {mockup_url}\n\n"
-
     pitch = (
         f"{greeting}\n\n"
-        f"Les escribe Sebastián Salinas, fundador del estudio de desarrollo y diseño web SSSSolutions (@ssss.olutions).\n\n"
+        f"Les escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\n"
         f"Estuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente "
         f"oportunidad para que {business_name} cuente con una plataforma web propia de alto impacto que les permita {benefit}.\n\n"
-        f"{mockup_section}"
         f"En SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n"
         f"• Portafolio: {portfolio_url}\n"
         f"• Instagram: {ig_url}\n\n"
-        f"¿Les gustaría agendar una breve llamada para comentar los detalles o adaptar este concepto a las necesidades de {business_name}?"
+        f"¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de {business_name}?"
     )
     return pitch
 
@@ -375,18 +368,7 @@ def run_autonomous_campaign(niche: str = "", city: str = "Torreón, Gómez Palac
     for item in leads_found:
         lead_id = len(existing_leads) + 1
         item_niche = item.get("niche", niche or "general")
-        
-        # Generar concepto web en vivo exclusivo y personalizado para el negocio
-        mockup_res = generate_business_mockup(
-            business_name=item["name"],
-            niche=item_niche,
-            city=item.get("city", city),
-            phone=item["phone"]
-        )
-        mockup_url = mockup_res.get("url", "")
-        mockup_slug = mockup_res.get("slug", "")
-
-        pitch = generate_pitch(business_name=item["name"], niche=item_niche, mockup_url=mockup_url)
+        pitch = generate_pitch(business_name=item["name"], niche=item_niche)
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         lead_record = {
@@ -397,8 +379,6 @@ def run_autonomous_campaign(niche: str = "", city: str = "Torreón, Gómez Palac
             "niche": item_niche,
             "source": item.get("source", ""),
             "notes": item.get("notes", ""),
-            "mockup_url": mockup_url,
-            "mockup_slug": mockup_slug,
             "created_at": now_str,
             "pitch": pitch,
             "status": "nuevo"
