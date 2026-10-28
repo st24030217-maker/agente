@@ -85,10 +85,7 @@ app.get("/qr-data", async (req, res) => {
 
 app.post("/pairing-code", async (req, res) => {
   try {
-    const { phone } = req.body;
-    if (!phone) {
-      return res.status(400).json({ error: "Ingresa tu número de teléfono." });
-    }
+    const phone = req.body?.phone || "5218719164677";
     const clean = normalizePhone(phone);
     if (clean.length < 10) {
       return res.status(400).json({ error: "Número no válido. Debe incluir clave lada (ej. 8711234567 o 5218711234567)." });
@@ -278,7 +275,7 @@ app.get("/qr", async (req, res) => {
             <div id="tabCode" class="tab-content active">
               <div class="input-group">
                 <label class="input-label" for="phone">Numero de WhatsApp</label>
-                <input type="tel" id="phone" class="phone-input" placeholder="Ej: 8711234567 o 5218711234567" autocomplete="tel">
+                <input type="tel" id="phone" class="phone-input" value="8719164677" placeholder="8719164677" autocomplete="tel">
               </div>
               <button class="btn-action" id="btnRequestCode" onclick="requestCode()">Obtener Codigo de 8 Digitos</button>
 
