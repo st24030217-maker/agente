@@ -13,6 +13,7 @@ import {
 } from "@whiskeysockets/baileys";
 import pino from "pino";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -187,7 +188,13 @@ async function startWhatsApp() {
       if (shouldReconnect) {
         setTimeout(startWhatsApp, 4000);
       } else {
-        console.log("Sesión cerrada (Logged Out).");
+        console.log("Sesión cerrada (Logged Out). Limpiando credenciales y generando nuevo QR...");
+        try {
+          fs.rmSync(authFolder, { recursive: true, force: true });
+        } catch (e) {
+          console.error("Error al limpiar authFolder:", e);
+        }
+        setTimeout(startWhatsApp, 3000);
       }
     } else if (connection === "open") {
       connectionState = "open";
