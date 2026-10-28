@@ -1,14 +1,14 @@
-// 3D Avatar Engine - Sebax Head Unit con Fondo Dinamico de Particulas
+// 3D Avatar Engine - Sebax Head Unit (Diseno Adaptativo Movil y Escritorio)
 (function () {
   const container = document.getElementById("canvas-container");
   if (!container) return;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x050608);
-  scene.fog = new THREE.FogExp2(0x050608, 0.028);
+  scene.fog = new THREE.FogExp2(0x050608, 0.025);
 
   const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 0, 3.8);
+  camera.position.set(0, 0, 4.0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -38,7 +38,7 @@
   rimLight.position.set(-2, 3, -3);
   scene.add(rimLight);
 
-  // Luces orbitales dinamicas que barren el espacio suavemente
+  // Luces orbitales dinamicas que barren el fondo suavemente
   const orbitLight1 = new THREE.PointLight(0x38bdf8, 1.4, 14);
   orbitLight1.position.set(-3, 1, 1);
   scene.add(orbitLight1);
@@ -50,7 +50,7 @@
   // ----------------------------------------------------
   // FONDO DINAMICO DE PARTICULAS (Starfield / Cyber Dust)
   // ----------------------------------------------------
-  const particleCount = 280;
+  const particleCount = 260;
   const particleGeo = new THREE.BufferGeometry();
   const particlePos = new Float32Array(particleCount * 3);
   const particleSpeeds = new Float32Array(particleCount);
@@ -63,7 +63,6 @@
   }
   particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 
-  // Textura suave de particula circular
   const pCanvas = document.createElement("canvas");
   pCanvas.width = 64;
   pCanvas.height = 64;
@@ -109,16 +108,15 @@
   });
 
   const eyeMat = new THREE.MeshBasicMaterial({
-    color: 0x52525b, // Gris suave en reposo
+    color: 0x52525b,
   });
 
   const eyeGlowMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8, // Celeste neon brillante al hablar
+    color: 0x38bdf8,
   });
 
-  // Raiz del Personaje Sebax (Escalada a 0.82 para ajuste perfecto)
+  // Raiz del Personaje Sebax
   const robot = new THREE.Group();
-  robot.scale.set(0.82, 0.82, 0.82);
   scene.add(robot);
 
   // ----------------------------------------------------
@@ -148,7 +146,7 @@
   screenInner.position.set(0, -0.02, 0.49);
   headGroup.add(screenInner);
 
-  // Ojos estilo Pixel (Dos rectangulos verticales)
+  // Ojos estilo Pixel
   const eyeGeo = new THREE.BoxGeometry(0.14, 0.32, 0.02);
   const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
   leftEye.position.set(-0.25, -0.02, 0.515);
@@ -204,7 +202,7 @@
   backVent2.position.set(0, -0.06, -0.49);
   headGroup.add(backVent2);
 
-  // Cuello minimalista flotante
+  // Cuello minimalista
   const baseRing = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.1, 24), blackMat);
   baseRing.position.y = -0.62;
   headGroup.add(baseRing);
@@ -239,38 +237,51 @@
   let currentRotation = { x: 0, y: 0 };
   let baseY = -0.06;
 
-  // Seguimiento inteligente del cursor hacia el panel derecho
   function onPointerMove(e) {
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+    let clientX = 0;
+    let clientY = 0;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.clientX !== undefined) {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    } else {
+      return;
+    }
+
     const normX = (clientX / window.innerWidth) * 2 - 1;
     const normY = -(clientY / window.innerHeight) * 2 + 1;
 
-    const isMobile = window.innerWidth < 860;
+    const isMobile = window.innerWidth < 768;
     const robotCenterNormX = isMobile ? 0 : -0.48;
 
-    targetRotation.y = (normX - robotCenterNormX) * 0.48;
-    targetRotation.x = -normY * 0.32;
+    targetRotation.y = (normX - robotCenterNormX) * (isMobile ? 0.35 : 0.48);
+    targetRotation.x = -normY * (isMobile ? 0.25 : 0.32);
   }
   window.addEventListener("mousemove", onPointerMove);
   window.addEventListener("touchmove", onPointerMove, { passive: true });
 
-  // Control de tamano y posicion dinamica segun dispositivo
+  // Control de tamano y encuadre matematico exacto para movil y PC
   function updateLayout() {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const isMobile = width < 860;
+    const isMobile = width < 768;
 
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 
     if (isMobile) {
-      baseY = 0.32;
-      robot.scale.set(0.72, 0.72, 0.72);
+      // En celular:
+      // La cabeza se coloca en la zona superior (y = 0.72) con escala proporcionada (0.50).
+      // Asi queda en los primeros 30vh del telefono sin tapar el texto ni chocar con la barra.
+      baseY = 0.72;
+      robot.scale.set(0.50, 0.50, 0.50);
       robot.position.set(0, baseY, 0);
-      camera.position.set(0, baseY, 3.8);
+      camera.position.set(0, 0, 4.4);
     } else {
+      // En computadora:
       baseY = -0.06;
       robot.scale.set(0.82, 0.82, 0.82);
       const fovRad = (camera.fov * Math.PI) / 180;
@@ -285,32 +296,27 @@
   window.addEventListener("resize", updateLayout);
   updateLayout();
 
-  // Animacion continua
   const clock = new THREE.Clock();
 
   function animate() {
     requestAnimationFrame(animate);
     const time = clock.getElapsedTime();
 
-    // Rotacion suave con amortiguacion
     currentRotation.x += (targetRotation.x - currentRotation.x) * 0.08;
     currentRotation.y += (targetRotation.y - currentRotation.y) * 0.08;
 
     headGroup.rotation.y = currentRotation.y;
     headGroup.rotation.x = currentRotation.x;
 
-    // Flotacion y respiracion ritmica
     const bob = Math.sin(time * 2.2) * 0.035;
     robot.position.y = baseY + bob;
 
-    // Movimiento orbital de luces dinamicas
     orbitLight1.position.x = -2.5 + Math.sin(time * 0.7) * 1.5;
     orbitLight1.position.y = 0.5 + Math.cos(time * 0.6) * 1.2;
 
     orbitLight2.position.x = 2.5 + Math.cos(time * 0.5) * 1.8;
     orbitLight2.position.y = -0.5 + Math.sin(time * 0.8) * 1.4;
 
-    // Movimiento fluido de particulas flotantes
     const positions = particleGeo.attributes.position.array;
     const speedMult = isSpeaking ? 1.8 : 1.0;
     for (let i = 0; i < particleCount; i++) {
@@ -326,7 +332,6 @@
     particles.rotation.y = currentRotation.y * 0.15;
     particles.rotation.x = currentRotation.x * 0.1;
 
-    // Parpadeo periodico natural
     const blinkCycle = Math.sin(time * 1.3);
     if (blinkCycle > 0.982) {
       leftEye.scale.y = 0.1;
@@ -336,7 +341,6 @@
       rightEye.scale.y = 1;
     }
 
-    // Estados de expresion
     if (isSpeaking) {
       const speech = Math.sin(time * 16);
       headGroup.position.y = Math.abs(speech) * 0.035;
