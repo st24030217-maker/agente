@@ -24,6 +24,13 @@ from agente.tools.prospecting import (
     normalize_mx_phone
 )
 from agente.tools.whatsapp import send_whatsapp_message
+from agente.tools.mockup import generate_business_mockup, PREVIEWS_DIR, slugify
+from agente.tools.agenda import (
+    add_appointment,
+    list_appointments,
+    update_appointment_status,
+    get_appointments_stats
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,6 +67,26 @@ class LeadSendRequest(BaseModel):
 class LeadIncomingCheck(BaseModel):
     sender: str
     message: str = ""
+
+class AppointmentCreateRequest(BaseModel):
+    business_name: str
+    client_name: str = ""
+    phone: str = ""
+    date_time: str = ""
+    notes: str = ""
+    status: str = "confirmada"
+
+class AppointmentUpdateRequest(BaseModel):
+    appointment_id: int
+    status: str
+    notes: str = ""
+
+class GenerateMockupRequest(BaseModel):
+    business_name: str
+    niche: str = ""
+    city: str = "Torreón"
+    phone: str = ""
+    lead_id: int | None = None
 
 @app.get("/health")
 def health_check():
@@ -184,6 +211,21 @@ async def check_incoming_lead_api(payload: LeadIncomingCheck):
         matched_lead["last_reply"] = payload.message
         matched_lead["last_reply_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        # Detectar si el prospecto propone o solicita agendar una cita o llamada
+        msg_lower = payload.message.lower()
+        if any(w in msg_lower for w in ["cita", "llamada", "reunion", "agendar", "mañana", "hora", "vernos", "platicar", "reunirnos", "zoom"]):
+            try:
+                add_appointment(
+                    business_name=matched_lead.get("name", "Prospecto"),
+                    client_name=matched_lead.get("name", "Contacto"),
+                    phone=matched_lead.get("phone", ""),
+                    date_time="Por confirmar con el cliente",
+                    notes=f"Solicitud automática recibida por WhatsApp: '{payload.message}'",
+                    status="en_negociacion"
+                )
+            except Exception as e:
+                logger.warning("Fallo al registrar cita automática: %s", e)
+
         # Generar respuesta automática con Sebax para el prospecto
         ai_reply = await generate_lead_reply(
             lead_name=matched_lead.get("name", "Cliente"),
@@ -213,6 +255,79 @@ async def check_incoming_lead_api(payload: LeadIncomingCheck):
 
     return {"is_lead": False}
 
+@app.get("/preview/{slug}")
+async def get_preview_page(slug: str):
+    """Muestra el prototipo web interactivo generado para un negocio."""
+    preview_file = PREVIEWS_DIR / f"{slug}.html"
+    if not preview_file.exists():
+        # Intentar buscar en leads para autogenerar
+        leads = _load_leads()
+        found_lead = None
+        for l in leads:
+            if slugify(l.get("name", "")) == slug or l.get("mockup_slug") == slug:
+                found_lead = l
+                break
+        if found_lead:
+            res = generate_business_mockup(
+                business_name=found_lead.get("name", "Negocio"),
+                niche=found_lead.get("niche", "general"),
+                city=found_lead.get("city", "Torreón"),
+                phone=found_lead.get("phone", "")
+            )
+            preview_file = Path(res["file_path"])
+        else:
+            raise HTTPException(status_code=404, detail="Prototipo web no encontrado.")
+
+    content = preview_file.read_text(encoding="utf-8")
+    return Response(content=content, media_type="text/html")
+
+@app.post("/api/leads/mockup")
+async def create_mockup_api(payload: GenerateMockupRequest):
+    """Genera un prototipo web bajo demanda y actualiza el prospecto si existe."""
+    res = generate_business_mockup(
+        business_name=payload.business_name,
+        niche=payload.niche,
+        city=payload.city,
+        phone=payload.phone
+    )
+    if payload.lead_id:
+        leads = _load_leads()
+        for l in leads:
+            if l.get("id") == payload.lead_id:
+                l["mockup_url"] = res["url"]
+                l["mockup_slug"] = res["slug"]
+                _save_leads(leads)
+                break
+    return res
+
+@app.get("/api/appointments")
+def get_appointments_api():
+    """Devuelve las citas agendadas y estadísticas para la agenda."""
+    return get_appointments_stats()
+
+@app.post("/api/appointments")
+def create_appointment_api(payload: AppointmentCreateRequest):
+    """Crea una nueva cita o reunión agendada."""
+    result = add_appointment(
+        business_name=payload.business_name,
+        client_name=payload.client_name,
+        phone=payload.phone,
+        date_time=payload.date_time,
+        notes=payload.notes,
+        status=payload.status
+    )
+    return {"success": True, "result": result, "stats": get_appointments_stats()}
+
+@app.put("/api/appointments")
+def update_appointment_api(payload: AppointmentUpdateRequest):
+    """Actualiza el estado de una cita."""
+    result = update_appointment_status(
+        appointment_id=payload.appointment_id,
+        status=payload.status,
+        notes=payload.notes
+    )
+    return {"success": True, "result": result, "stats": get_appointments_stats()}
+
 @app.get("/api/tts")
 async def get_tts(text: str, voice: str = "es-MX-JorgeNeural"):
     """Genera audio con voz neuronal humana ultrarrealista con tolerancia a fallos."""
@@ -239,6 +354,24 @@ async def get_tts(text: str, voice: str = "es-MX-JorgeNeural"):
             continue
 
     raise HTTPException(status_code=500, detail="No se pudo sintetizar audio en este momento.")
+
+@app.on_event("startup")
+async def startup_event():
+    """Inicia tareas de fondo como el heartbeat para mantener despierto el contenedor en la nube."""
+    asyncio.create_task(render_keepalive_loop())
+
+async def render_keepalive_loop():
+    """Envía un ping periódico al endpoint health para evitar la suspensión en Render free tier."""
+    await asyncio.sleep(60)
+    health_url = "https://agente-hgba.onrender.com/health"
+    while True:
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                await client.get(health_url)
+                logger.debug("Render keepalive ping enviado.")
+        except Exception:
+            pass
+        await asyncio.sleep(600) # Ping cada 10 minutos
 
 # Montar interfaz web interactiva con el Avatar 3D
 if STATIC_DIR.exists():

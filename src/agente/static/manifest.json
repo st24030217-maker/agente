@@ -42,6 +42,13 @@
       "description": "Lanzar prospección en Torreón",
       "url": "/?action=campaign",
       "icons": [{ "src": "https://img.icons8.com/fluency/96/rocket.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Agenda de Citas",
+      "short_name": "Agenda",
+      "description": "Ver citas y llamadas comerciales agendadas",
+      "url": "/?action=agenda",
+      "icons": [{ "src": "https://img.icons8.com/fluency/96/calendar.png", "sizes": "96x96" }]
     }
   ]
 }

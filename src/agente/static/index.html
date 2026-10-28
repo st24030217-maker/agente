@@ -416,6 +416,35 @@
       gap: 16px;
     }
 
+    .sheet-tabs {
+      display: flex;
+      gap: 6px;
+      padding: 0 22px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      background: #fafafa;
+    }
+    .sheet-tab {
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .sheet-tab.active {
+      color: #09090b;
+      border-bottom-color: #09090b;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     /* Tarjetas de Métricas */
     .stats-row {
       display: grid;
@@ -620,6 +649,14 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
         </button>
+        <button class="icon-btn" id="btn-open-agenda" title="Agenda y Citas" onclick="openAgendaModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </button>
         <select id="voice-select" class="voice-select" title="Voz de Sebax">
           <option value="es-MX-JorgeNeural">Jorge (México)</option>
           <option value="es-MX-PelayoNeural">Pelayo (Dinámico)</option>
@@ -649,6 +686,7 @@
         <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreón y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar cualquier negocio</div>
         <div class="pill" onclick="sendQuick('Sebax, busca 3 talleres mecanicos o restaurantes en Torreon y prospectalos por WhatsApp')">Talleres y Restaurantes</div>
         <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
+        <div class="pill" onclick="openAgendaModal()">Agenda & Citas</div>
         <div class="pill" onclick="sendQuick('Muestra la lista de prospectos registrados en el sistema')">Ver prospectos</div>
       </div>
 
@@ -677,8 +715,8 @@
     <div class="leads-sheet">
       <div class="sheet-header">
         <div>
-          <div class="sheet-title">Prospección Comercial SSSSolutions</div>
-          <div class="sheet-subtitle">Pipeline autónomo de clientes potenciales por WhatsApp</div>
+          <div class="sheet-title" id="sheet-header-title">Centro Comercial SSSSolutions</div>
+          <div class="sheet-subtitle" id="sheet-header-sub">Prospección autónoma, prototipos web en vivo y agenda de citas</div>
         </div>
         <button class="btn-close" id="btn-close-leads">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -688,68 +726,131 @@
         </button>
       </div>
 
+      <!-- Pestañas del Modal -->
+      <div class="sheet-tabs">
+        <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos & Mockups</div>
+        <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas & Agenda</div>
+      </div>
+
       <div class="sheet-body">
-        <!-- Métricas -->
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-val" id="stat-total">0</div>
-            <div class="stat-label">Total Leads</div>
+        <!-- Pestaña 1: Prospectos & Campañas -->
+        <div class="tab-content active" id="tab-content-leads">
+          <!-- Métricas -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-val" id="stat-total">0</div>
+              <div class="stat-label">Total Leads</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="stat-contacted">0</div>
+              <div class="stat-label">Contactados</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="stat-replied">0</div>
+              <div class="stat-label">Respondieron</div>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-contacted">0</div>
-            <div class="stat-label">Contactados</div>
+
+          <!-- Formulario de Campaña Rápida -->
+          <div class="campaign-box">
+            <div class="campaign-box-title">
+              <span>Lanzar Campaña con Prototipos Web en Vivo</span>
+              <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="campaign-status-msg"></span>
+            </div>
+            <div class="form-row">
+              <input type="text" class="form-input" id="camp-niche" list="niches-list" placeholder="Giro (ej. Talleres, Restaurantes, o 'Cualquier negocio')" value="Cualquier negocio">
+              <datalist id="niches-list">
+                <option value="Cualquier negocio">
+                <option value="Talleres mecánicos">
+                <option value="Restaurantes y cafeterías">
+                <option value="Mueblerías y decoración">
+                <option value="Despachos de arquitectura">
+                <option value="Abogados y contadores">
+                <option value="Gimnasios y fitness">
+                <option value="Ferreterías y materiales">
+                <option value="Clínicas y consultorios">
+                <option value="Escuelas y academias">
+                <option value="Salones de eventos">
+              </datalist>
+              <input type="text" class="form-input" id="camp-city" value="Torreón" placeholder="Ciudad">
+              <select class="form-select" id="camp-count">
+                <option value="1">1</option>
+                <option value="3" selected>3</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <label class="toggle-row">
+              <input type="checkbox" id="camp-auto-send" checked>
+              <span>Generar prototipo web exclusivo y enviar WhatsApp automáticamente</span>
+            </label>
+            <button class="btn-launch" id="btn-start-campaign" onclick="launchCampaign()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              <span>Iniciar Prospección y Enviar Mockups</span>
+            </button>
           </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-replied">0</div>
-            <div class="stat-label">Respondieron</div>
+
+          <!-- Registro de Prospectos -->
+          <div>
+            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Registro de Negocios y Conceptos Web</div>
+            <div class="leads-list" id="leads-container">
+              <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
+            </div>
           </div>
         </div>
 
-        <!-- Formulario de Campaña Rápida -->
-        <div class="campaign-box">
-          <div class="campaign-box-title">
-            <span>Lanzar Campaña Autónoma</span>
-            <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="campaign-status-msg"></span>
+        <!-- Pestaña 2: Citas & Agenda -->
+        <div class="tab-content" id="tab-content-agenda">
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-val" id="stat-agenda-total">0</div>
+              <div class="stat-label">Total Citas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="stat-agenda-confirmed">0</div>
+              <div class="stat-label">Confirmadas</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="stat-agenda-pending">0</div>
+              <div class="stat-label">En Negociación</div>
+            </div>
           </div>
-          <div class="form-row">
-            <input type="text" class="form-input" id="camp-niche" list="niches-list" placeholder="Giro (ej. Talleres, Restaurantes, o 'Cualquier negocio')" value="Cualquier negocio">
-            <datalist id="niches-list">
-              <option value="Cualquier negocio">
-              <option value="Talleres mecánicos">
-              <option value="Restaurantes y cafeterías">
-              <option value="Mueblerías y decoración">
-              <option value="Despachos de arquitectura">
-              <option value="Abogados y contadores">
-              <option value="Gimnasios y fitness">
-              <option value="Ferreterías y materiales">
-              <option value="Clínicas y consultorios">
-              <option value="Escuelas y academias">
-              <option value="Salones de eventos">
-            </datalist>
-            <input type="text" class="form-input" id="camp-city" value="Torreón" placeholder="Ciudad">
-            <select class="form-select" id="camp-count">
-              <option value="1">1</option>
-              <option value="3" selected>3</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-          <label class="toggle-row">
-            <input type="checkbox" id="camp-auto-send" checked>
-            <span>Enviar WhatsApp automáticamente con espaciado de seguridad</span>
-          </label>
-          <button class="btn-launch" id="btn-start-campaign" onclick="launchCampaign()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-            <span>Iniciar Prospección y Contacto</span>
-          </button>
-        </div>
 
-        <!-- Registro de Prospectos -->
-        <div>
-          <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Registro de Negocios Prospectados</div>
-          <div class="leads-list" id="leads-container">
-            <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
+          <!-- Agendar Nueva Cita -->
+          <div class="campaign-box">
+            <div class="campaign-box-title">
+              <span>Agendar Reunión o Llamada Comercial</span>
+              <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="agenda-status-msg"></span>
+            </div>
+            <div class="form-row">
+              <input type="text" class="form-input" id="agenda-business" placeholder="Negocio / Empresa">
+              <input type="text" class="form-input" id="agenda-client" placeholder="Persona de contacto">
+            </div>
+            <div class="form-row" style="margin-top:8px;">
+              <input type="text" class="form-input" id="agenda-phone" placeholder="Teléfono WhatsApp">
+              <input type="text" class="form-input" id="agenda-datetime" placeholder="Fecha y hora (ej. Mañana 11:00 AM)">
+            </div>
+            <div style="margin-top:8px;">
+              <input type="text" class="form-input" id="agenda-notes" placeholder="Notas (ej. Interesado en sitio web y cotización)">
+            </div>
+            <button class="btn-launch" id="btn-save-appointment" style="margin-top:10px;" onclick="saveNewAppointment()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>Guardar Cita y Notificar a mi WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- Lista de Citas Programadas -->
+          <div>
+            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Citas Programadas en Agenda</div>
+            <div class="leads-list" id="appointments-container">
+              <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando agenda...</div>
+            </div>
           </div>
         </div>
       </div>
@@ -954,10 +1055,16 @@
       sendCommand(q);
     }
 
-    // Modal de Leads & Campañas
+    // Modal de Leads, Mockups & Agenda
     function openLeadsModal() {
       leadsModal.classList.add("active");
+      switchTab("leads");
       loadLeadsData();
+    }
+    function openAgendaModal() {
+      leadsModal.classList.add("active");
+      switchTab("agenda");
+      loadAppointmentsData();
     }
     function closeLeadsModal() {
       leadsModal.classList.remove("active");
@@ -967,6 +1074,33 @@
     leadsModal.addEventListener("click", (e) => {
       if (e.target === leadsModal) closeLeadsModal();
     });
+
+    function switchTab(tab) {
+      const tabBtnLeads = document.getElementById("tab-btn-leads");
+      const tabBtnAgenda = document.getElementById("tab-btn-agenda");
+      const tabContentLeads = document.getElementById("tab-content-leads");
+      const tabContentAgenda = document.getElementById("tab-content-agenda");
+      const headerTitle = document.getElementById("sheet-header-title");
+      const headerSub = document.getElementById("sheet-header-sub");
+
+      if (tab === "agenda") {
+        tabBtnLeads.classList.remove("active");
+        tabBtnAgenda.classList.add("active");
+        tabContentLeads.classList.remove("active");
+        tabContentAgenda.classList.add("active");
+        headerTitle.textContent = "Agenda de Citas SSSSolutions";
+        headerSub.textContent = "Reuniones programadas y llamadas de ventas con clientes";
+        loadAppointmentsData();
+      } else {
+        tabBtnAgenda.classList.remove("active");
+        tabBtnLeads.classList.add("active");
+        tabContentAgenda.classList.remove("active");
+        tabContentLeads.classList.add("active");
+        headerTitle.textContent = "Prospección & Mockups Web";
+        headerSub.textContent = "Pipeline autónomo de clientes y conceptos visuales en vivo";
+        loadLeadsData();
+      }
+    }
 
     async function loadLeadsData() {
       try {
@@ -994,6 +1128,7 @@
         const badgeClass = l.status === "contactado" ? "badge-contactado" : (l.status === "respondio" ? "badge-respondio" : "badge-nuevo");
         const statusLabel = l.status === "contactado" ? "Contactado" : (l.status === "respondio" ? "Respondió" : "Nuevo");
         const waLink = `https://wa.me/${l.phone}`;
+        const previewUrl = l.mockup_url || `/preview/${escapeHtml(l.mockup_slug || '')}`;
 
         return `
           <div class="lead-card">
@@ -1007,18 +1142,154 @@
               <span>${escapeHtml(l.city || "México")}</span>
             </div>
             <div class="lead-actions">
+              ${l.mockup_url ? `
+                <a href="${l.mockup_url}" target="_blank" class="lead-btn" style="color:#4f46e5; border-color:rgba(79,70,229,0.3); background:#eef2ff;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  Ver Mockup Web
+                </a>
+              ` : `
+                <button class="lead-btn" onclick="generateMockupForLead(${l.id}, '${escapeHtml(l.name)}', '${escapeHtml(l.niche || '')}', '${escapeHtml(l.city || 'Torreón')}', '${l.phone}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  Crear Mockup Web
+                </button>
+              `}
               <a href="${waLink}" target="_blank" class="lead-btn">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 WhatsApp
               </a>
+              <button class="lead-btn" onclick="scheduleForLead('${escapeHtml(l.name)}', '${l.phone}')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+                Agendar
+              </button>
               <button class="lead-btn" onclick="sendDirectLead(${l.id}, '${l.phone}', '${escapeHtml(l.name)}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Reenviar Propuesta
+                Reenviar
               </button>
             </div>
           </div>
         `;
       }).join("");
+    }
+
+    async function generateMockupForLead(leadId, name, niche, city, phone) {
+      try {
+        const res = await fetch("/api/leads/mockup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lead_id: leadId, business_name: name, niche: niche, city: city, phone: phone })
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.open(data.url, "_blank");
+          loadLeadsData();
+        }
+      } catch (err) {
+        alert("Error generando prototipo: " + err.message);
+      }
+    }
+
+    function scheduleForLead(name, phone) {
+      switchTab("agenda");
+      document.getElementById("agenda-business").value = name;
+      document.getElementById("agenda-phone").value = phone;
+      document.getElementById("agenda-datetime").focus();
+    }
+
+    async function loadAppointmentsData() {
+      try {
+        const res = await fetch("/api/appointments");
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById("stat-agenda-total").textContent = data.total || 0;
+        document.getElementById("stat-agenda-confirmed").textContent = data.confirmadas || 0;
+        document.getElementById("stat-agenda-pending").textContent = data.pendientes || 0;
+
+        renderAppointmentsList(data.appointments || []);
+      } catch (e) {
+        console.error("Error cargando citas:", e);
+      }
+    }
+
+    function renderAppointmentsList(appointments) {
+      const container = document.getElementById("appointments-container");
+      if (!appointments || appointments.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay citas agendadas aún. Agrega una nueva o Sebax las programará automáticamente cuando los clientes respondan.</div>`;
+        return;
+      }
+
+      container.innerHTML = appointments.map(a => {
+        const isConfirmed = a.status === "confirmada";
+        const badgeColor = isConfirmed ? "background:#dcfce7; color:#16a34a;" : "background:#fef3c7; color:#d97706;";
+        const statusLabel = isConfirmed ? "Confirmada" : (a.status === "en_negociacion" ? "En Negociación" : a.status);
+        const waLink = a.phone ? `https://wa.me/${a.phone}` : "#";
+
+        return `
+          <div class="lead-card">
+            <div class="lead-top">
+              <div class="lead-name">${escapeHtml(a.business_name)} ${a.client_name ? `(${escapeHtml(a.client_name)})` : ''}</div>
+              <span class="lead-badge" style="${badgeColor}">${statusLabel}</span>
+            </div>
+            <div class="lead-meta">
+              <span><strong>Fecha/Hora:</strong> ${escapeHtml(a.date_time || 'Por acordar')}</span>
+              ${a.phone ? `<span>Tel: ${escapeHtml(a.phone)}</span>` : ''}
+            </div>
+            ${a.notes ? `<div style="font-size:0.75rem; color:#4b5563; margin-top:2px;">${escapeHtml(a.notes)}</div>` : ''}
+            <div class="lead-actions">
+              ${a.phone ? `
+                <a href="${waLink}" target="_blank" class="lead-btn">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  Contactar por WhatsApp
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function saveNewAppointment() {
+      const business = document.getElementById("agenda-business").value.trim();
+      const client = document.getElementById("agenda-client").value.trim();
+      const phone = document.getElementById("agenda-phone").value.trim();
+      const datetime = document.getElementById("agenda-datetime").value.trim();
+      const notes = document.getElementById("agenda-notes").value.trim();
+      const statusMsg = document.getElementById("agenda-status-msg");
+      const btn = document.getElementById("btn-save-appointment");
+
+      if (!business || !datetime) {
+        alert("Por favor ingresa al menos el nombre del negocio y la fecha/hora.");
+        return;
+      }
+
+      btn.disabled = true;
+      statusMsg.textContent = "Guardando...";
+
+      try {
+        const res = await fetch("/api/appointments", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            business_name: business,
+            client_name: client,
+            phone: phone,
+            date_time: datetime,
+            notes: notes,
+            status: "confirmada"
+          })
+        });
+        const data = await res.json();
+        statusMsg.textContent = "Guardada con éxito";
+        document.getElementById("agenda-business").value = "";
+        document.getElementById("agenda-client").value = "";
+        document.getElementById("agenda-phone").value = "";
+        document.getElementById("agenda-datetime").value = "";
+        document.getElementById("agenda-notes").value = "";
+        loadAppointmentsData();
+      } catch (err) {
+        statusMsg.textContent = "Error: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
     }
 
     async function launchCampaign() {
@@ -1142,6 +1413,8 @@
       const action = urlParams.get("action");
       if (action === "leads") {
         setTimeout(openLeadsModal, 500);
+      } else if (action === "agenda") {
+        setTimeout(openAgendaModal, 500);
       } else if (action === "campaign") {
         setTimeout(() => {
           openLeadsModal();
