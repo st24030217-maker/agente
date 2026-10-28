@@ -68,7 +68,7 @@ def list_directory(path: str = ".", max_items: int = 50) -> str:
         entries = list(target.iterdir())
         output = [f"Directorio: {target}"]
         for i, entry in enumerate(entries[:max_items]):
-            tipo = "📁 [DIR]" if entry.is_dir() else "📄 [FILE]"
+            tipo = "[DIR]" if entry.is_dir() else "[FILE]"
             output.append(f"{tipo} {entry.name}")
 
         if len(entries) > max_items:

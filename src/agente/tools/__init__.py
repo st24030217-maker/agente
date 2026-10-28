@@ -12,6 +12,7 @@ from agente.tools.prospecting import (
     run_autonomous_campaign,
     update_lead_status
 )
+from agente.tools.demo_generator import generate_business_demo
 
 # Lista de funciones pasadas directamente al SDK de Google Gemini para Function Calling
 AGENT_TOOLS = [
@@ -33,5 +34,6 @@ AGENT_TOOLS = [
     list_leads,
     generate_pitch,
     run_autonomous_campaign,
-    update_lead_status
+    update_lead_status,
+    generate_business_demo
 ]

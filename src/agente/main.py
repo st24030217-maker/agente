@@ -38,6 +38,12 @@ from agente.tools.autopilot import (
     send_daily_morning_report,
     retry_unsent_leads
 )
+from agente.tools.demo_generator import (
+    generate_business_demo,
+    get_demo,
+    list_all_demos,
+    render_demo_html
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -90,6 +96,13 @@ class AppointmentUpdateRequest(BaseModel):
 
 class AutopilotToggleRequest(BaseModel):
     enabled: bool | None = None
+
+class DemoCreateRequest(BaseModel):
+    business_name: str
+    niche: str = "cafeteria"
+    city: str = "Torreón, Coahuila"
+    phone: str = ""
+    custom_tagline: str = ""
 
 @app.get("/health")
 def health_check():
@@ -181,6 +194,33 @@ async def whatsapp_webhook(request: Request):
 async def chat_direct(payload: DirectChatRequest):
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message)
     return {"reply": reply}
+
+@app.get("/demo/{slug}", response_class=Response)
+async def view_demo(slug: str):
+    """Visualizador público del prototipo web interactivo generado para el prospecto."""
+    demo = get_demo(slug)
+    if not demo:
+        clean_name = slug.replace("-", " ").title()
+        demo_res = generate_business_demo(business_name=clean_name, niche="cafeteria", city="Torreón, Coahuila")
+        demo = get_demo(demo_res["slug"])
+    html_content = render_demo_html(demo)
+    return Response(content=html_content, media_type="text/html")
+
+@app.get("/api/demos")
+def get_demos_api():
+    """Listado de todos los prototipos comerciales generados."""
+    return list_all_demos()
+
+@app.post("/api/demos/create")
+def create_demo_api(payload: DemoCreateRequest):
+    """Crea un prototipo interactivo para un negocio específico."""
+    return generate_business_demo(
+        business_name=payload.business_name,
+        niche=payload.niche,
+        city=payload.city,
+        phone=payload.phone,
+        custom_tagline=payload.custom_tagline
+    )
 
 @app.get("/qr")
 async def get_qr_page():

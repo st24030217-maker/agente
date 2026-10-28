@@ -1307,7 +1307,8 @@
         <div class="quick-actions-panel">
           <div class="quick-actions-title">Acciones y Prospeccion Rapida</div>
           <div class="quick-actions">
-            <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; background:rgba(16,185,129,0.18); color:#34d399;">Vincular WhatsApp</div>
+            <div class="pill" onclick="openDemosTab()" style="font-weight:700; background:rgba(245,158,11,0.18); color:#fbbf24;">Generar Prototipos en Vivo</div>
+            <div class="pill" onclick="openWhatsAppTab()"  style="font-weight:700; background:rgba(16,185,129,0.18); color:#34d399;">Vincular WhatsApp</div>
             <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreon, Gomez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreon, Gomez y Lerdo</div>
             <div class="pill" onclick="sendQuick('Sebax, busca 3 cafeterias, dulcerias o florerias en Torreon, Gomez Palacio o Lerdo y prospectalos por WhatsApp')">Cafeterias, Dulcerias y Florerias</div>
             <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
@@ -1358,6 +1359,7 @@
       <!-- Pestanas del Modal -->
       <div class="sheet-tabs">
         <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos</div>
+        <div class="sheet-tab" id="tab-btn-demos" onclick="switchTab('demos')">Prototipos en Vivo</div>
         <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas y Agenda</div>
         <div class="sheet-tab" id="tab-btn-whatsapp" onclick="switchTab('whatsapp')">Conectar WhatsApp</div>
       </div>
@@ -1449,6 +1451,40 @@
             <div class="leads-list" id="leads-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
             </div>
+          </div>
+        </div>
+
+        <!-- Pestana Prototipos en Vivo SSSSolutions -->
+        <div class="tab-content" id="tab-content-demos">
+          <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:14px; padding:16px; margin-bottom:16px;">
+            <div style="font-weight:800; font-size:0.95rem; color:#ffffff; margin-bottom:4px;">Generador Instantaneo de Sitios y Menus Digitales</div>
+            <div style="font-size:0.8rem; color:#cbd5e1; line-height:1.4; margin-bottom:12px;">
+              Crea un prototipo interactivo real para cualquier negocio de Torreon, Gomez o Lerdo. Incluye catalogo, carrito y pedidos directos por WhatsApp con el sello de SSSSolutions.
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px; margin-bottom:10px;">
+              <input type="text" id="demo-name" placeholder="Nombre (ej. Cafe Central)" class="filter-input" style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px; font-size:0.8rem; font-family:inherit;">
+              <select id="demo-niche" class="filter-input" style="background:#18181b; color:#fff; border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px; font-size:0.8rem; font-family:inherit;">
+                <option value="cafeteria">Cafeteria de Especialidad</option>
+                <option value="restaurante">Restaurante / Tacos</option>
+                <option value="pasteleria">Pasteleria y Reposteria</option>
+                <option value="floreria">Floreria y Diseños</option>
+                <option value="boutique">Boutique de Ropa</option>
+                <option value="salon_eventos">Salon de Eventos</option>
+              </select>
+              <input type="text" id="demo-city" value="Torreon, Coahuila" placeholder="Ciudad" class="filter-input" style="background:rgba(255,255,255,0.06); color:#fff; border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:8px 12px; font-size:0.8rem; font-family:inherit;">
+            </div>
+            <button onclick="createDemoFromUi()" class="btn-primary" style="background:#f59e0b; color:#000; font-weight:800; width:100%; border:none; padding:10px; border-radius:8px; cursor:pointer;">
+              Generar Prototipo al Vuelo (5 Segundos)
+            </button>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="font-weight:700; font-size:0.85rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em;">Prototipos Generados</div>
+            <button onclick="loadDemosData()" class="btn-refresh" style="background:transparent; border:none; color:#38bdf8; font-size:0.8rem; cursor:pointer; font-weight:600;">Actualizar</button>
+          </div>
+
+          <div id="demos-list-container" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Renderizado dinamicamente -->
           </div>
         </div>
 
@@ -1869,6 +1905,8 @@
     function switchTab(tab) {
       const tabBtnLeads = document.getElementById("tab-btn-leads");
       const tabBtnAgenda = document.getElementById("tab-btn-agenda");
+      const tabBtnDemos = document.getElementById("tab-btn-demos");
+      const tabContentDemos = document.getElementById("tab-content-demos");
       const tabBtnWhatsapp = document.getElementById("tab-btn-whatsapp");
       const tabContentLeads = document.getElementById("tab-content-leads");
       const tabContentAgenda = document.getElementById("tab-content-agenda");
@@ -1878,12 +1916,20 @@
 
       tabBtnLeads.classList.remove("active");
       tabBtnAgenda.classList.remove("active");
+      if (tabBtnDemos) tabBtnDemos.classList.remove("active");
+      if (tabContentDemos) tabContentDemos.classList.remove("active");
       if (tabBtnWhatsapp) tabBtnWhatsapp.classList.remove("active");
       tabContentLeads.classList.remove("active");
       tabContentAgenda.classList.remove("active");
       if (tabContentWhatsapp) tabContentWhatsapp.classList.remove("active");
 
-      if (tab === "agenda") {
+      if (tab === "demos") {
+        if (tabBtnDemos) tabBtnDemos.classList.add("active");
+        if (tabContentDemos) tabContentDemos.classList.add("active");
+        headerTitle.textContent = "Prototipos en Vivo SSSSolutions";
+        headerSub.textContent = "Catalogo de demos interactivos para clientes en La Laguna";
+        loadDemosData();
+      } else if (tab === "agenda") {
         tabBtnAgenda.classList.add("active");
         tabContentAgenda.classList.add("active");
         headerTitle.textContent = "Agenda de Citas SSSSolutions";
