@@ -5,25 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sebax - Agente de Inteligencia Artificial | SSSSolutions</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#f5f6f9">
+  <meta name="theme-color" content="#070709">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f8fafc;
-      --card-bg: rgba(255, 255, 255, 0.88);
-      --card-border: rgba(0, 0, 0, 0.07);
-      --card-shadow: 0 12px 36px rgba(0, 0, 0, 0.04);
-      --primary: #09090b;
-      --text: #09090b;
-      --text-dim: #71717a;
-      --accent: #2563eb;
+      --bg: #070709;
+      --card-bg: rgba(18, 18, 24, 0.82);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-hover: rgba(255, 255, 255, 0.18);
+      --card-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+      --primary: #ffffff;
+      --text: #f4f4f6;
+      --text-dim: #94949e;
+      --text-muted: #62626e;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
       --online: #10b981;
+      --online-glow: rgba(16, 185, 129, 0.35);
       --warning: #f59e0b;
+      --danger: #ef4444;
+      --surface-dark: #0f0f14;
+      --surface-sheet: rgba(15, 15, 20, 0.96);
+      --input-bg: rgba(12, 12, 16, 0.88);
       --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
       --transition-fast: 0.15s ease;
@@ -43,7 +51,7 @@
       position: relative;
     }
 
-    /* Fondos ambientales de estudio */
+    /* Fondos ambientales de estudio Onyx y Titanio */
     .bg-blobs {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -54,16 +62,40 @@
     .blob {
       position: absolute;
       border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.6;
-      animation: drift 20s infinite alternate ease-in-out;
+      filter: blur(100px);
+      opacity: 0.5;
+      animation: drift 22s infinite alternate ease-in-out;
     }
-    .blob-1 { top: -80px; right: -80px; width: 280px; height: 280px; background: rgba(226, 232, 240, 0.9); }
-    .blob-2 { bottom: -60px; left: -60px; width: 320px; height: 320px; background: rgba(241, 245, 249, 0.9); animation-duration: 18s; }
+    .blob-1 {
+      top: -100px;
+      right: -80px;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(7, 7, 9, 0) 70%);
+    }
+    .blob-2 {
+      bottom: -100px;
+      left: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(7, 7, 9, 0) 70%);
+      animation-duration: 20s;
+    }
+    .studio-spotlight {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 740px;
+      height: 520px;
+      background: radial-gradient(ellipse at center, rgba(32, 36, 54, 0.3) 0%, rgba(7, 7, 9, 0) 75%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
     @keyframes drift {
       0% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(40px, -30px) scale(1.08); }
+      50% { transform: translate(30px, -25px) scale(1.06); }
       100% { transform: translate(-20px, 20px) scale(0.95); }
     }
 
@@ -81,90 +113,161 @@
       flex-direction: column;
       height: 100%;
       justify-content: space-between;
-      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)) 16px;
+      padding: max(14px, env(safe-area-inset-top)) 16px max(14px, env(safe-area-inset-bottom)) 16px;
     }
 
-    /* Barra Superior */
+    /* Capsula Dynamic Island Superior */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       background: var(--card-bg);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      backdrop-filter: blur(32px) saturate(190%);
+      -webkit-backdrop-filter: blur(32px) saturate(190%);
       border: 1px solid var(--card-border);
-      border-radius: 22px;
-      padding: 9px 16px;
+      border-radius: 26px;
+      padding: 8px 16px;
       pointer-events: auto;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
-      max-width: 680px;
+      max-width: 720px;
       width: 100%;
       margin: 0 auto;
+      transition: all var(--transition-fast);
     }
+    .top-bar:hover {
+      border-color: var(--card-border-hover);
+    }
+
     .agent-identity {
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
     .status-dot {
       width: 8px; height: 8px;
       background: var(--online);
       border-radius: 50%;
+      box-shadow: 0 0 10px var(--online-glow);
       animation: pulse-dot 2s infinite;
+      flex-shrink: 0;
     }
     @keyframes pulse-dot {
       0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
       70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
       100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+    .agent-meta {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
     .agent-name {
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.8px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      color: #09090b;
+      color: #ffffff;
+      line-height: 1.1;
     }
     .agent-status {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
     }
+
+    /* Visualizador de Ondas de Audio (Waveform) */
+    .audio-waveform {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      height: 16px;
+      padding: 0 4px;
+    }
+    .audio-waveform .wave-bar {
+      width: 2.5px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 99px;
+      transition: all 0.2s ease;
+    }
+    .audio-waveform.speaking .wave-bar {
+      background: linear-gradient(180deg, #38bdf8, #10b981);
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+      animation: wave-bar-dance 0.9s ease-in-out infinite alternate;
+    }
+    .audio-waveform.listening .wave-bar {
+      background: linear-gradient(180deg, #f43f5e, #fb923c);
+      box-shadow: 0 0 6px rgba(244, 63, 94, 0.6);
+      animation: wave-bar-dance 0.7s ease-in-out infinite alternate;
+    }
+    .audio-waveform .wave-bar:nth-child(1) { animation-delay: 0.05s; }
+    .audio-waveform .wave-bar:nth-child(2) { animation-delay: 0.25s; }
+    .audio-waveform .wave-bar:nth-child(3) { animation-delay: 0.1s; }
+    .audio-waveform .wave-bar:nth-child(4) { animation-delay: 0.35s; }
+    .audio-waveform .wave-bar:nth-child(5) { animation-delay: 0.15s; }
+
+    @keyframes wave-bar-dance {
+      0% { height: 4px; }
+      50% { height: 16px; }
+      100% { height: 6px; }
+    }
+
     .top-controls {
       display: flex;
-      gap: 8px;
+      gap: 7px;
       align-items: center;
+      flex-shrink: 0;
     }
+
     .voice-select {
-      background: #f4f4f5;
-      color: #18181b;
-      border: 1px solid rgba(0,0,0,0.06);
+      background: rgba(25, 25, 34, 0.85);
+      color: #e4e4e7;
+      border: 1px solid var(--card-border);
       border-radius: 12px;
       padding: 5px 8px;
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 600;
       outline: none;
       cursor: pointer;
+      transition: border-color var(--transition-fast);
     }
+    .voice-select:hover {
+      border-color: var(--card-border-hover);
+    }
+    .voice-select option {
+      background: #121216;
+      color: #ffffff;
+    }
+
     .badge-link {
-      background: #18181b;
+      background: rgba(255, 255, 255, 0.08);
       color: #ffffff;
       text-decoration: none;
-      padding: 5px 12px;
+      padding: 5px 11px;
       border-radius: 12px;
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: -0.2px;
-      transition: transform var(--transition-fast), background var(--transition-fast);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all var(--transition-fast);
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
     .badge-link:hover {
       transform: translateY(-1px);
-      background: #27272a;
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.2);
     }
+
     .wa-status-pill {
-      border: 1px solid rgba(0,0,0,0.08);
+      border: 1px solid var(--card-border);
       padding: 5px 11px;
       border-radius: 12px;
       font-size: 0.72rem;
@@ -175,75 +278,82 @@
       gap: 6px;
       cursor: pointer;
       transition: all var(--transition-fast);
-      background: #ffffff;
+      background: rgba(25, 25, 34, 0.85);
+      color: #f4f4f6;
       font-family: inherit;
     }
     .wa-status-pill.connected {
-      background: #ecfdf5;
-      color: #059669;
-      border-color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
     }
     .wa-status-pill.connected .dot-status {
       background: #10b981;
+      box-shadow: 0 0 6px #10b981;
     }
     .wa-status-pill.disconnected {
-      background: #fffbeb;
-      color: #b45309;
-      border-color: #fde68a;
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
     }
     .wa-status-pill.disconnected .dot-status {
       background: #f59e0b;
       animation: pulse-dot 1.8s infinite;
     }
-    @keyframes pulse-dot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.4); opacity: 0.6; }
-    }
     .dot-status {
       width: 7px;
       height: 7px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
+
     .icon-btn {
       width: 32px; height: 32px;
       border-radius: 10px;
       border: 1px solid var(--card-border);
-      background: #f4f4f5;
-      color: #18181b;
+      background: rgba(25, 25, 34, 0.85);
+      color: #e4e4e7;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all var(--transition-fast);
     }
-    .icon-btn.active {
-      background: #18181b;
+    .icon-btn:hover {
+      background: rgba(40, 40, 52, 0.9);
+      border-color: var(--card-border-hover);
       color: #ffffff;
-      border-color: #18181b;
+      transform: translateY(-1px);
+    }
+    .icon-btn.active {
+      background: #ffffff;
+      color: #09090b;
+      border-color: #ffffff;
     }
     .icon-btn svg { width: 15px; height: 15px; }
 
-    /* Burbuja de Diálogo */
+    /* Burbuja de Dialogo Central Onyx */
     .center-hud {
       display: flex;
       flex-direction: column;
       align-items: center;
       pointer-events: none;
       margin-bottom: auto;
-      margin-top: 20px;
+      margin-top: 18px;
     }
     .speech-bubble {
       max-width: 90%;
       background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 14px 18px;
+      border-radius: 22px;
+      padding: 14px 20px;
       font-size: 0.92rem;
-      line-height: 1.48;
-      color: #18181b;
-      box-shadow: 0 10px 32px rgba(0,0,0,0.05);
+      line-height: 1.5;
+      color: #f4f4f6;
+      box-shadow: var(--card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
       transform: translateY(14px);
       opacity: 0;
       transition: all var(--transition-normal);
@@ -262,27 +372,28 @@
       align-items: center;
       gap: 6px;
       margin-top: 10px;
-      background: #f4f4f5;
-      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 5px 12px;
       font-size: 0.74rem;
       font-weight: 600;
-      color: #18181b;
+      color: #ffffff;
       cursor: pointer;
       transition: all var(--transition-fast);
     }
     .mini-voice-btn:hover {
-      background: #e4e4e7;
+      background: rgba(255, 255, 255, 0.16);
       transform: translateY(-1px);
     }
     .mini-voice-btn:active {
       transform: scale(0.95);
     }
     .mini-voice-btn.playing {
-      background: #18181b;
+      background: #10b981;
       color: #ffffff;
-      border-color: #18181b;
+      border-color: #10b981;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
     .mini-voice-btn svg { width: 13px; height: 13px; }
     @keyframes float-hero-card {
@@ -297,12 +408,12 @@
       flex-direction: column;
       gap: 10px;
       animation: fade-slide-up 0.6s var(--ease-smooth) forwards;
-      max-width: 680px;
+      max-width: 720px;
       width: 100%;
       margin: 0 auto;
     }
 
-    /* Acciones Rápidas */
+    /* Acciones Rapidas Glassmorphic */
     .quick-actions {
       display: flex;
       gap: 8px;
@@ -313,39 +424,44 @@
     }
     .quick-actions::-webkit-scrollbar { display: none; }
     .pill {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(20, 20, 28, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--card-border);
       border-radius: 20px;
       padding: 7px 14px;
       font-size: 0.76rem;
       font-weight: 600;
-      color: #27272a;
+      color: #d4d4d8;
       white-space: nowrap;
       cursor: pointer;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       transition: all var(--transition-fast);
     }
     .pill:hover {
-      background: #ffffff;
-      border-color: rgba(0,0,0,0.15);
+      background: rgba(35, 35, 48, 0.95);
+      border-color: var(--card-border-hover);
+      color: #ffffff;
       transform: translateY(-2px);
     }
     .pill:active { transform: scale(0.96); }
 
-    /* Barra de Entrada */
+    /* Barra de Entrada Titanio */
     .input-bar {
       display: flex;
       align-items: center;
       gap: 8px;
       background: var(--card-bg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
+      backdrop-filter: blur(32px) saturate(180%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%);
       border: 1px solid var(--card-border);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 6px 8px 6px 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color var(--transition-fast);
+    }
+    .input-bar:focus-within {
+      border-color: rgba(255, 255, 255, 0.22);
     }
     .input-bar input {
       flex: 1;
@@ -354,53 +470,58 @@
       outline: none;
       font-family: inherit;
       font-size: 0.92rem;
-      color: #09090b;
+      color: #ffffff;
     }
     .input-bar input::placeholder {
-      color: #a1a1aa;
+      color: #71717a;
     }
 
     .btn-action {
       width: 40px; height: 40px;
       border-radius: 50%;
       border: none;
-      background: #18181b;
-      color: #ffffff;
+      background: #ffffff;
+      color: #09090b;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all var(--transition-fast);
+      flex-shrink: 0;
     }
     .btn-action:hover {
       transform: scale(1.05);
-      background: #27272a;
+      background: #f4f4f5;
     }
     .btn-action:active { transform: scale(0.94); }
 
     #mic-btn {
-      background: #f4f4f5;
-      color: #18181b;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
       border: 1px solid var(--card-border);
+    }
+    #mic-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
     }
     #mic-btn.listening {
       background: #ef4444;
       color: #ffffff;
       border-color: #ef4444;
       animation: pulse-mic 1.2s infinite;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
     }
     @keyframes pulse-mic {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
       50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
     }
 
-    /* Modal / Drawer de Prospección SSSSolutions */
+    /* Modal / Drawer de Prospeccion SSSSolutions Onyx */
     .leads-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(9, 9, 11, 0.45);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(5, 5, 8, 0.72);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       z-index: 100;
       display: none;
       align-items: flex-end;
@@ -421,12 +542,12 @@
     }
     .leads-sheet {
       width: 100%;
-      max-width: 620px;
+      max-width: 660px;
       max-height: 88dvh;
-      background: #ffffff;
+      background: var(--surface-sheet);
       border-radius: 28px 28px 0 0;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 -12px 50px rgba(0, 0, 0, 0.7);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -437,7 +558,7 @@
       .leads-sheet {
         border-radius: 28px;
         max-height: 84vh;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
         transform: translateY(20px) scale(0.98);
       }
     }
@@ -447,7 +568,7 @@
     .sheet-drag-handle {
       width: 36px;
       height: 4px;
-      background: rgba(0, 0, 0, 0.14);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
       margin: 10px auto 2px auto;
       flex-shrink: 0;
@@ -462,13 +583,14 @@
       justify-content: space-between;
       align-items: center;
       padding: 18px 22px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(18, 18, 24, 0.7);
     }
     .sheet-title {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 1.05rem;
       letter-spacing: -0.3px;
-      color: #09090b;
+      color: #ffffff;
     }
     .sheet-subtitle {
       font-size: 0.74rem;
@@ -479,12 +601,17 @@
       width: 32px; height: 32px;
       border-radius: 50%;
       border: 1px solid var(--card-border);
-      background: #f4f4f5;
-      color: #18181b;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .btn-close:hover {
+      background: rgba(255, 255, 255, 0.16);
+      transform: scale(1.05);
     }
     .sheet-body {
       padding: 18px 22px;
@@ -495,7 +622,8 @@
     }
 
     .autopilot-banner {
-      background: #09090b;
+      background: linear-gradient(135deg, rgba(24, 28, 40, 0.95), rgba(12, 14, 20, 0.95));
+      border: 1px solid rgba(56, 189, 248, 0.25);
       color: #ffffff;
       border-radius: 18px;
       padding: 14px 16px;
@@ -503,7 +631,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
     .autopilot-left {
       display: flex;
@@ -528,6 +656,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      color: #ffffff;
     }
     .autopilot-tag {
       font-size: 0.65rem;
@@ -537,6 +666,7 @@
       background: rgba(16, 185, 129, 0.2);
       color: #34d399;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
     .autopilot-tag.paused {
       background: rgba(239, 68, 68, 0.2);
@@ -546,14 +676,16 @@
       font-size: 0.72rem;
       color: #a1a1aa;
       margin-top: 2px;
+      line-height: 1.4;
     }
     .autopilot-actions {
       display: flex;
       gap: 6px;
+      flex-shrink: 0;
     }
     .btn-toggle-auto {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: #ffffff;
       border-radius: 10px;
       padding: 6px 12px;
@@ -564,12 +696,12 @@
       white-space: nowrap;
     }
     .btn-toggle-auto:hover {
-      background: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.2);
     }
     .btn-report-auto {
-      background: #2563eb;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #ffffff;
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
       border-radius: 10px;
       padding: 6px 12px;
       font-size: 0.72rem;
@@ -579,18 +711,19 @@
       white-space: nowrap;
     }
     .btn-report-auto:hover {
-      background: #1d4ed8;
+      background: rgba(56, 189, 248, 0.3);
+      color: #ffffff;
     }
 
     .sheet-tabs {
       display: flex;
       gap: 6px;
       padding: 0 22px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-      background: #fafafa;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(12, 12, 16, 0.8);
     }
     .sheet-tab {
-      padding: 10px 14px;
+      padding: 11px 14px;
       font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-dim);
@@ -598,9 +731,12 @@
       cursor: pointer;
       transition: all var(--transition-fast);
     }
+    .sheet-tab:hover {
+      color: #ffffff;
+    }
     .sheet-tab.active {
-      color: #09090b;
-      border-bottom-color: #09090b;
+      color: #ffffff;
+      border-bottom-color: #38bdf8;
     }
     .tab-content {
       display: none;
@@ -611,15 +747,15 @@
       gap: 16px;
     }
 
-    /* Tarjetas de Métricas */
+    /* Tarjetas de Metricas Titanio */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
     .stat-card {
-      background: #f8fafc;
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: rgba(22, 22, 30, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: 16px;
       padding: 12px;
       text-align: center;
@@ -627,10 +763,10 @@
     .stat-val {
       font-size: 1.35rem;
       font-weight: 800;
-      color: #09090b;
+      color: #ffffff;
     }
     .stat-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-dim);
       font-weight: 600;
       text-transform: uppercase;
@@ -638,10 +774,10 @@
       margin-top: 2px;
     }
 
-    /* Caja de Lanzamiento de Campaña */
+    /* Caja de Lanzamiento de Campana */
     .campaign-box {
-      background: #f4f4f5;
-      border: 1px solid var(--card-border);
+      background: rgba(20, 20, 28, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 18px;
       padding: 14px 16px;
       display: flex;
@@ -652,7 +788,7 @@
       font-size: 0.84rem;
       font-weight: 700;
       letter-spacing: -0.2px;
-      color: #18181b;
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -669,30 +805,39 @@
       }
     }
     .form-input, .form-select {
-      background: #ffffff;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 8px 10px;
       font-size: 0.8rem;
-      color: #09090b;
+      color: #ffffff;
       outline: none;
+      font-family: inherit;
+      transition: border-color var(--transition-fast);
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+    .form-select option {
+      background: #121216;
+      color: #ffffff;
     }
     .toggle-row {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 0.76rem;
-      color: #27272a;
+      color: #d4d4d8;
       cursor: pointer;
     }
     .btn-launch {
-      background: #18181b;
-      color: #ffffff;
+      background: #ffffff;
+      color: #09090b;
       border: none;
       border-radius: 14px;
       padding: 10px;
       font-size: 0.84rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -705,39 +850,47 @@
       cursor: not-allowed;
     }
     .btn-launch:not(:disabled):hover {
-      background: #27272a;
+      background: #e4e4e7;
       transform: translateY(-1px);
     }
 
-    /* Lista de Prospectos */
+    /* Lista de Prospectos Mejorada */
     .leads-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
     .lead-card {
-      background: #ffffff;
-      border: 1px solid var(--card-border);
+      background: rgba(22, 22, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
       transition: all var(--transition-fast);
     }
     .lead-card:hover {
-      border-color: rgba(0, 0, 0, 0.16);
+      border-color: rgba(56, 189, 248, 0.35);
+      background: rgba(26, 26, 36, 0.9);
     }
     .lead-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 8px;
     }
     .lead-name {
       font-weight: 700;
       font-size: 0.88rem;
-      color: #09090b;
+      color: #ffffff;
+    }
+    .lead-badges-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
     }
     .lead-badge {
       font-size: 0.68rem;
@@ -747,9 +900,53 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
-    .badge-nuevo { background: #e0f2fe; color: #0284c7; }
-    .badge-contactado { background: #dcfce7; color: #16a34a; }
-    .badge-respondio { background: #fef3c7; color: #d97706; }
+    .badge-nuevo {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .badge-contactado {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-respondio {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .channel-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 8px;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .channel-fb {
+      background: rgba(24, 119, 242, 0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(24, 119, 242, 0.35);
+    }
+    .channel-ig {
+      background: rgba(225, 48, 108, 0.18);
+      color: #f472b6;
+      border: 1px solid rgba(225, 48, 108, 0.35);
+    }
+    .channel-maps {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .channel-web {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
     .lead-meta {
       font-size: 0.74rem;
       color: var(--text-dim);
@@ -760,34 +957,37 @@
     .lead-actions {
       display: flex;
       gap: 6px;
-      margin-top: 4px;
+      margin-top: 2px;
       flex-wrap: wrap;
     }
     .lead-btn {
-      background: #f4f4f5;
-      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       padding: 6px 11px;
       font-size: 0.72rem;
       font-weight: 600;
-      color: #18181b;
+      color: #ffffff;
       text-decoration: none;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
       transition: all var(--transition-fast);
+      font-family: inherit;
     }
     .lead-btn:hover {
-      background: #e4e4e7;
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     .lead-btn-wa {
-      background: #ecfdf5;
-      color: #059669;
-      border-color: rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.16);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
     }
     .lead-btn-wa:hover {
-      background: #d1fae5;
+      background: rgba(16, 185, 129, 0.28);
+      color: #ffffff;
     }
 
     @keyframes fade-slide-up {
@@ -801,32 +1001,40 @@
   <div class="bg-blobs">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
+    <div class="studio-spotlight"></div>
   </div>
 
   <div id="canvas-container"></div>
 
-  <!-- Reproductor persistente para compatibilidad de audio móvil -->
+  <!-- Reproductor persistente para compatibilidad de audio movil -->
   <audio id="voice-player" playsinline preload="auto"></audio>
 
   <div class="hud">
-    <!-- Header -->
+    <!-- Dynamic Island Superior -->
     <div class="top-bar">
       <div class="agent-identity">
         <div class="status-dot"></div>
-        <div>
+        <div class="agent-meta">
           <div class="agent-name">SEBAX</div>
           <div class="agent-status" id="agent-state">En espera de instrucciones</div>
         </div>
+        <div class="audio-waveform" id="hud-waveform" title="Monitor de voz">
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+        </div>
       </div>
       <div class="top-controls">
-        <button id="wa-status-btn" class="wa-status-pill disconnected" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
+        <button id="wa-status-btn" class="wa-status-pill disconnected" onclick="openWhatsAppTab()" title="Conexion de WhatsApp">
           <span class="dot-status"></span>
           <span id="wa-status-label">Vincular WhatsApp</span>
         </button>
         <a href="https://www.instagram.com/ssss.olutions" target="_blank" class="badge-link" title="Instagram oficial de SSSSolutions">
           @ssss.olutions
         </a>
-        <button class="icon-btn" id="btn-open-leads" title="Panel de Prospección y Clientes">
+        <button class="icon-btn" id="btn-open-leads" title="Panel de Prospeccion y Clientes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
             <circle cx="9" cy="7" r="4"/>
@@ -843,10 +1051,10 @@
           </svg>
         </button>
         <select id="voice-select" class="voice-select" title="Voz de Sebax">
-          <option value="es-MX-JorgeNeural">Jorge (México)</option>
-          <option value="es-MX-PelayoNeural">Pelayo (Dinámico)</option>
-          <option value="es-ES-AlvaroNeural">Álvaro (Jarvis)</option>
-          <option value="es-MX-DaliaNeural">Dalia (México)</option>
+          <option value="es-MX-JorgeNeural">Jorge (Mexico)</option>
+          <option value="es-MX-PelayoNeural">Pelayo (Dinamico)</option>
+          <option value="es-ES-AlvaroNeural">Alvaro (Jarvis)</option>
+          <option value="es-MX-DaliaNeural">Dalia (Mexico)</option>
         </select>
         <button class="icon-btn active" id="btn-toggle-voice" title="Alternar audio">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -858,21 +1066,21 @@
       </div>
     </div>
 
-    <!-- Burbuja de Diálogo -->
+    <!-- Burbuja de Dialogo Central -->
     <div class="center-hud">
       <div class="speech-bubble" id="speech-bubble">
-        Sebax en línea. Toca el micrófono para dictar o escribe una orden para comenzar.
+        Sebax en linea. Toca el microfono para dictar o escribe una orden para comenzar.
       </div>
     </div>
 
     <!-- Controles Inferiores -->
     <div class="bottom-controls">
       <div class="quick-actions">
-        <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(0,0,0,0.15); background:#ffffff;">Vincular WhatsApp</div>
-        <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreón, Gómez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreón, Gómez y Lerdo</div>
+        <div class="pill" onclick="openWhatsAppTab()" style="font-weight:700; border-color:rgba(255,255,255,0.2); background:rgba(30,30,42,0.95); color:#ffffff;">Vincular WhatsApp</div>
+        <div class="pill" onclick="sendQuick('Sebax, busca 3 negocios de cualquier tipo en Torreon, Gomez o Lerdo y haz todo el movimiento de mandarles mensaje con mi Instagram y portafolio')">Prospectar Torreon, Gomez y Lerdo</div>
         <div class="pill" onclick="sendQuick('Sebax, busca 3 cafeterias, dulcerias o florerias en Torreon, Gomez Palacio o Lerdo y prospectalos por WhatsApp')">Cafeterias, Dulcerias y Florerias La Laguna</div>
         <div class="pill" onclick="openLeadsModal()">Panel de Leads</div>
-        <div class="pill" onclick="openAgendaModal()">Agenda & Citas</div>
+        <div class="pill" onclick="openAgendaModal()">Agenda y Citas</div>
         <div class="pill" onclick="sendQuick('Muestra la lista de prospectos registrados en el sistema')">Ver prospectos</div>
       </div>
 
@@ -896,13 +1104,14 @@
     </div>
   </div>
 
-  <!-- Modal / Drawer de Prospección -->
+  <!-- Modal / Drawer de Prospeccion -->
   <div class="leads-modal" id="leads-modal">
     <div class="leads-sheet">
+      <div class="sheet-drag-handle"></div>
       <div class="sheet-header">
         <div>
-          <div class="sheet-title" id="sheet-header-title">Prospección & Ventas SSSSolutions</div>
-          <div class="sheet-subtitle" id="sheet-header-sub">Piloto automático 24/7 en Torreón, Gómez Palacio y Lerdo</div>
+          <div class="sheet-title" id="sheet-header-title">Prospeccion y Ventas SSSSolutions</div>
+          <div class="sheet-subtitle" id="sheet-header-sub">Piloto automatico 24/7 en Torreon, Gomez Palacio y Lerdo</div>
         </div>
         <button class="btn-close" id="btn-close-leads">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -912,33 +1121,33 @@
         </button>
       </div>
 
-      <!-- Pestañas del Modal -->
+      <!-- Pestanas del Modal -->
       <div class="sheet-tabs">
         <div class="sheet-tab active" id="tab-btn-leads" onclick="switchTab('leads')">Prospectos</div>
-        <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas & Agenda</div>
+        <div class="sheet-tab" id="tab-btn-agenda" onclick="switchTab('agenda')">Citas y Agenda</div>
         <div class="sheet-tab" id="tab-btn-whatsapp" onclick="switchTab('whatsapp')">Conectar WhatsApp</div>
       </div>
 
       <div class="sheet-body">
-        <!-- Pestaña 1: Prospectos & Campañas -->
+        <!-- Pestana 1: Prospectos y Campanas -->
         <div class="tab-content active" id="tab-content-leads">
-          <!-- Banner de Piloto Automático 24/7 -->
+          <!-- Banner de Piloto Automatico 24/7 -->
           <div class="autopilot-banner">
             <div class="autopilot-left">
               <div class="autopilot-dot active" id="autopilot-dot"></div>
               <div>
-                <div class="autopilot-title">Piloto Automático 24/7 <span class="autopilot-tag" id="autopilot-tag">ACTIVO</span></div>
-                <div class="autopilot-desc" id="autopilot-desc">Prospectando continuamente en Torreón, Gómez y Lerdo. Reportes diarios a tu WhatsApp.</div>
+                <div class="autopilot-title">Piloto Automatico 24/7 <span class="autopilot-tag" id="autopilot-tag">ACTIVO</span></div>
+                <div class="autopilot-desc" id="autopilot-desc">Prospectando continuamente en Torreon, Gomez y Lerdo. Reportes diarios a tu WhatsApp.</div>
               </div>
             </div>
             <div class="autopilot-actions">
-              <button class="btn-report-auto" id="btn-run-now" onclick="triggerAutopilotNowUi()" title="Ejecutar una ronda de prospección en vivo">Buscar Ahora</button>
+              <button class="btn-report-auto" id="btn-run-now" onclick="triggerAutopilotNowUi()" title="Ejecutar una ronda de prospeccion en vivo">Buscar Ahora</button>
               <button class="btn-toggle-auto" id="btn-toggle-auto" onclick="toggleAutopilotUi()">Pausar</button>
               <button class="btn-report-auto" onclick="requestDailyReportUi()" title="Enviar reporte inmediato a tu WhatsApp">Reporte</button>
             </div>
           </div>
 
-          <!-- Métricas -->
+          <!-- Metricas -->
           <div class="stats-row">
             <div class="stat-card">
               <div class="stat-val" id="stat-total">0</div>
@@ -954,32 +1163,32 @@
             </div>
           </div>
 
-          <!-- Formulario de Campaña Rápida -->
+          <!-- Formulario de Campana Rapida -->
           <div class="campaign-box">
             <div class="campaign-box-title">
-              <span>Lanzar Campaña Rápida</span>
+              <span>Lanzar Campana Rapida</span>
               <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="campaign-status-msg"></span>
             </div>
             <div class="form-row">
-              <input type="text" class="form-input" id="camp-niche" list="niches-list" placeholder="Giro (ej. Cafeterías, Dulcerías o Florerías)" value="Cualquier negocio">
+              <input type="text" class="form-input" id="camp-niche" list="niches-list" placeholder="Giro (ej. Cafeterias, Dulcerias o Florerias)" value="Cualquier negocio">
               <datalist id="niches-list">
                 <option value="Cualquier negocio">
-                <option value="Cafeterías y coffee shops">
-                <option value="Restaurantes y gastronomía">
-                <option value="Dulcerías y confiterías">
-                <option value="Florerías y arreglos florales">
-                <option value="Pastelerías y repostería">
-                <option value="Panaderías artesanales">
-                <option value="Neverías y heladerías">
-                <option value="Pizzerías y hamburgueserías">
+                <option value="Cafeterias y coffee shops">
+                <option value="Restaurantes y gastronomia">
+                <option value="Dulcerias y confiterias">
+                <option value="Florerias y arreglos florales">
+                <option value="Pastelerias y reposteria">
+                <option value="Panaderias artesanales">
+                <option value="Neverias y heladerias">
+                <option value="Pizzerias y hamburgueserias">
                 <option value="Boutiques y tiendas de regalos">
                 <option value="Salones de eventos y banquetes">
               </datalist>
-              <input type="text" class="form-input" id="camp-city" list="cities-list" value="Torreón, Gómez Palacio y Lerdo" placeholder="Zona o Ciudad">
+              <input type="text" class="form-input" id="camp-city" list="cities-list" value="Torreon, Gomez Palacio y Lerdo" placeholder="Zona o Ciudad">
               <datalist id="cities-list">
-                <option value="Torreón, Gómez Palacio y Lerdo">
-                <option value="Torreón">
-                <option value="Gómez Palacio">
+                <option value="Torreon, Gomez Palacio y Lerdo">
+                <option value="Torreon">
+                <option value="Gomez Palacio">
                 <option value="Lerdo">
               </datalist>
               <select class="form-select" id="camp-count">
@@ -990,26 +1199,26 @@
             </div>
             <label class="toggle-row">
               <input type="checkbox" id="camp-auto-send" checked>
-              <span>Enviar WhatsApp con portafolio e Instagram automáticamente</span>
+              <span>Enviar WhatsApp con portafolio e Instagram automaticamente</span>
             </label>
             <button class="btn-launch" id="btn-start-campaign" onclick="launchCampaign()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
-              <span>Iniciar Prospección y Enviar Mensajes</span>
+              <span>Iniciar Prospeccion y Enviar Mensajes</span>
             </button>
           </div>
 
           <!-- Registro de Prospectos -->
           <div>
-            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Registro de Negocios Prospectados</div>
+            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#ffffff;">Registro de Negocios Prospectados</div>
             <div class="leads-list" id="leads-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
             </div>
           </div>
         </div>
 
-        <!-- Pestaña 2: Citas & Agenda -->
+        <!-- Pestana 2: Citas y Agenda -->
         <div class="tab-content" id="tab-content-agenda">
           <div class="stats-row">
             <div class="stat-card">
@@ -1022,14 +1231,14 @@
             </div>
             <div class="stat-card">
               <div class="stat-val" id="stat-agenda-pending">0</div>
-              <div class="stat-label">En Negociación</div>
+              <div class="stat-label">En Negociacion</div>
             </div>
           </div>
 
           <!-- Agendar Nueva Cita -->
           <div class="campaign-box">
             <div class="campaign-box-title">
-              <span>Agendar Reunión o Llamada Comercial</span>
+              <span>Agendar Reunion o Llamada Comercial</span>
               <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="agenda-status-msg"></span>
             </div>
             <div class="form-row">
@@ -1037,11 +1246,11 @@
               <input type="text" class="form-input" id="agenda-client" placeholder="Persona de contacto">
             </div>
             <div class="form-row" style="margin-top:8px;">
-              <input type="text" class="form-input" id="agenda-phone" placeholder="Teléfono WhatsApp">
-              <input type="text" class="form-input" id="agenda-datetime" placeholder="Fecha y hora (ej. Mañana 11:00 AM)">
+              <input type="text" class="form-input" id="agenda-phone" placeholder="Telefono WhatsApp">
+              <input type="text" class="form-input" id="agenda-datetime" placeholder="Fecha y hora (ej. Manana 11:00 AM)">
             </div>
             <div style="margin-top:8px;">
-              <input type="text" class="form-input" id="agenda-notes" placeholder="Notas (ej. Interesado en sitio web y cotización)">
+              <input type="text" class="form-input" id="agenda-notes" placeholder="Notas (ej. Interesado en sitio web y cotizacion)">
             </div>
             <button class="btn-launch" id="btn-save-appointment" style="margin-top:10px;" onclick="saveNewAppointment()">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1056,88 +1265,88 @@
 
           <!-- Lista de Citas Programadas -->
           <div>
-            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#18181b;">Citas Programadas en Agenda</div>
+            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#ffffff;">Citas Programadas en Agenda</div>
             <div class="leads-list" id="appointments-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando agenda...</div>
             </div>
           </div>
         </div>
 
-        <!-- Pestaña 3: Conexión de WhatsApp -->
+        <!-- Pestana 3: Conexion de WhatsApp -->
         <div class="tab-content" id="tab-content-whatsapp">
-          <!-- Vista cuando WhatsApp está CONECTADO -->
+          <!-- Vista cuando WhatsApp esta CONECTADO -->
           <div id="wa-tab-connected-view" style="display:none; text-align:center; padding:2rem 1rem;">
-            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:#ecfdf5; color:#059669; font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem;">
-              <span style="width:8px; height:8px; border-radius:50%; background:#10b981;"></span> EN LÍNEA Y OPERATIVO
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:rgba(16,185,129,0.15); color:#34d399; font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem; border:1px solid rgba(16,185,129,0.35);">
+              <span style="width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px #10b981;"></span> EN LINEA Y OPERATIVO
             </div>
-            <div style="font-size:1.15rem; font-weight:800; color:#09090b; margin-bottom:0.4rem;">WhatsApp Conectado con Éxito</div>
-            <div style="font-size:0.84rem; color:#71717a; line-height:1.5; max-width:400px; margin:0 auto 1.4rem auto;" id="wa-connected-user-desc">
-              Sebax está activo 24/7 atendiendo clientes y prospectando negocios en Torreón, Gómez Palacio y Lerdo.
+            <div style="font-size:1.15rem; font-weight:800; color:#ffffff; margin-bottom:0.4rem;">WhatsApp Conectado con Exito</div>
+            <div style="font-size:0.84rem; color:#a1a1aa; line-height:1.5; max-width:400px; margin:0 auto 1.4rem auto;" id="wa-connected-user-desc">
+              Sebax esta activo 24/7 atendiendo clientes y prospectando negocios en Torreon, Gomez Palacio y Lerdo.
             </div>
             <div style="display:flex; flex-direction:column; gap:8px; max-width:320px; margin:0 auto;">
-              <button class="btn-launch" onclick="retryUnsentLeadsUi()" style="padding:12px; border-radius:12px; font-weight:700; background:#09090b; color:#fff;">
+              <button class="btn-launch" onclick="retryUnsentLeadsUi()" style="padding:12px; border-radius:12px; font-weight:700;">
                 Reintentar Prospectos Pendientes Ahora
               </button>
               <button class="btn-toggle-auto" onclick="resetWhatsAppSessionUi()" style="padding:10px; border-radius:12px; font-size:0.78rem;">
-                Desvincular / Cambiar Número
+                Desvincular / Cambiar Numero
               </button>
             </div>
           </div>
 
-          <!-- Vista cuando WhatsApp está DESCONECTADO -->
+          <!-- Vista cuando WhatsApp esta DESCONECTADO -->
           <div id="wa-tab-pairing-view">
-            <div class="autopilot-banner" style="background:#fffbeb; border-color:#fde68a; margin-bottom:1.2rem;">
+            <div class="autopilot-banner" style="background:rgba(245, 158, 11, 0.12); border-color:rgba(245, 158, 11, 0.35); margin-bottom:1.2rem;">
               <div class="autopilot-left">
-                <div class="autopilot-dot" style="background:#f59e0b;"></div>
+                <div class="autopilot-dot" style="background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></div>
                 <div>
-                  <div class="autopilot-title" style="color:#b45309;">WhatsApp Desconectado</div>
-                  <div class="autopilot-desc" style="color:#92400e;">Vincula tu cuenta una sola vez para que Sebax pueda enviar mensajes y reportes 24/7.</div>
+                  <div class="autopilot-title" style="color:#fbbf24;">WhatsApp Desconectado</div>
+                  <div class="autopilot-desc" style="color:#fde68a;">Vincula tu cuenta una sola vez para que Sebax pueda enviar mensajes y reportes 24/7.</div>
                 </div>
               </div>
             </div>
 
-            <!-- Sub pestañas Código vs QR -->
-            <div style="display:flex; gap:6px; background:#f1f5f9; padding:4px; border-radius:12px; margin-bottom:1.2rem;">
-              <button type="button" id="subtab-code-btn" class="sheet-tab active" style="flex:1; padding:8px; font-size:0.78rem; text-align:center;" onclick="switchWaSubtab('code')">Código Telefónico (Celular)</button>
-              <button type="button" id="subtab-qr-btn" class="sheet-tab" style="flex:1; padding:8px; font-size:0.78rem; text-align:center;" onclick="switchWaSubtab('qr')">Escanear QR (PC)</button>
+            <!-- Sub pestanas Codigo vs QR -->
+            <div style="display:flex; gap:6px; background:rgba(20,20,28,0.8); padding:4px; border-radius:12px; margin-bottom:1.2rem; border:1px solid rgba(255,255,255,0.08);">
+              <button type="button" id="subtab-code-btn" class="sheet-tab active" style="flex:1; padding:8px; font-size:0.78rem; text-align:center; border-radius:8px;" onclick="switchWaSubtab('code')">Codigo Telefonico (Celular)</button>
+              <button type="button" id="subtab-qr-btn" class="sheet-tab" style="flex:1; padding:8px; font-size:0.78rem; text-align:center; border-radius:8px;" onclick="switchWaSubtab('qr')">Escanear QR (PC)</button>
             </div>
 
-            <!-- Opción 1: Código de 8 dígitos para celular -->
+            <!-- Opcion 1: Codigo de 8 digitos para celular -->
             <div id="wa-subtab-code">
               <div class="campaign-box" style="margin-bottom:1rem;">
                 <div class="form-row">
                   <input type="tel" class="form-input" id="wa-sheet-phone" value="8719164677" placeholder="8719164677">
                   <button class="btn-launch" id="btn-sheet-pairing" onclick="requestSheetPairingCode()">
-                    <span>Obtener Código</span>
+                    <span>Obtener Codigo</span>
                   </button>
                 </div>
               </div>
 
-              <div id="wa-sheet-code-box" style="display:none; margin:1rem 0; padding:16px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:16px; text-align:center;">
-                <div style="font-size:0.72rem; color:#64748b; font-weight:600; margin-bottom:6px;">Tu código de vinculación de 8 dígitos:</div>
-                <div id="wa-sheet-code-text" style="font-family:monospace; font-size:1.8rem; font-weight:800; letter-spacing:4px; color:#09090b; margin-bottom:8px;">----</div>
-                <button class="btn-toggle-auto" style="padding:6px 14px; font-size:0.76rem; font-weight:700;" onclick="copySheetCode()">Copiar Código</button>
+              <div id="wa-sheet-code-box" style="display:none; margin:1rem 0; padding:16px; background:rgba(24,24,34,0.9); border:1.5px dashed rgba(56,189,248,0.4); border-radius:16px; text-align:center;">
+                <div style="font-size:0.72rem; color:#94a3b8; font-weight:600; margin-bottom:6px;">Tu codigo de vinculacion de 8 digitos:</div>
+                <div id="wa-sheet-code-text" style="font-family:monospace; font-size:1.8rem; font-weight:800; letter-spacing:4px; color:#38bdf8; margin-bottom:8px;">----</div>
+                <button class="btn-toggle-auto" style="padding:6px 14px; font-size:0.76rem; font-weight:700;" onclick="copySheetCode()">Copiar Codigo</button>
               </div>
 
-              <div style="background:#f8fafc; border:1px solid rgba(0,0,0,0.05); border-radius:16px; padding:14px 16px; font-size:0.78rem; color:#3f3f46; line-height:1.55;">
-                <div style="font-weight:700; margin-bottom:6px; color:#09090b;">Instrucciones para vincular en tu celular:</div>
+              <div style="background:rgba(22,22,30,0.75); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:14px 16px; font-size:0.78rem; color:#d4d4d8; line-height:1.55;">
+                <div style="font-weight:700; margin-bottom:6px; color:#ffffff;">Instrucciones para vincular en tu celular:</div>
                 <ol style="padding-left:18px; margin:0;">
-                  <li style="margin-bottom:4px;">Abre <b>WhatsApp</b> en este teléfono.</li>
+                  <li style="margin-bottom:4px;">Abre <b>WhatsApp</b> en este telefono.</li>
                   <li style="margin-bottom:4px;">Toca <b>Ajustes</b> &gt; <b>Dispositivos vinculados</b> &gt; <b>Vincular un dispositivo</b>.</li>
-                  <li style="margin-bottom:4px;">Toca abajo en: <b>Vincular con el número de teléfono</b>.</li>
-                  <li>Ingresa el código de 8 dígitos generado arriba.</li>
+                  <li style="margin-bottom:4px;">Toca abajo en: <b>Vincular con el numero de telefono</b>.</li>
+                  <li>Ingresa el codigo de 8 digitos generado arriba.</li>
                 </ol>
               </div>
             </div>
 
-            <!-- Opción 2: QR para computadora -->
+            <!-- Opcion 2: QR para computadora -->
             <div id="wa-subtab-qr" style="display:none; text-align:center;">
-              <div style="background:#ffffff; padding:14px; border-radius:18px; border:1px solid rgba(0,0,0,0.08); display:inline-block; margin-bottom:1rem;">
+              <div style="background:#ffffff; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.1); display:inline-block; margin-bottom:1rem;">
                 <img id="wa-sheet-qr-img" src="" alt="QR WhatsApp" style="display:none; max-width:240px; border-radius:10px; margin:0 auto;">
-                <div id="wa-sheet-qr-loader" style="padding:40px 20px; font-size:0.8rem; color:#64748b;">Cargando código QR...</div>
+                <div id="wa-sheet-qr-loader" style="padding:40px 20px; font-size:0.8rem; color:#64748b;">Cargando codigo QR...</div>
               </div>
-              <div style="background:#f8fafc; border-radius:14px; padding:12px 14px; font-size:0.78rem; color:#64748b; text-align:left;">
-                Apunta la cámara de WhatsApp de tu celular al código QR para vincularlo inmediatamente.
+              <div style="background:rgba(22,22,30,0.75); border-radius:14px; padding:12px 14px; font-size:0.78rem; color:#94a3b8; text-align:left;">
+                Apunta la camara de WhatsApp de tu celular al codigo QR para vincularlo inmediatamente.
               </div>
             </div>
           </div>
@@ -1156,6 +1365,7 @@
     const voiceToggleBtn = document.getElementById("btn-toggle-voice");
     const voiceSelect = document.getElementById("voice-select");
     const voicePlayer = document.getElementById("voice-player");
+    const hudWaveform = document.getElementById("hud-waveform");
 
     // Modal de Leads
     const leadsModal = document.getElementById("leads-modal");
@@ -1166,7 +1376,19 @@
     let isSpeaking = false;
     let lastSpokenText = "";
 
-    // Activar audio en móviles en el primer toque de usuario
+    // Actualizador visual de Ondas de Audio
+    function updateWaveformUI(active, mode = "speaking") {
+      const bubbleWaveform = document.getElementById("bubble-waveform");
+      [hudWaveform, bubbleWaveform].forEach(wf => {
+        if (!wf) return;
+        wf.classList.remove("speaking", "listening");
+        if (active) {
+          wf.classList.add(mode === "listening" ? "listening" : "speaking");
+        }
+      });
+    }
+
+    // Activar audio en moviles en el primer toque de usuario
     function prewarmAudio() {
       if (voicePlayer) {
         voicePlayer.play().then(() => {
@@ -1194,6 +1416,7 @@
       if (window.avatar) window.avatar.setSpeaking(false);
       isSpeaking = false;
       updatePlayButtonUI(false);
+      updateWaveformUI(false);
     }
 
     function updatePlayButtonUI(isPlaying) {
@@ -1232,18 +1455,20 @@
         isSpeaking = true;
         if (window.avatar) window.avatar.setSpeaking(true);
         updatePlayButtonUI(true);
+        updateWaveformUI(true, "speaking");
       };
       voicePlayer.onended = () => {
         isSpeaking = false;
         if (window.avatar) window.avatar.setSpeaking(false);
         updatePlayButtonUI(false);
+        updateWaveformUI(false);
       };
       voicePlayer.onerror = () => {
         fallbackSpeechSynthesis(spoken);
       };
 
       voicePlayer.play().catch(err => {
-        console.warn("Autoplay bloqueado en móvil, usando síntesis de navegador:", err);
+        console.warn("Autoplay bloqueado en movil, usando sintesis de navegador:", err);
         fallbackSpeechSynthesis(spoken);
       });
     }
@@ -1258,20 +1483,24 @@
           isSpeaking = true;
           if (window.avatar) window.avatar.setSpeaking(true);
           updatePlayButtonUI(true);
+          updateWaveformUI(true, "speaking");
         };
         utter.onend = () => {
           isSpeaking = false;
           if (window.avatar) window.avatar.setSpeaking(false);
           updatePlayButtonUI(false);
+          updateWaveformUI(false);
         };
         utter.onerror = () => {
           isSpeaking = false;
           if (window.avatar) window.avatar.setSpeaking(false);
           updatePlayButtonUI(false);
+          updateWaveformUI(false);
         };
         window.speechSynthesis.speak(utter);
       } else {
         updatePlayButtonUI(false);
+        updateWaveformUI(false);
       }
     }
 
@@ -1281,7 +1510,7 @@
       lastMessageText = text;
       const formatted = text.replace(/\*(.*?)\*/g, '<b>$1</b>');
       const actionHtml = `
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:10px;">
           <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -1289,6 +1518,13 @@
             </svg>
             <span class="btn-text">Escuchar voz</span>
           </button>
+          <div class="audio-waveform" id="bubble-waveform" style="height:14px;">
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+          </div>
         </div>
       `;
       speechBubble.innerHTML = formatted + actionHtml;
@@ -1314,7 +1550,6 @@
       userInput.value = "";
       agentState.textContent = "Procesando orden...";
       if (window.avatar) window.avatar.setThinking(true);
-      // No vocalizar el mensaje temporal de "Procesando..." para evitar interrupciones en móvil
       setBubble(`Procesando: "${text}"...`, false);
 
       try {
@@ -1328,7 +1563,7 @@
         setBubble(reply, true);
         agentState.textContent = "Listo";
       } catch (err) {
-        setBubble("Error al comunicar con el núcleo: " + err.message, false);
+        setBubble("Error al comunicar con el nucleo: " + err.message, false);
         agentState.textContent = "Error";
       } finally {
         if (window.avatar) window.avatar.setThinking(false);
@@ -1344,7 +1579,7 @@
       sendCommand(q);
     }
 
-    // Modal de Leads, Piloto Automático & Agenda
+    // Modal de Leads, Piloto Automatico y Agenda
     function openLeadsModal() {
       leadsModal.classList.add("active");
       switchTab("leads");
@@ -1396,14 +1631,14 @@
       } else if (tab === "whatsapp") {
         if (tabBtnWhatsapp) tabBtnWhatsapp.classList.add("active");
         if (tabContentWhatsapp) tabContentWhatsapp.classList.add("active");
-        headerTitle.textContent = "Conexión de WhatsApp";
-        headerSub.textContent = "Vinculación directa para envíos y reportes 24/7";
+        headerTitle.textContent = "Conexion de WhatsApp";
+        headerSub.textContent = "Vinculacion directa para envios y reportes 24/7";
         checkWhatsAppStatus();
       } else {
         tabBtnLeads.classList.add("active");
         tabContentLeads.classList.add("active");
-        headerTitle.textContent = "Prospección Comercial SSSSolutions";
-        headerSub.textContent = "Piloto automático 24/7 en Torreón, Gómez y Lerdo";
+        headerTitle.textContent = "Prospeccion Comercial SSSSolutions";
+        headerSub.textContent = "Piloto automatico 24/7 en Torreon, Gomez y Lerdo";
         loadLeadsData();
         loadAutopilotStatus();
       }
@@ -1439,13 +1674,13 @@
       const codeText = document.getElementById("wa-sheet-code-text");
 
       if (!phone) {
-        alert("Por favor ingresa tu número de WhatsApp con lada.");
+        alert("Por favor ingresa tu numero de WhatsApp con lada.");
         phoneInput.focus();
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = "Generando código seguro...";
+      btn.textContent = "Generando codigo seguro...";
 
       try {
         const res = await fetch("/pairing-code", {
@@ -1461,13 +1696,13 @@
         if (data.success && data.code) {
           codeText.textContent = data.code;
           box.style.display = "block";
-          btn.textContent = "Generar Nuevo Código";
+          btn.textContent = "Generar Nuevo Codigo";
         } else {
-          alert(data.error || "No se pudo generar el código. Verifica el número.");
+          alert(data.error || "No se pudo generar el codigo. Verifica el numero.");
           btn.textContent = "Reintentar";
         }
       } catch (e) {
-        alert("Error de conexión: " + e.message);
+        alert("Error de conexion: " + e.message);
         btn.textContent = "Reintentar";
       } finally {
         btn.disabled = false;
@@ -1477,9 +1712,9 @@
     function copySheetCode() {
       const text = document.getElementById("wa-sheet-code-text").textContent.replace(/-/g, "").trim();
       navigator.clipboard.writeText(text).then(() => {
-        alert("Código copiado: " + text);
+        alert("Codigo copiado: " + text);
       }).catch(() => {
-        prompt("Copia este código:", text);
+        prompt("Copia este codigo:", text);
       });
     }
 
@@ -1495,13 +1730,13 @@
     }
 
     async function resetWhatsAppSessionUi() {
-      if (!confirm("¿Deseas desvincular la sesión actual de WhatsApp para vincular un nuevo número?")) return;
+      if (!confirm("Deseas desvincular la sesion actual de WhatsApp para vincular un nuevo numero?")) return;
       try {
         await fetch("/api/bridge/reset", { method: "POST" });
-        alert("Sesión reiniciada. Puedes generar un nuevo código ahora.");
+        alert("Sesion reiniciada. Puedes generar un nuevo codigo ahora.");
         checkWhatsAppStatus();
       } catch (e) {
-        alert("Error al reiniciar sesión: " + e.message);
+        alert("Error al reiniciar sesion: " + e.message);
       }
     }
 
@@ -1524,8 +1759,8 @@
         if (connectedView && pairingView) {
           connectedView.style.display = isOnline ? "block" : "none";
           pairingView.style.display = isOnline ? "none" : "block";
-          if (isOnline && userDesc && data.user?.id) {
-            userDesc.textContent = "Conectado al número " + data.user.id.split("@")[0] + ". Sebax está activo 24/7 en Torreón, Gómez y Lerdo.";
+          if (isOnline && userDesc && data.user && data.user.id) {
+            userDesc.textContent = "Conectado al numero " + data.user.id.split("@")[0] + ". Sebax esta activo 24/7 en Torreon, Gomez y Lerdo.";
           }
         }
       } catch (e) {}
@@ -1549,20 +1784,20 @@
           tag.textContent = "ACTIVO";
           tag.className = "autopilot-tag";
           btn.textContent = "Pausar";
-          const lastTime = cfg.last_run ? `Última búsqueda: ${cfg.last_run}` : "Iniciando ciclo...";
-          desc.textContent = `Prospectando cada ${cfg.interval_minutes || 25} min en Torreón, Gómez y Lerdo. Contactados hoy: ${cfg.sent_today || 0}. ${lastTime}.`;
-          if (agentState && (agentState.textContent.includes("espera") || agentState.textContent.includes("línea"))) {
-            agentState.textContent = `En línea 24/7 • ${cfg.sent_today || 0} contactados hoy`;
+          const lastTime = cfg.last_run ? `Ultima busqueda: ${cfg.last_run}` : "Iniciando ciclo...";
+          desc.textContent = `Prospectando cada ${cfg.interval_minutes || 25} min en Torreon, Gomez y Lerdo. Contactados hoy: ${cfg.sent_today || 0}. ${lastTime}.`;
+          if (agentState && (agentState.textContent.includes("espera") || agentState.textContent.includes("linea"))) {
+            agentState.textContent = `En linea 24/7 - ${cfg.sent_today || 0} contactados hoy`;
           }
         } else {
           dot.classList.remove("active");
           tag.textContent = "EN PAUSA";
           tag.className = "autopilot-tag paused";
           btn.textContent = "Reanudar";
-          desc.textContent = "El piloto automático está en pausa temporalmente.";
+          desc.textContent = "El piloto automatico esta en pausa temporalmente.";
         }
       } catch (e) {
-        console.error("Error al cargar estado del piloto automático:", e);
+        console.error("Error al cargar estado del piloto automatico:", e);
       }
     }
 
@@ -1576,7 +1811,7 @@
         const res = await fetch("/api/autopilot/run", { method: "POST" });
         const data = await res.json();
         if (data.executed && data.sent > 0) {
-          alert(`Ronda completada con éxito. Se enviaron propuestas a ${data.sent} negocios de ${data.niche} y se envió un reporte a tu WhatsApp.`);
+          alert(`Ronda completada con exito. Se enviaron propuestas a ${data.sent} negocios de ${data.niche} y se envio un reporte a tu WhatsApp.`);
         } else {
           alert(data.message || "Ronda ejecutada.");
         }
@@ -1610,7 +1845,7 @@
           loadAutopilotStatus();
         }
       } catch (e) {
-        alert("Error al alternar piloto automático: " + e.message);
+        alert("Error al alternar piloto automatico: " + e.message);
       }
     }
 
@@ -1642,41 +1877,61 @@
       }
     }
 
+    function detectChannel(lead) {
+      const src = ((lead.source || "") + " " + (lead.href || "")).toLowerCase();
+      if (src.includes("facebook") || src.includes("fb.")) {
+        return { name: "Facebook", class: "channel-fb", icon: "[FB]" };
+      }
+      if (src.includes("instagram") || src.includes("ig.")) {
+        return { name: "Instagram", class: "channel-ig", icon: "[IG]" };
+      }
+      if (src.includes("google") || src.includes("maps")) {
+        return { name: "Google Maps", class: "channel-maps", icon: "[MAPS]" };
+      }
+      return { name: "Directorio Web", class: "channel-web", icon: "[WEB]" };
+    }
+
     function renderLeadsList(leads) {
       const container = document.getElementById("leads-container");
       if (!leads || leads.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay prospectos registrados aún. El piloto automático comenzará a prospectar en breve.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay prospectos registrados aun. El piloto automatico comenzara a prospectar en breve.</div>`;
         return;
       }
 
       container.innerHTML = leads.map(l => {
         const badgeClass = l.status === "contactado" ? "badge-contactado" : (l.status === "respondio" ? "badge-respondio" : "badge-nuevo");
-        const statusLabel = l.status === "contactado" ? "Contactado" : (l.status === "respondio" ? "Respondió" : "Nuevo");
+        const statusLabel = l.status === "contactado" ? "Contactado" : (l.status === "respondio" ? "Respondio" : "Nuevo");
+        const channel = detectChannel(l);
         const waLink = `https://wa.me/${l.phone}`;
 
         return `
           <div class="lead-card">
             <div class="lead-top">
-              <div class="lead-name">${escapeHtml(l.name)}</div>
-              <span class="lead-badge ${badgeClass}">${statusLabel}</span>
-            </div>
-            <div class="lead-meta">
-              <span>Tel: ${escapeHtml(l.phone)}</span>
-              <span>Giro: ${escapeHtml(l.niche || "General")}</span>
-              <span>${escapeHtml(l.city || "La Laguna")}</span>
+              <div>
+                <div class="lead-name">${escapeHtml(l.name)}</div>
+                <div class="lead-meta" style="margin-top:3px;">
+                  <span>Tel: ${escapeHtml(l.phone)}</span>
+                  <span>Giro: ${escapeHtml(l.niche || "General")}</span>
+                  <span>${escapeHtml(l.city || "La Laguna")}</span>
+                </div>
+              </div>
+              <div class="lead-badges-group">
+                <span class="lead-badge ${badgeClass}">${statusLabel}</span>
+                <span class="channel-badge ${channel.class}">${channel.icon} ${channel.name}</span>
+              </div>
             </div>
             <div class="lead-actions">
-              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa">
+              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa" title="Abrir chat directo en WhatsApp">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                WhatsApp
+                <span>Abrir WhatsApp</span>
               </a>
               <button class="lead-btn" onclick="scheduleForLead('${escapeHtml(l.name)}', '${l.phone}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-                Agendar Cita
+                <span>Agendar Cita</span>
               </button>
               <button class="lead-btn" onclick="sendDirectLead(${l.id}, '${l.phone}', '${escapeHtml(l.name)}')">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Reenviar Propuesta
+                <span>Reenviar Propuesta</span>
               </button>
             </div>
           </div>
@@ -1709,32 +1964,32 @@
     function renderAppointmentsList(appointments) {
       const container = document.getElementById("appointments-container");
       if (!appointments || appointments.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay citas agendadas aún. Agrega una nueva o Sebax las programará automáticamente cuando los clientes respondan.</div>`;
+        container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-dim); font-size:0.82rem;">No hay citas agendadas aun. Agrega una nueva o Sebax las programara automaticamente cuando los clientes respondan.</div>`;
         return;
       }
 
       container.innerHTML = appointments.map(a => {
         const isConfirmed = a.status === "confirmada";
-        const badgeColor = isConfirmed ? "background:#dcfce7; color:#16a34a;" : "background:#fef3c7; color:#d97706;";
-        const statusLabel = isConfirmed ? "Confirmada" : (a.status === "en_negociacion" ? "En Negociación" : a.status);
+        const badgeStyle = isConfirmed ? "background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3);" : "background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.3);";
+        const statusLabel = isConfirmed ? "Confirmada" : (a.status === "en_negociacion" ? "En Negociacion" : a.status);
         const waLink = a.phone ? `https://wa.me/${a.phone}` : "#";
 
         return `
           <div class="lead-card">
             <div class="lead-top">
               <div class="lead-name">${escapeHtml(a.business_name)} ${a.client_name ? `(${escapeHtml(a.client_name)})` : ''}</div>
-              <span class="lead-badge" style="${badgeColor}">${statusLabel}</span>
+              <span class="lead-badge" style="${badgeStyle}">${statusLabel}</span>
             </div>
             <div class="lead-meta">
               <span><strong>Fecha/Hora:</strong> ${escapeHtml(a.date_time || 'Por acordar')}</span>
               ${a.phone ? `<span>Tel: ${escapeHtml(a.phone)}</span>` : ''}
             </div>
-            ${a.notes ? `<div style="font-size:0.75rem; color:#4b5563; margin-top:2px;">${escapeHtml(a.notes)}</div>` : ''}
+            ${a.notes ? `<div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">${escapeHtml(a.notes)}</div>` : ''}
             <div class="lead-actions">
               ${a.phone ? `
                 <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  Contactar por WhatsApp
+                  <span>Abrir WhatsApp</span>
                 </a>
               ` : ''}
             </div>
@@ -1774,7 +2029,7 @@
           })
         });
         const data = await res.json();
-        statusMsg.textContent = "Guardada con éxito";
+        statusMsg.textContent = "Guardada con exito";
         document.getElementById("agenda-business").value = "";
         document.getElementById("agenda-client").value = "";
         document.getElementById("agenda-phone").value = "";
@@ -1793,7 +2048,7 @@
       if (niche.toLowerCase().includes("cualquier") || niche.toLowerCase().includes("todos")) {
         niche = "";
       }
-      const city = document.getElementById("camp-city").value.trim() || "Torreón, Gómez Palacio y Lerdo";
+      const city = document.getElementById("camp-city").value.trim() || "Torreon, Gomez Palacio y Lerdo";
       const count = parseInt(document.getElementById("camp-count").value, 10) || 3;
       const autoSend = document.getElementById("camp-auto-send").checked;
       const btn = document.getElementById("btn-start-campaign");
@@ -1825,13 +2080,13 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"/>
           </svg>
-          <span>Iniciar Prospección y Contacto</span>
+          <span>Iniciar Prospeccion y Contacto</span>
         `;
       }
     }
 
     async function sendDirectLead(leadId, phone, name) {
-      if (!confirm(`¿Deseas enviar la propuesta oficial de SSSSolutions a ${name} (${phone}) por WhatsApp?`)) return;
+      if (!confirm(`Deseas enviar la propuesta oficial de SSSSolutions a ${name} (${phone}) por WhatsApp?`)) return;
       try {
         const res = await fetch("/api/leads/send", {
           method: "POST",
@@ -1839,7 +2094,7 @@
           body: JSON.stringify({
             phone: phone,
             lead_id: leadId,
-            message: `Hola equipo de ${name}, les escribe Sebastián Salinas de SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando opciones para potenciar su presencia digital con una plataforma web moderna para captar más clientes.\n\nPueden consultar:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les interesaría una propuesta visual sin costo para ${name}?`
+            message: `Hola equipo de ${name}, les escribe Sebastian Salinas de SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando opciones para potenciar su presencia digital con una plataforma web moderna para captar mas clientes.\n\nPueden consultar:\n* Portafolio: https://st24030217-maker.github.io/cv-salinas/\n* Instagram: https://www.instagram.com/ssss.olutions\n\nLes interesaria una propuesta visual sin costo para ${name}?`
           })
         });
         const data = await res.json();
@@ -1855,7 +2110,7 @@
       return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
 
-    // Reconocimiento de Voz Móvil
+    // Reconocimiento de Voz Movil
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isListening = false;
@@ -1870,6 +2125,7 @@
         isListening = true;
         micBtn.classList.add("listening");
         agentState.textContent = "Escuchando...";
+        updateWaveformUI(true, "listening");
         prewarmAudio();
       };
 
@@ -1883,11 +2139,13 @@
         isListening = false;
         micBtn.classList.remove("listening");
         agentState.textContent = "Listo";
+        updateWaveformUI(false);
       };
 
       recognition.onend = () => {
         isListening = false;
         micBtn.classList.remove("listening");
+        updateWaveformUI(false);
       };
 
       micBtn.addEventListener("click", () => {

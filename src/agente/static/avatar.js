@@ -4,8 +4,8 @@
   if (!container) return;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf5f6f9);
-  scene.fog = new THREE.FogExp2(0xf5f6f9, 0.035);
+  scene.background = new THREE.Color(0x09090b);
+  scene.fog = new THREE.FogExp2(0x09090b, 0.035);
 
   const isMobile = window.innerWidth < 768;
   const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -20,11 +20,11 @@
   renderer.toneMappingExposure = 1.15;
   container.appendChild(renderer.domElement);
 
-  // Iluminación Studio Minimalista
-  const hemiLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
+  // Iluminación Studio Onyx & Titanio
+  const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.85);
   scene.add(hemiLight);
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
   keyLight.position.set(4, 8, 5);
   keyLight.castShadow = true;
   keyLight.shadow.mapSize.width = 1024;
@@ -38,17 +38,17 @@
   keyLight.shadow.bias = -0.0005;
   scene.add(keyLight);
 
-  const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.7);
+  const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.55);
   fillLight.position.set(-4, 3, 2);
   scene.add(fillLight);
 
-  const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  const backLight = new THREE.DirectionalLight(0xe2e8f0, 1.1);
   backLight.position.set(0, 4, -4);
   scene.add(backLight);
 
   // Sombra de Piso Suave Studio
   const floorGeo = new THREE.PlaneGeometry(20, 20);
-  const floorMat = new THREE.ShadowMaterial({ opacity: 0.08 });
+  const floorMat = new THREE.ShadowMaterial({ opacity: 0.35 });
   const floor = new THREE.Mesh(floorGeo, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -1.65;

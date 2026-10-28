@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-v2";
+const CACHE_NAME = "sebax-onyx-v3";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
