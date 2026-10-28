@@ -1,0 +1,29 @@
+{
+  "name": "agente",
+  "version": "1.0.0",
+  "description": "Agente comercial y director de ventas autonomo con interfaz 3D y WhatsApp para SSSSolutions.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/st24030217-maker/agente.git"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "threejs",
+    "whatsapp",
+    "thinking-orbs"
+  ],
+  "author": "Sebastian Salinas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/st24030217-maker/agente/issues"
+  },
+  "homepage": "https://github.com/st24030217-maker/agente#readme",
+  "dependencies": {
+    "thinking-orbs": "^0.3.2"
+  }
+}

@@ -137,6 +137,38 @@
       flex-shrink: 0;
     }
 
+    .top-orb-canvas {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.7));
+    }
+    .thinking-orb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .thinking-orb-badge:hover {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+    .orb-state-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      font-family: var(--font-mono);
+    }
     .agent-identity {
       display: flex;
       align-items: center;
@@ -1180,7 +1212,7 @@
     <!-- Barra Superior Flotante y Transparente -->
     <div class="top-bar">
       <div class="agent-identity">
-        <div class="status-dot"></div>
+        <canvas id="header-thinking-orb" width="20" height="20" class="top-orb-canvas" title="Estado cognitivo de Sebax (thinking-orbs)"></canvas>
         <div class="agent-meta">
           <div class="agent-name">SEBAX</div>
           <div class="agent-status" id="agent-state">En espera de instrucciones</div>
@@ -1240,7 +1272,13 @@
       <div class="right-chat-panel">
         <div class="speech-container">
           <div class="speech-header">
-            <span class="sb-badge-agent">SEBAX AI</span>
+            <div style="display:inline-flex; align-items:center; gap:8px;">
+              <span class="sb-badge-agent">SEBAX AI</span>
+              <div class="thinking-orb-badge" id="thinking-orb-badge" title="Toca para cambiar estado cognitivo (thinking-orbs)">
+                <canvas id="speech-thinking-orb" width="22" height="22"></canvas>
+                <span id="speech-orb-label" class="orb-state-label">breathing</span>
+              </div>
+            </div>
             <div class="audio-waveform" id="panel-waveform" title="Monitor de voz">
               <span class="wave-bar"></span>
               <span class="wave-bar"></span>
@@ -1551,6 +1589,7 @@
     </div>
   </div>
 
+  <script src="/thinking-orbs.js"></script>
   <script src="/avatar.js"></script>
   <script>
     const speechBubble = document.getElementById("speech-bubble");
@@ -1562,6 +1601,54 @@
     const voiceSelect = document.getElementById("voice-select");
     const voicePlayer = document.getElementById("voice-player");
     const panelWaveform = document.getElementById("panel-waveform");
+
+    // Thinking Orbs Manager
+    let headerOrb = null;
+    let speechOrb = null;
+    const orbStatesList = ["breathing", "working", "searching", "listening", "solving", "connecting", "weaving", "composing", "shaping"];
+    let currentOrbIndex = 0;
+
+    function initThinkingOrbs() {
+      if (typeof window.createThinkingOrb !== "function") return;
+
+      const headerCanvas = document.getElementById("header-thinking-orb");
+      if (headerCanvas) {
+        headerOrb = window.createThinkingOrb(headerCanvas, {
+          state: "breathing",
+          size: 20,
+          color: "#38bdf8",
+          dark: true
+        });
+      }
+
+      const speechCanvas = document.getElementById("speech-thinking-orb");
+      if (speechCanvas) {
+        speechOrb = window.createThinkingOrb(speechCanvas, {
+          state: "breathing",
+          size: 22,
+          color: "#38bdf8",
+          dark: true
+        });
+      }
+
+      const badge = document.getElementById("thinking-orb-badge");
+      if (badge) {
+        badge.addEventListener("click", () => {
+          currentOrbIndex = (currentOrbIndex + 1) % orbStatesList.length;
+          const nextState = orbStatesList[currentOrbIndex];
+          setAgentOrbState(nextState);
+        });
+      }
+    }
+
+    function setAgentOrbState(stateName) {
+      if (headerOrb) headerOrb.setState(stateName);
+      if (speechOrb) speechOrb.setState(stateName);
+      const label = document.getElementById("speech-orb-label");
+      if (label) {
+        label.textContent = stateName;
+      }
+    }
 
     // Modal de Leads
     const leadsModal = document.getElementById("leads-modal");
@@ -1642,12 +1729,14 @@
       voicePlayer.src = audioUrl;
       voicePlayer.onplay = () => {
         isSpeaking = true;
+        setAgentOrbState("composing");
         if (window.avatar) window.avatar.setSpeaking(true);
         updatePlayButtonUI(true);
         updateWaveformUI(true, "speaking");
       };
       voicePlayer.onended = () => {
         isSpeaking = false;
+        setAgentOrbState("breathing");
         if (window.avatar) window.avatar.setSpeaking(false);
         updatePlayButtonUI(false);
         updateWaveformUI(false);
@@ -1719,6 +1808,7 @@
       prewarmAudio();
       userInput.value = "";
       if (agentState) agentState.textContent = "Procesando...";
+      setAgentOrbState("working");
       if (window.avatar) window.avatar.setThinking(true);
       setBubble(`Procesando: "${text}"...`, false);
 
@@ -1732,6 +1822,7 @@
         const reply = data.reply || "Orden ejecutada.";
         setBubble(reply, true);
         if (agentState) agentState.textContent = "Listo";
+        setAgentOrbState("breathing");
       } catch (err) {
         setBubble("Error al comunicar con el nucleo: " + err.message, false);
         if (agentState) agentState.textContent = "Error";
@@ -2293,6 +2384,7 @@
 
       recognition.onstart = () => {
         isListening = true;
+        setAgentOrbState("listening");
         micBtn.classList.add("listening");
         if (agentState) agentState.textContent = "Escuchando...";
         updateWaveformUI(true, "listening");
@@ -2314,6 +2406,7 @@
 
       recognition.onend = () => {
         isListening = false;
+        setAgentOrbState("breathing");
         micBtn.classList.remove("listening");
         updateWaveformUI(false);
       };
@@ -2332,6 +2425,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      initThinkingOrbs();
       const urlParams = new URLSearchParams(window.location.search);
       const action = urlParams.get("action");
       if (action === "leads") {
