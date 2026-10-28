@@ -106,6 +106,26 @@ async def chat_direct(payload: DirectChatRequest):
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message)
     return {"reply": reply}
 
+@app.get("/qr")
+async def get_qr_page():
+    """Proxy para mostrar el código QR de vinculación de WhatsApp directamente en el navegador."""
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr", timeout=10.0)
+            return Response(content=resp.content, media_type="text/html")
+        except Exception as e:
+            return Response(content=f"<div style='font-family:sans-serif;text-align:center;padding:40px;'><h3>Iniciando puente de WhatsApp...</h3><p>{e}</p></div>", media_type="text/html")
+
+@app.get("/api/bridge/status")
+async def get_bridge_status():
+    """Estado de conexión del conector de WhatsApp."""
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/status", timeout=5.0)
+            return resp.json()
+        except Exception:
+            return {"status": "starting"}
+
 @app.get("/api/status")
 def api_status():
     return {
