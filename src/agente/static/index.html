@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Sebax AI - SSSSolutions Workspace</title>
+  <title>Sebax AI - SSSSolutions</title>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,8 +16,8 @@
     :root {
       --bg: #050505;
       --panel: #111114;
-      --panel-hover: #17171a;
-      --panel-elevated: #1a1a1e;
+      --panel-hover: #16161a;
+      --panel-elevated: #1a1a1f;
       --border: #232328;
       --border-hover: #32323a;
       --text: #f5f5f5;
@@ -50,30 +50,30 @@
       overflow-x: hidden;
     }
 
-    /* Container framing: Max 1200px centered */
+    /* Main Container (1200px max width framing) */
     .workspace-frame {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1140px;
       margin: 0 auto;
-      padding: 20px 20px 48px 20px;
+      padding: 24px 20px 48px 20px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     @media (max-width: 768px) {
       .workspace-frame {
         padding: 14px 12px 36px 12px;
-        gap: 12px;
+        gap: 14px;
       }
     }
 
-    /* 1. TOP UTILITY STRIP */
+    /* 1. TOP BAR */
     .top-utility-strip {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
@@ -84,7 +84,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 5px 12px;
+      padding: 6px 14px;
     }
 
     .live-dot {
@@ -121,14 +121,14 @@
     .utility-controls {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
     }
 
     .utility-pill, #wa-status-btn {
       background: var(--panel) !important;
       border: 1px solid var(--border) !important;
       border-radius: 9999px !important;
-      padding: 5px 12px !important;
+      padding: 6px 13px !important;
       font-size: 0.72rem !important;
       font-weight: 600 !important;
       color: #d4d4d8 !important;
@@ -164,7 +164,7 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 9999px;
-      padding: 5px 10px;
+      padding: 6px 10px;
       font-size: 0.72rem;
       font-weight: 600;
       outline: none;
@@ -177,8 +177,8 @@
     }
 
     .icon-ctrl-btn {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: var(--panel);
       border: 1px solid var(--border);
@@ -201,23 +201,23 @@
     }
     .icon-ctrl-btn svg { width: 13px; height: 13px; }
 
-    /* 2. WORKSPACE NAVIGATION ROW */
+    /* 2. NAVIGATION ROW */
     .nav-workspace-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
     .nav-active-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 8px;
       background: var(--panel-elevated);
       border: 1px solid #2e2e34;
       border-radius: 9999px;
-      padding: 6px 15px;
+      padding: 7px 16px;
       font-size: 0.8rem;
       font-weight: 700;
       color: #ffffff;
@@ -238,18 +238,14 @@
       border: 1px solid var(--border);
       border-radius: 9999px;
       padding: 3px;
-      gap: 2px;
-      overflow-x: auto;
-      max-width: 100%;
-      scrollbar-width: none;
+      gap: 3px;
     }
-    .nav-segmented-bar::-webkit-scrollbar { display: none; }
 
     .nav-segmented-btn {
       background: transparent;
       border: none;
       border-radius: 9999px;
-      padding: 5px 13px;
+      padding: 6px 14px;
       font-size: 0.74rem;
       font-weight: 600;
       color: var(--text-muted);
@@ -264,227 +260,15 @@
       background: var(--panel-elevated);
       color: #ffffff;
       border: 1px solid #303036;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
-    /* 3. SHORTCUT TILES */
-    .shortcut-tiles-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-    }
-
-    @media (max-width: 860px) {
-      .shortcut-tiles-row {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    @media (max-width: 540px) {
-      .shortcut-tiles-row {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .shortcut-tile {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: var(--transition);
-      text-align: left;
-    }
-
-    .shortcut-tile:hover {
-      background: var(--panel-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-1.5px);
-    }
-
-    .tile-icon-box {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: var(--panel-elevated);
-      border: 1px solid #28282e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #e4e4e7;
-      flex-shrink: 0;
-    }
-    .tile-icon-box svg { width: 14px; height: 14px; }
-
-    .tile-text {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      min-width: 0;
-    }
-
-    .tile-title {
-      font-size: 0.77rem;
-      font-weight: 700;
-      color: #ffffff;
-      line-height: 1.15;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .tile-desc {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      line-height: 1.25;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* 4. PRIMARY DASHBOARD ROW */
-    .primary-dashboard-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1.2fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 860px) {
-      .primary-dashboard-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .dash-panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px 18px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 8px;
-      min-height: 105px;
-    }
-
-    .dash-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .panel-tag {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    .panel-accent-badge {
-      font-size: 0.62rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 6px;
-      background: rgba(168, 85, 247, 0.12);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-      color: #d8b4fe;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .panel-main-val {
-      font-size: 1.3rem;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-    }
-
-    .panel-main-val.mono-time {
-      font-family: var(--font-mono);
-      font-size: 1.5rem;
-      letter-spacing: 0.02em;
-    }
-
-    .panel-sub-line {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* 5. ACTIVITY ROW */
-    .activity-row-card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 9px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .activity-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .activity-icon-box {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      background: var(--panel-elevated);
-      border: 1px solid #28282e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-violet);
-      flex-shrink: 0;
-    }
-    .activity-icon-box svg { width: 12px; height: 12px; }
-
-    .activity-title {
-      font-size: 0.77rem;
-      font-weight: 700;
-      color: #ffffff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .activity-dot-status {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-violet);
-      box-shadow: 0 0 6px var(--accent-violet);
-      flex-shrink: 0;
-    }
-
-    .activity-meta {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      white-space: nowrap;
-    }
-
-    /* 6. INTERACTIVE AGENT & AVATAR WORKSPACE */
+    /* 3. HERO INTERACTION AREA (3D Avatar + Agent Chat) */
     .agent-workspace-grid {
       display: grid;
       grid-template-columns: 340px 1fr;
-      gap: 14px;
+      gap: 16px;
       align-items: stretch;
-      min-height: 370px;
+      min-height: 400px;
     }
 
     @media (max-width: 900px) {
@@ -493,18 +277,18 @@
       }
     }
 
-    /* Columna Avatar 3D (Cleanly framed) */
+    /* Columna Avatar 3D (Enmarcado perfecto sin traspasar) */
     .avatar-card-panel {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 16px 18px;
+      padding: 18px 20px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 370px;
+      height: 400px;
     }
 
     #canvas-container {
@@ -529,7 +313,7 @@
     }
 
     .avatar-panel-title {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -537,7 +321,7 @@
     }
 
     .avatar-panel-status {
-      font-size: 0.66rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
       font-family: var(--font-mono);
     }
@@ -553,7 +337,7 @@
       backdrop-filter: blur(12px);
       border: 1px solid #2a2a30;
       border-radius: 9999px;
-      padding: 5px 14px;
+      padding: 6px 16px;
       margin-top: auto;
       pointer-events: none;
     }
@@ -579,12 +363,12 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 20px 22px;
+      padding: 22px 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 14px;
-      height: 370px;
+      gap: 16px;
+      height: 400px;
     }
 
     .chat-card-header {
@@ -592,17 +376,17 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #1c1c22;
-      padding-bottom: 10px;
+      padding-bottom: 12px;
     }
 
     .agent-header-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .agent-brand-title {
-      font-size: 0.8rem;
+      font-size: 0.84rem;
       font-weight: 800;
       letter-spacing: 0.07em;
       text-transform: uppercase;
@@ -613,7 +397,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 9999px;
       background: var(--panel-elevated);
       border: 1px solid #28282e;
@@ -626,7 +410,7 @@
     }
 
     .orb-state-label {
-      font-size: 0.65rem;
+      font-size: 0.66rem;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -673,11 +457,11 @@
 
     /* Speech Bubble */
     .speech-bubble {
-      font-size: 0.96rem;
+      font-size: 1rem;
       font-weight: 500;
-      line-height: 1.55;
+      line-height: 1.6;
       color: #f5f5f5;
-      max-height: 190px;
+      max-height: 210px;
       overflow-y: auto;
       word-wrap: break-word;
       padding-right: 4px;
@@ -691,6 +475,7 @@
     .speech-footer {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
@@ -701,8 +486,8 @@
       background: var(--panel-elevated);
       border: 1px solid #28282e;
       border-radius: 9999px;
-      padding: 5px 12px;
-      font-size: 0.72rem;
+      padding: 5px 13px;
+      font-size: 0.73rem;
       font-weight: 600;
       color: #d4d4d8;
       cursor: pointer;
@@ -720,34 +505,6 @@
     }
     .mini-voice-btn svg { width: 12px; height: 12px; }
 
-    /* Quick action pills */
-    .quick-actions-bar {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .quick-actions-bar::-webkit-scrollbar { display: none; }
-
-    .quick-pill {
-      background: var(--panel-elevated);
-      border: 1px solid var(--border);
-      border-radius: 9999px;
-      padding: 5px 11px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: var(--transition);
-    }
-    .quick-pill:hover {
-      background: #222228;
-      color: #ffffff;
-      border-color: #36363e;
-    }
-
     /* Input Bar */
     .input-bar-wrap {
       display: flex;
@@ -756,7 +513,7 @@
       background: var(--panel-elevated);
       border: 1px solid #2e2e34;
       border-radius: 9999px;
-      padding: 5px 6px 5px 16px;
+      padding: 6px 8px 6px 18px;
       transition: var(--transition);
     }
 
@@ -771,7 +528,7 @@
       border: none;
       outline: none;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: #ffffff;
     }
 
@@ -780,8 +537,8 @@
     }
 
     .btn-circle-action {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: none;
       background: #ffffff;
@@ -815,11 +572,86 @@
       50% { transform: scale(1.08); }
     }
 
-    /* 7. BOTTOM METRICS ROW */
+    /* 4. PRIMARY DASHBOARD PANELS (3 Panels) */
+    .primary-dashboard-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .primary-dashboard-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dash-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 110px;
+    }
+
+    .dash-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .panel-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .panel-accent-badge {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #d8b4fe;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .panel-main-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .panel-main-val.mono-time {
+      font-family: var(--font-mono);
+      font-size: 1.55rem;
+      letter-spacing: 0.02em;
+    }
+
+    .panel-sub-line {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 5. EXECUTIVE METRICS ROW */
     .bottom-metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 14px;
     }
 
     @media (max-width: 820px) {
@@ -832,7 +664,7 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      padding: 20px 22px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -847,7 +679,7 @@
     }
 
     .metric-card-label {
-      font-size: 0.66rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -856,7 +688,7 @@
 
     .oversized-metric {
       font-family: var(--font-mono);
-      font-size: 2.6rem;
+      font-size: 2.8rem;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: -0.04em;
@@ -865,7 +697,7 @@
     }
 
     .metric-supporting-line {
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
       line-height: 1.35;
       display: flex;
@@ -945,9 +777,7 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    .btn-close:hover {
-      background: #24242c;
-    }
+    .btn-close:hover { background: #24242c; }
 
     .sheet-tabs {
       display: flex;
@@ -1060,9 +890,7 @@
       cursor: pointer;
       transition: var(--transition);
     }
-    .btn-report-auto:hover, .btn-toggle-auto:hover {
-      background: #222228;
-    }
+    .btn-report-auto:hover, .btn-toggle-auto:hover { background: #222228; }
 
     .campaign-box {
       background: var(--panel);
@@ -1102,9 +930,7 @@
       outline: none;
       font-family: inherit;
     }
-    .form-input:focus, .form-select:focus {
-      border-color: #484852;
-    }
+    .form-input:focus, .form-select:focus { border-color: #484852; }
 
     .toggle-row {
       display: flex;
@@ -1214,7 +1040,7 @@
   <audio id="voice-player" playsinline preload="auto"></audio>
 
   <div class="workspace-frame">
-    <!-- 1. TOP UTILITY STRIP -->
+    <!-- 1. TOP BAR -->
     <header class="top-utility-strip">
       <div class="status-badge-live">
         <span class="live-dot"></span>
@@ -1227,10 +1053,6 @@
           <span class="wa-status-dot" id="wa-status-dot"></span>
           <span id="wa-status-label">WhatsApp</span>
         </button>
-
-        <a href="https://www.instagram.com/ssss.olutions" target="_blank" class="utility-pill" title="Instagram oficial de SSSSolutions">
-          @ssss.olutions
-        </a>
 
         <div class="thinking-orb-badge" id="thinking-orb-badge" title="Toca para alternar estado cognitivo">
           <canvas id="header-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
@@ -1254,91 +1076,94 @@
       </div>
     </header>
 
-    <!-- 2. WORKSPACE NAVIGATION ROW -->
+    <!-- 2. NAVIGATION ROW -->
     <nav class="nav-workspace-row">
       <div class="nav-active-pill">
         <span class="pill-dot"></span>
-        <span>Sebax Commercial HQ</span>
+        <span>Sebax Commercial Workspace</span>
       </div>
 
       <div class="nav-segmented-bar">
         <button class="nav-segmented-btn active" onclick="switchTab('leads'); closeLeadsModal();">Chat &amp; Asistente</button>
         <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal()">Prospectos (<span id="nav-leads-count">77</span>)</button>
-        <button class="nav-segmented-btn" onclick="openDemosTab()">Prototipos en Vivo</button>
+        <button class="nav-segmented-btn" onclick="openDemosTab()">Prototipos Web</button>
         <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal()">Citas y Agenda</button>
-        <button class="nav-segmented-btn" onclick="openWhatsAppTab()">Conectar WhatsApp</button>
       </div>
     </nav>
 
-    <!-- 3. SHORTCUT TILES -->
-    <section class="shortcut-tiles-row">
-      <div class="shortcut-tile" onclick="triggerAutopilotNowUi()" title="Disparar ronda autónoma inmediata">
-        <div class="tile-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-          </svg>
+    <!-- 3. HERO INTERACTION (3D Head + Chat) -->
+    <section class="agent-workspace-grid">
+      <!-- Columna Avatar 3D (Cleanly framed inside this card!) -->
+      <div class="avatar-card-panel">
+        <div class="avatar-overlay-header">
+          <span class="avatar-panel-title">UNIDAD 3D SEBAX</span>
+          <span id="agent-state" class="avatar-panel-status">Listo</span>
         </div>
-        <div class="tile-text">
-          <span class="tile-title">Ronda Autopilot</span>
-          <span class="tile-desc">Buscar 2 prospectos ya</span>
+
+        <div id="canvas-container"></div>
+
+        <div class="avatar-pedestal-pill">
+          <span class="pedestal-dot"></span>
+          <span class="pedestal-title">SEBAX AI HEAD UNIT</span>
         </div>
       </div>
 
-      <div class="shortcut-tile" onclick="sendQuick('Sebax, busca 3 negocios de consumo o cafeterias en Torreón, Gómez o Lerdo y haz el movimiento comercial')" title="Prospectar Comercios">
-        <div class="tile-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-        </div>
-        <div class="tile-text">
-          <span class="tile-title">Prospectar Laguna</span>
-          <span class="tile-desc">Torreón, Gómez, Lerdo</span>
-        </div>
-      </div>
+      <!-- Columna Diálogo y Entrada -->
+      <div class="chat-card-panel">
+        <div class="chat-card-header">
+          <div class="agent-header-brand">
+            <span class="agent-brand-title">SEBAX AI</span>
+            <div class="thinking-orb-badge" title="Estado cognitivo">
+              <canvas id="speech-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
+            </div>
+          </div>
 
-      <div class="shortcut-tile" onclick="openDemosTab()" title="Generar prototipo interactivo express">
-        <div class="tile-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"/>
-            <polyline points="8 6 2 12 8 18"/>
-          </svg>
+          <div class="audio-waveform" id="panel-waveform" title="Monitor de voz neuronal">
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+            <span class="wave-bar"></span>
+          </div>
         </div>
-        <div class="tile-text">
-          <span class="tile-title">Generar Demo</span>
-          <span class="tile-desc">Menú o web en 5 seg</span>
-        </div>
-      </div>
 
-      <div class="shortcut-tile" onclick="openAgendaModal()" title="Registrar reunión comercial">
-        <div class="tile-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
+        <!-- Speech Bubble -->
+        <div class="speech-bubble" id="speech-bubble">
+          Sebax en línea. Soy tu agente comercial y técnico de SSSSolutions. Escribe una orden, consulta prospectos o dicta por voz.
         </div>
-        <div class="tile-text">
-          <span class="tile-title">Agendar Cita</span>
-          <span class="tile-desc">Reunión con cliente</span>
-        </div>
-      </div>
 
-      <div class="shortcut-tile" onclick="sendQuick('/reset')" title="Reiniciar memoria y contexto del chat">
-        <div class="tile-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-          </svg>
+        <div class="speech-footer">
+          <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            <span class="btn-text">Escuchar voz</span>
+          </button>
         </div>
-        <div class="tile-text">
-          <span class="tile-title">Reiniciar Chat</span>
-          <span class="tile-desc">Limpiar contexto</span>
+
+        <!-- Input Bar -->
+        <div class="input-bar-wrap">
+          <input type="text" id="user-input" placeholder="Escribe una orden para Sebax..." autocomplete="off">
+          <button class="btn-circle-action" id="mic-btn" title="Hablar por voz">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
+          <button class="btn-circle-action" id="send-btn" title="Enviar orden">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- 4. PRIMARY DASHBOARD ROW -->
+    <!-- 4. PRIMARY DASHBOARD ROW (3 Compact Panels) -->
     <section class="primary-dashboard-row">
       <!-- Panel 1: Hora y Fecha Comarca Lagunera -->
       <div class="dash-panel">
@@ -1378,103 +1203,7 @@
       </div>
     </section>
 
-    <!-- 5. ACTIVITY ROW -->
-    <div class="activity-row-card">
-      <div class="activity-left">
-        <div class="activity-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-          </svg>
-        </div>
-        <span class="activity-title" id="dash-activity-title">Último movimiento: Florería Simental prospectada en Torreón</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span class="activity-dot-status"></span>
-        <span class="activity-meta" id="dash-activity-meta">Propuesta en cola · Tel: 5218714096367</span>
-      </div>
-    </div>
-
-    <!-- 6. INTERACTIVE AGENT & AVATAR WORKSPACE -->
-    <section class="agent-workspace-grid">
-      <!-- Columna Avatar 3D (Cleanly framed inside this card!) -->
-      <div class="avatar-card-panel">
-        <div class="avatar-overlay-header">
-          <span class="avatar-panel-title">UNIDAD 3D SEBAX</span>
-          <span id="agent-state" class="avatar-panel-status">Listo</span>
-        </div>
-
-        <div id="canvas-container"></div>
-
-        <div class="avatar-pedestal-pill">
-          <span class="pedestal-dot"></span>
-          <span class="pedestal-title">SEBAX AI HEAD UNIT</span>
-        </div>
-      </div>
-
-      <!-- Columna Diálogo y Entrada -->
-      <div class="chat-card-panel">
-        <div class="chat-card-header">
-          <div class="agent-header-brand">
-            <span class="agent-brand-title">SEBAX AI</span>
-            <div class="thinking-orb-badge" title="Estado cognitivo">
-              <canvas id="speech-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
-            </div>
-          </div>
-
-          <div class="audio-waveform" id="panel-waveform" title="Monitor de voz neuronal">
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-          </div>
-        </div>
-
-        <!-- Speech Bubble -->
-        <div class="speech-bubble" id="speech-bubble">
-          Sebax en línea. Soy tu agente comercial de SSSSolutions. Escribe una orden, consulta prospectos o dicta por voz.
-        </div>
-
-        <div class="speech-footer">
-          <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            </svg>
-            <span class="btn-text">Escuchar voz</span>
-          </button>
-        </div>
-
-        <!-- Acciones rápidas -->
-        <div class="quick-actions-bar">
-          <button class="quick-pill" onclick="openDemosTab()">Prototipos Web</button>
-          <button class="quick-pill" onclick="sendQuick('Sebax, busca 3 dulcerias o pastelerias en Gómez Palacio o Lerdo')">Gómez y Lerdo</button>
-          <button class="quick-pill" onclick="sendQuick('Muestra el estado actual del piloto automatico')">Estado Autopilot</button>
-          <button class="quick-pill" onclick="openLeadsModal()">Ver Prospectos</button>
-        </div>
-
-        <!-- Input Bar -->
-        <div class="input-bar-wrap">
-          <input type="text" id="user-input" placeholder="Escribe una orden comercial o técnica..." autocomplete="off">
-          <button class="btn-circle-action" id="mic-btn" title="Hablar por voz">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </button>
-          <button class="btn-circle-action" id="send-btn" title="Enviar orden">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 7. BOTTOM METRICS ROW -->
+    <!-- 5. EXECUTIVE METRICS ROW -->
     <section class="bottom-metrics-row">
       <div class="metric-card-large" onclick="openLeadsModal()" title="Ver tabla de prospectos">
         <span class="metric-card-label">TOTAL PROSPECTOS</span>
@@ -2660,5 +2389,6 @@
   </script>
 </body>
 </html>
+
 
 
