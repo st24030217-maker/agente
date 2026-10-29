@@ -4,8 +4,8 @@
   if (!container) return;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050608);
-  scene.fog = new THREE.FogExp2(0x050608, 0.025);
+  scene.background = null;
+  scene.fog = null;
 
   const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.set(0, 0, 4.0);
