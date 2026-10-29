@@ -19,7 +19,7 @@ class Settings(BaseModel):
         if num.strip()
     ]
     # Directorio de trabajo predeterminado para herramientas de código y terminal
-    workspace_dir: str = os.getenv("WORKSPACE_DIR", str(BASE_DIR))
+    workspace_dir: str = os.getenv("WORKSPACE_DIR") or str(BASE_DIR)
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
