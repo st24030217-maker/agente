@@ -7,11 +7,13 @@
   scene.background = null;
   scene.fog = null;
 
-  const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+  const const initialWidth = container.clientWidth || 340;
+  const initialHeight = container.clientHeight || 380;
+  const camera = new THREE.PerspectiveCamera(38, initialWidth / initialHeight, 0.1, 100);
   camera.position.set(0, 0, 4.0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(initialWidth, initialHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -56,8 +58,8 @@
   const particleSpeeds = new Float32Array(particleCount);
 
   for (let i = 0; i < particleCount; i++) {
-    particlePos[i * 3] = (Math.random() - 0.5) * 16;
-    particlePos[i * 3 + 1] = (Math.random() - 0.5) * 12;
+    particlePos[i * 3] = (Math.random() - 0.5) * 4.5;
+    particlePos[i * 3 + 1] = (Math.random() - 0.5) * 4.5;
     particlePos[i * 3 + 2] = (Math.random() - 0.5) * 8 - 1;
     particleSpeeds[i] = Math.random() * 0.4 + 0.15;
   }
@@ -250,48 +252,31 @@
       return;
     }
 
-    const normX = (clientX / window.innerWidth) * 2 - 1;
-    const normY = -(clientY / window.innerHeight) * 2 + 1;
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const diffX = (clientX - centerX) / (window.innerWidth / 2);
+    const diffY = (clientY - centerY) / (window.innerHeight / 2);
 
-    const isMobile = window.innerWidth < 768;
-    const robotCenterNormX = isMobile ? 0 : -0.48;
-
-    targetRotation.y = (normX - robotCenterNormX) * (isMobile ? 0.35 : 0.48);
-    targetRotation.x = -normY * (isMobile ? 0.25 : 0.32);
+    targetRotation.y = Math.max(-0.6, Math.min(0.6, diffX * 0.65));
+    targetRotation.x = Math.max(-0.4, Math.min(0.4, -diffY * 0.45));
   }
   window.addEventListener("mousemove", onPointerMove);
   window.addEventListener("touchmove", onPointerMove, { passive: true });
 
   // Control de tamano y encuadre matematico exacto para movil y PC
   function updateLayout() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const isMobile = width < 768;
+    const width = container.clientWidth || 340;
+    const height = container.clientHeight || 380;
 
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
 
-    if (isMobile) {
-      // En celular:
-      // La cabeza se coloca en la zona superior (y = 0.72) con escala proporcionada (0.50).
-      // Asi queda en los primeros 30vh del telefono sin tapar el texto ni chocar con la barra.
-      baseY = 0.72;
-      robot.scale.set(0.50, 0.50, 0.50);
-      robot.position.set(0, baseY, 0);
-      camera.position.set(0, 0, 4.4);
-    } else {
-      // En computadora:
-      baseY = -0.06;
-      robot.scale.set(0.82, 0.82, 0.82);
-      const fovRad = (camera.fov * Math.PI) / 180;
-      const visibleHeight = 2 * Math.tan(fovRad / 2) * 3.8;
-      const visibleWidth = visibleHeight * camera.aspect;
-
-      const targetX = -(visibleWidth * 0.25);
-      robot.position.set(targetX, baseY, 0);
-      camera.position.set(0, baseY, 3.8);
-    }
+    baseY = -0.12;
+    robot.scale.set(0.88, 0.88, 0.88);
+    robot.position.set(0, baseY, 0);
+    camera.position.set(0, baseY, 3.7);
   }
   window.addEventListener("resize", updateLayout);
   updateLayout();

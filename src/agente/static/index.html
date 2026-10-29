@@ -15,25 +15,23 @@
   <style>
     :root {
       --bg: #050505;
-      --panel: #141416;
-      --panel-hover: #1c1c1f;
-      --panel-elevated: #222226;
-      --border: #2a2a2e;
-      --border-subtle: #202024;
+      --panel: #111114;
+      --panel-hover: #17171a;
+      --panel-elevated: #1a1a1e;
+      --border: #232328;
+      --border-hover: #32323a;
       --text: #f5f5f5;
-      --text-muted: #8b8b90;
-      --text-dim: #606066;
+      --text-muted: #84848c;
+      --text-dim: #54545c;
       --accent-violet: #a855f7;
-      --accent-violet-glow: rgba(168, 85, 247, 0.25);
       --accent-green: #32d466;
-      --accent-green-glow: rgba(50, 212, 102, 0.25);
       --accent-amber: #f59e0b;
       --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      --radius-xl: 26px;
-      --radius-lg: 20px;
-      --radius-md: 14px;
-      --radius-sm: 10px;
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
       --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -43,8 +41,8 @@
       width: 100%;
       min-height: 100%;
       background-color: var(--bg);
-      background-image: radial-gradient(rgba(255, 255, 255, 0.11) 1.1px, transparent 1.1px);
-      background-size: 22px 22px;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.1px, transparent 1.1px);
+      background-size: 20px 20px;
       background-attachment: fixed;
       color: var(--text);
       font-family: var(--font);
@@ -52,31 +50,21 @@
       overflow-x: hidden;
     }
 
-    /* Canvas 3D Avatar (Sits behind workspace interaction) */
-    #canvas-container {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    /* Main Container (1200px max width framing) */
+    /* Container framing: Max 1200px centered */
     .workspace-frame {
-      position: relative;
-      z-index: 10;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 24px 48px 24px;
+      padding: 20px 20px 48px 20px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 14px;
     }
 
     @media (max-width: 768px) {
       .workspace-frame {
-        padding: 16px 14px 40px 14px;
-        gap: 14px;
+        padding: 14px 12px 36px 12px;
+        gap: 12px;
       }
     }
 
@@ -85,19 +73,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding: 4px 2px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .status-badge-live {
       display: inline-flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 6px 14px;
+      padding: 5px 12px;
     }
 
     .live-dot {
@@ -116,9 +103,9 @@
     }
 
     .status-badge-text {
-      font-size: 0.73rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--text);
     }
@@ -134,39 +121,42 @@
     .utility-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
 
-    .utility-pill {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 9999px;
-      padding: 6px 14px;
-      font-size: 0.74rem;
-      font-weight: 600;
-      color: var(--text);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: var(--transition);
+    .utility-pill, #wa-status-btn {
+      background: var(--panel) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 9999px !important;
+      padding: 5px 12px !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      color: #d4d4d8 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      cursor: pointer !important;
+      text-decoration: none !important;
+      box-shadow: none !important;
+      transition: var(--transition) !important;
     }
 
-    .utility-pill:hover {
-      background: var(--panel-hover);
-      border-color: #3e3e44;
+    .utility-pill:hover, #wa-status-btn:hover {
+      background: var(--panel-hover) !important;
+      border-color: var(--border-hover) !important;
+      color: #ffffff !important;
       transform: translateY(-1px);
     }
 
-    .utility-pill.connected {
-      border-color: rgba(50, 212, 102, 0.35);
-      color: #86efac;
+    .wa-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-amber);
     }
-
-    .utility-pill.disconnected {
-      border-color: rgba(245, 158, 11, 0.35);
-      color: #fde047;
+    .wa-status-dot.connected {
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
     }
 
     .voice-select-dark {
@@ -174,22 +164,21 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 9999px;
-      padding: 6px 12px;
-      font-size: 0.74rem;
+      padding: 5px 10px;
+      font-size: 0.72rem;
       font-weight: 600;
       outline: none;
       cursor: pointer;
       font-family: inherit;
       transition: var(--transition);
     }
-
     .voice-select-dark:hover {
-      border-color: #3e3e44;
+      border-color: var(--border-hover);
     }
 
     .icon-ctrl-btn {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--panel);
       border: 1px solid var(--border);
@@ -200,102 +189,97 @@
       cursor: pointer;
       transition: var(--transition);
     }
-
     .icon-ctrl-btn:hover {
       background: var(--panel-hover);
-      border-color: #3e3e44;
-      transform: scale(1.05);
+      border-color: var(--border-hover);
+      transform: scale(1.06);
     }
-
     .icon-ctrl-btn.active {
       background: #f5f5f5;
       color: #050505;
       border-color: #ffffff;
     }
-
-    .icon-ctrl-btn svg { width: 14px; height: 14px; }
+    .icon-ctrl-btn svg { width: 13px; height: 13px; }
 
     /* 2. WORKSPACE NAVIGATION ROW */
     .nav-workspace-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .nav-active-pill {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       background: var(--panel-elevated);
-      border: 1px solid #36363c;
+      border: 1px solid #2e2e34;
       border-radius: 9999px;
-      padding: 8px 18px;
-      font-size: 0.82rem;
+      padding: 6px 15px;
+      font-size: 0.8rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
     }
 
     .nav-active-pill .pill-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--accent-violet);
       box-shadow: 0 0 8px var(--accent-violet);
     }
 
-    .nav-items-sequence {
-      display: flex;
+    .nav-segmented-bar {
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
-      overflow-x: auto;
-      max-width: 100%;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .nav-items-sequence::-webkit-scrollbar { display: none; }
-
-    .nav-btn {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 7px 15px;
-      font-size: 0.77rem;
+      padding: 3px;
+      gap: 2px;
+      overflow-x: auto;
+      max-width: 100%;
+      scrollbar-width: none;
+    }
+    .nav-segmented-bar::-webkit-scrollbar { display: none; }
+
+    .nav-segmented-btn {
+      background: transparent;
+      border: none;
+      border-radius: 9999px;
+      padding: 5px 13px;
+      font-size: 0.74rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
-      white-space: nowrap;
       transition: var(--transition);
+      white-space: nowrap;
     }
-
-    .nav-btn:hover {
-      background: var(--panel-hover);
-      color: var(--text);
-      border-color: #38383e;
+    .nav-segmented-btn:hover {
+      color: #ffffff;
     }
-
-    .nav-btn.active {
+    .nav-segmented-btn.active {
       background: var(--panel-elevated);
       color: #ffffff;
-      border-color: #404048;
+      border: 1px solid #303036;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
-    /* 3. SHORTCUT TILES (Row of dark rounded-square tiles with abstract marks) */
+    /* 3. SHORTCUT TILES */
     .shortcut-tiles-row {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
-    @media (max-width: 840px) {
+    @media (max-width: 860px) {
       .shortcut-tiles-row {
         grid-template-columns: repeat(3, 1fr);
       }
     }
-    @media (max-width: 520px) {
+    @media (max-width: 540px) {
       .shortcut-tiles-row {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -305,9 +289,9 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 14px 16px;
+      padding: 10px 12px;
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 10px;
       cursor: pointer;
       transition: var(--transition);
@@ -316,48 +300,55 @@
 
     .shortcut-tile:hover {
       background: var(--panel-hover);
-      border-color: #3a3a40;
-      transform: translateY(-2px);
+      border-color: var(--border-hover);
+      transform: translateY(-1.5px);
     }
 
     .tile-icon-box {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--radius-sm);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
       background: var(--panel-elevated);
-      border: 1px solid #303036;
+      border: 1px solid #28282e;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--text);
+      color: #e4e4e7;
+      flex-shrink: 0;
     }
-
-    .tile-icon-box svg { width: 16px; height: 16px; }
+    .tile-icon-box svg { width: 14px; height: 14px; }
 
     .tile-text {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
+      min-width: 0;
     }
 
     .tile-title {
-      font-size: 0.8rem;
+      font-size: 0.77rem;
       font-weight: 700;
-      color: var(--text);
-      line-height: 1.2;
+      color: #ffffff;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .tile-desc {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       color: var(--text-muted);
-      line-height: 1.3;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* 4. PRIMARY DASHBOARD ROW (Three modular rounded dark panels) */
+    /* 4. PRIMARY DASHBOARD ROW */
     .primary-dashboard-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1.3fr;
-      gap: 14px;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 12px;
     }
 
     @media (max-width: 860px) {
@@ -370,59 +361,59 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 18px 20px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
-      min-height: 124px;
+      gap: 8px;
+      min-height: 105px;
     }
 
     .dash-panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
     }
 
     .panel-tag {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: var(--text-dim);
     }
 
     .panel-accent-badge {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 6px;
-      background: rgba(168, 85, 247, 0.15);
-      border: 1px solid rgba(168, 85, 247, 0.35);
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.3);
       color: #d8b4fe;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     .panel-main-val {
-      font-size: 1.45rem;
+      font-size: 1.3rem;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: -0.02em;
-      line-height: 1.1;
+      line-height: 1.15;
     }
 
     .panel-main-val.mono-time {
       font-family: var(--font-mono);
-      font-size: 1.65rem;
+      font-size: 1.5rem;
       letter-spacing: 0.02em;
     }
 
     .panel-sub-line {
-      font-size: 0.74rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.35;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -433,38 +424,37 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 12px 18px;
+      padding: 9px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 12px;
       flex-wrap: wrap;
     }
 
     .activity-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       min-width: 0;
     }
 
     .activity-icon-box {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
       background: var(--panel-elevated);
-      border: 1px solid #303036;
+      border: 1px solid #28282e;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--accent-violet);
       flex-shrink: 0;
     }
-
-    .activity-icon-box svg { width: 14px; height: 14px; }
+    .activity-icon-box svg { width: 12px; height: 12px; }
 
     .activity-title {
-      font-size: 0.8rem;
+      font-size: 0.77rem;
       font-weight: 700;
       color: #ffffff;
       white-space: nowrap;
@@ -473,16 +463,16 @@
     }
 
     .activity-dot-status {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--accent-violet);
-      box-shadow: 0 0 8px var(--accent-violet);
+      box-shadow: 0 0 6px var(--accent-violet);
       flex-shrink: 0;
     }
 
     .activity-meta {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       font-family: var(--font-mono);
       white-space: nowrap;
@@ -491,30 +481,42 @@
     /* 6. INTERACTIVE AGENT & AVATAR WORKSPACE */
     .agent-workspace-grid {
       display: grid;
-      grid-template-columns: 1fr 1.25fr;
-      gap: 16px;
+      grid-template-columns: 340px 1fr;
+      gap: 14px;
       align-items: stretch;
-      min-height: 380px;
+      min-height: 370px;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       .agent-workspace-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Columna Avatar 3D */
+    /* Columna Avatar 3D (Cleanly framed) */
     .avatar-card-panel {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 20px;
+      padding: 16px 18px;
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 340px;
+      height: 370px;
+    }
+
+    #canvas-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 2;
+    }
+
+    #canvas-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
     }
 
     .avatar-overlay-header {
@@ -523,6 +525,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      pointer-events: none;
+    }
+
+    .avatar-panel-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e4e4e7;
+    }
+
+    .avatar-panel-status {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
     }
 
     .avatar-pedestal-pill {
@@ -531,61 +548,63 @@
       align-self: center;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(10, 10, 12, 0.7);
+      gap: 7px;
+      background: rgba(14, 14, 18, 0.85);
       backdrop-filter: blur(12px);
-      border: 1px solid #2e2e34;
+      border: 1px solid #2a2a30;
       border-radius: 9999px;
-      padding: 6px 16px;
+      padding: 5px 14px;
       margin-top: auto;
+      pointer-events: none;
     }
 
     .pedestal-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
     }
 
     .pedestal-title {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 800;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #e4e4e7;
     }
 
-    /* Columna Chat del Agente */
+    /* Columna Diálogo y Entrada */
     .chat-card-panel {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 24px;
+      padding: 20px 22px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
+      height: 370px;
     }
 
     .chat-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 12px;
+      border-bottom: 1px solid #1c1c22;
+      padding-bottom: 10px;
     }
 
     .agent-header-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .agent-brand-title {
-      font-size: 0.84rem;
+      font-size: 0.8rem;
       font-weight: 800;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       color: #ffffff;
     }
@@ -594,25 +613,24 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 9999px;
       background: var(--panel-elevated);
-      border: 1px solid #323238;
+      border: 1px solid #28282e;
       cursor: pointer;
       user-select: none;
       transition: var(--transition);
     }
-
     .thinking-orb-badge:hover {
-      border-color: #44444c;
+      border-color: #383840;
     }
 
     .orb-state-label {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #e4e4e7;
+      color: #d4d4d8;
       font-family: var(--font-mono);
     }
 
@@ -621,13 +639,13 @@
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      height: 16px;
+      height: 14px;
       padding: 0 4px;
     }
     .audio-waveform .wave-bar {
-      width: 2.5px;
+      width: 2px;
       height: 4px;
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.2);
       border-radius: 99px;
       transition: all 0.2s ease;
     }
@@ -649,17 +667,17 @@
 
     @keyframes wave-bar-dance {
       0% { height: 4px; }
-      50% { height: 18px; }
-      100% { height: 6px; }
+      50% { height: 16px; }
+      100% { height: 5px; }
     }
 
     /* Speech Bubble */
     .speech-bubble {
-      font-size: 1.02rem;
+      font-size: 0.96rem;
       font-weight: 500;
-      line-height: 1.6;
+      line-height: 1.55;
       color: #f5f5f5;
-      max-height: 240px;
+      max-height: 190px;
       overflow-y: auto;
       word-wrap: break-word;
       padding-right: 4px;
@@ -681,29 +699,26 @@
       align-items: center;
       gap: 6px;
       background: var(--panel-elevated);
-      border: 1px solid #303036;
+      border: 1px solid #28282e;
       border-radius: 9999px;
-      padding: 6px 14px;
-      font-size: 0.74rem;
+      padding: 5px 12px;
+      font-size: 0.72rem;
       font-weight: 600;
-      color: #e4e4e7;
+      color: #d4d4d8;
       cursor: pointer;
       transition: var(--transition);
     }
-
     .mini-voice-btn:hover {
-      background: #28282e;
-      border-color: #404048;
+      background: #222228;
+      border-color: #383840;
       color: #ffffff;
     }
-
     .mini-voice-btn.playing {
       background: rgba(50, 212, 102, 0.15);
       border-color: rgba(50, 212, 102, 0.4);
       color: #86efac;
     }
-
-    .mini-voice-btn svg { width: 13px; height: 13px; }
+    .mini-voice-btn svg { width: 12px; height: 12px; }
 
     /* Quick action pills */
     .quick-actions-bar {
@@ -719,19 +734,18 @@
       background: var(--panel-elevated);
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 6px 13px;
-      font-size: 0.74rem;
+      padding: 5px 11px;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
       white-space: nowrap;
       transition: var(--transition);
     }
-
     .quick-pill:hover {
-      background: #28282e;
+      background: #222228;
       color: #ffffff;
-      border-color: #3e3e44;
+      border-color: #36363e;
     }
 
     /* Input Bar */
@@ -740,15 +754,15 @@
       align-items: center;
       gap: 8px;
       background: var(--panel-elevated);
-      border: 1px solid #323238;
+      border: 1px solid #2e2e34;
       border-radius: 9999px;
-      padding: 6px 8px 6px 18px;
+      padding: 5px 6px 5px 16px;
       transition: var(--transition);
     }
 
     .input-bar-wrap:focus-within {
-      border-color: #50505a;
-      box-shadow: 0 0 0 1px #50505a;
+      border-color: #484852;
+      box-shadow: 0 0 0 1px #484852;
     }
 
     .input-bar-wrap input {
@@ -757,7 +771,7 @@
       border: none;
       outline: none;
       font-family: inherit;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       color: #ffffff;
     }
 
@@ -766,8 +780,8 @@
     }
 
     .btn-circle-action {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       border: none;
       background: #ffffff;
@@ -779,21 +793,18 @@
       transition: var(--transition);
       flex-shrink: 0;
     }
-
     .btn-circle-action:hover {
       transform: scale(1.05);
       background: #f4f4f5;
     }
 
     #mic-btn {
-      background: #2a2a30;
+      background: #24242a;
       color: #ffffff;
     }
-
     #mic-btn:hover {
-      background: #36363e;
+      background: #303038;
     }
-
     #mic-btn.listening {
       background: #ef4444;
       animation: pulse-mic 1.2s infinite;
@@ -804,11 +815,11 @@
       50% { transform: scale(1.08); }
     }
 
-    /* 7. BOTTOM METRICS ROW (Large rounded metric cards) */
+    /* 7. BOTTOM METRICS ROW */
     .bottom-metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      gap: 12px;
     }
 
     @media (max-width: 820px) {
@@ -821,20 +832,22 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 22px 24px;
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       transition: var(--transition);
+      cursor: pointer;
     }
 
     .metric-card-large:hover {
-      border-color: #38383e;
-      transform: translateY(-2px);
+      background: var(--panel-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-1.5px);
     }
 
     .metric-card-label {
-      font-size: 0.72rem;
+      font-size: 0.66rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -843,18 +856,18 @@
 
     .oversized-metric {
       font-family: var(--font-mono);
-      font-size: 3rem;
+      font-size: 2.6rem;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: -0.04em;
       line-height: 1;
-      margin: 4px 0 2px 0;
+      margin: 2px 0 1px 0;
     }
 
     .metric-supporting-line {
-      font-size: 0.76rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.35;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -869,9 +882,7 @@
       font-family: var(--font-mono);
     }
 
-    /* -------------------------------------------------------------------------
-       MODAL / DRAWER (Prospectos, Demos, Agenda, WhatsApp) - Restyled
-       ------------------------------------------------------------------------- */
+    /* MODAL / DRAWER */
     .leads-modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -884,49 +895,49 @@
       justify-content: center;
       opacity: 0;
       transition: opacity 0.25s ease;
-      padding: 20px;
+      padding: 16px;
     }
 
     .leads-sheet {
       width: 100%;
       max-width: 820px;
       max-height: 90vh;
-      background: #111113;
+      background: #0f0f12;
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.85);
     }
 
     .sheet-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 16px 22px;
+      border-bottom: 1px solid #1a1a20;
     }
 
     .sheet-title {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 800;
       letter-spacing: -0.01em;
       color: #ffffff;
     }
 
     .sheet-subtitle {
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 1px;
     }
 
     .btn-close {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: var(--panel-elevated);
-      border: 1px solid #303036;
+      border: 1px solid #28282e;
       color: var(--text);
       display: flex;
       align-items: center;
@@ -934,70 +945,64 @@
       cursor: pointer;
       transition: var(--transition);
     }
-
     .btn-close:hover {
-      background: #2a2a32;
-      border-color: #404048;
+      background: #24242c;
     }
 
     .sheet-tabs {
       display: flex;
       gap: 6px;
-      padding: 8px 20px;
-      background: #0d0d0f;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 18px;
+      background: #0a0a0c;
+      border-bottom: 1px solid #1a1a20;
       overflow-x: auto;
     }
 
     .sheet-tab {
-      padding: 8px 14px;
+      padding: 6px 13px;
       border-radius: 9999px;
-      font-size: 0.77rem;
+      font-size: 0.74rem;
       font-weight: 700;
       color: var(--text-muted);
       cursor: pointer;
       transition: var(--transition);
       white-space: nowrap;
     }
-
-    .sheet-tab:hover {
-      color: #ffffff;
-    }
-
+    .sheet-tab:hover { color: #ffffff; }
     .sheet-tab.active {
       background: var(--panel-elevated);
       color: #ffffff;
-      border: 1px solid #36363e;
+      border: 1px solid #303036;
     }
 
     .sheet-body {
-      padding: 22px 24px;
+      padding: 20px 22px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
     }
 
     .tab-content { display: none; }
-    .tab-content.active { display: flex; flex-direction: column; gap: 16px; }
+    .tab-content.active { display: flex; flex-direction: column; gap: 14px; }
 
     /* Banner Autopilot */
     .autopilot-banner {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 14px 18px;
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .autopilot-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .autopilot-dot {
@@ -1008,11 +1013,11 @@
     }
     .autopilot-dot.active {
       background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
     }
 
     .autopilot-title {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #ffffff;
       display: flex;
@@ -1021,9 +1026,9 @@
     }
 
     .autopilot-tag {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 800;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 6px;
       background: rgba(50, 212, 102, 0.15);
       border: 1px solid rgba(50, 212, 102, 0.35);
@@ -1037,46 +1042,40 @@
     }
 
     .autopilot-desc {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
       margin-top: 2px;
     }
 
-    .autopilot-actions {
-      display: flex;
-      gap: 6px;
-    }
+    .autopilot-actions { display: flex; gap: 6px; }
 
     .btn-report-auto, .btn-toggle-auto {
       background: var(--panel-elevated);
-      border: 1px solid #323238;
+      border: 1px solid #2a2a30;
       border-radius: 9999px;
-      padding: 6px 14px;
-      font-size: 0.74rem;
+      padding: 5px 12px;
+      font-size: 0.72rem;
       font-weight: 700;
       color: #ffffff;
       cursor: pointer;
       transition: var(--transition);
     }
-
     .btn-report-auto:hover, .btn-toggle-auto:hover {
-      background: #2a2a32;
-      border-color: #42424a;
+      background: #222228;
     }
 
-    /* Formulario de Campaña */
     .campaign-box {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 16px 18px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .campaign-box-title {
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #ffffff;
       display: flex;
@@ -1089,31 +1088,29 @@
       grid-template-columns: 1.3fr 1.1fr 70px;
       gap: 8px;
     }
-
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
     }
 
     .form-input, .form-select {
       background: var(--panel-elevated);
-      border: 1px solid #303036;
+      border: 1px solid #2a2a30;
       border-radius: var(--radius-sm);
-      padding: 8px 12px;
-      font-size: 0.8rem;
+      padding: 7px 10px;
+      font-size: 0.78rem;
       color: #ffffff;
       outline: none;
       font-family: inherit;
     }
-
     .form-input:focus, .form-select:focus {
-      border-color: #50505a;
+      border-color: #484852;
     }
 
     .toggle-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
       cursor: pointer;
     }
@@ -1123,8 +1120,8 @@
       color: #050505;
       border: none;
       border-radius: 9999px;
-      padding: 10px 18px;
-      font-size: 0.82rem;
+      padding: 9px 16px;
+      font-size: 0.8rem;
       font-weight: 800;
       cursor: pointer;
       display: inline-flex;
@@ -1133,18 +1130,16 @@
       gap: 8px;
       transition: var(--transition);
     }
-
     .btn-launch:hover {
       background: #f4f4f5;
       transform: translateY(-1px);
     }
 
-    /* Leads list cards */
     .leads-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-height: 380px;
+      gap: 8px;
+      max-height: 340px;
       overflow-y: auto;
     }
 
@@ -1152,16 +1147,13 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       transition: var(--transition);
     }
-
-    .lead-card:hover {
-      border-color: #3a3a42;
-    }
+    .lead-card:hover { border-color: #383840; }
 
     .lead-card-header {
       display: flex;
@@ -1170,32 +1162,29 @@
     }
 
     .lead-name {
-      font-size: 0.86rem;
+      font-size: 0.84rem;
       font-weight: 700;
       color: #ffffff;
     }
 
     .lead-status-tag {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 800;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 6px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
-
     .lead-status-tag.contactado {
       background: rgba(50, 212, 102, 0.15);
       border: 1px solid rgba(50, 212, 102, 0.35);
       color: #86efac;
     }
-
     .lead-status-tag.error_envio {
       background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.35);
       color: #fca5a5;
     }
-
     .lead-status-tag.nuevo {
       background: rgba(168, 85, 247, 0.15);
       border: 1px solid rgba(168, 85, 247, 0.35);
@@ -1203,27 +1192,24 @@
     }
 
     .lead-meta-line {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
     .lead-pitch-preview {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       color: #a1a1aa;
       background: var(--panel-elevated);
       border-radius: 6px;
-      padding: 8px 10px;
-      line-height: 1.45;
-      max-height: 80px;
+      padding: 6px 8px;
+      line-height: 1.4;
+      max-height: 70px;
       overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <!-- Canvas 3D Avatar -->
-  <div id="canvas-container"></div>
-
   <!-- Audio persistente para voz TTS -->
   <audio id="voice-player" playsinline preload="auto"></audio>
 
@@ -1237,8 +1223,8 @@
       </div>
 
       <div class="utility-controls">
-        <button id="wa-status-btn" class="utility-pill disconnected" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
-          <span style="width:7px; height:7px; border-radius:50%; background:currentColor;"></span>
+        <button id="wa-status-btn" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
+          <span class="wa-status-dot" id="wa-status-dot"></span>
           <span id="wa-status-label">WhatsApp</span>
         </button>
 
@@ -1247,7 +1233,7 @@
         </a>
 
         <div class="thinking-orb-badge" id="thinking-orb-badge" title="Toca para alternar estado cognitivo">
-          <canvas id="header-thinking-orb" width="16" height="16" style="border-radius:50%;"></canvas>
+          <canvas id="header-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
           <span id="speech-orb-label" class="orb-state-label">breathing</span>
         </div>
 
@@ -1275,16 +1261,16 @@
         <span>Sebax Commercial HQ</span>
       </div>
 
-      <div class="nav-items-sequence">
-        <button class="nav-btn active" onclick="switchTab('leads'); closeLeadsModal();">Chat &amp; Asistente</button>
-        <button class="nav-btn" id="btn-open-leads">Prospectos (<span id="nav-leads-count">77</span>)</button>
-        <button class="nav-btn" onclick="openDemosTab()">Prototipos en Vivo</button>
-        <button class="nav-btn" id="btn-open-agenda" onclick="openAgendaModal()">Citas y Agenda</button>
-        <button class="nav-btn" onclick="openWhatsAppTab()">Conectar WhatsApp</button>
+      <div class="nav-segmented-bar">
+        <button class="nav-segmented-btn active" onclick="switchTab('leads'); closeLeadsModal();">Chat &amp; Asistente</button>
+        <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal()">Prospectos (<span id="nav-leads-count">77</span>)</button>
+        <button class="nav-segmented-btn" onclick="openDemosTab()">Prototipos en Vivo</button>
+        <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal()">Citas y Agenda</button>
+        <button class="nav-segmented-btn" onclick="openWhatsAppTab()">Conectar WhatsApp</button>
       </div>
     </nav>
 
-    <!-- 3. SHORTCUT TILES (Row of dark rounded-square tiles with abstract marks) -->
+    <!-- 3. SHORTCUT TILES -->
     <section class="shortcut-tiles-row">
       <div class="shortcut-tile" onclick="triggerAutopilotNowUi()" title="Disparar ronda autónoma inmediata">
         <div class="tile-icon-box">
@@ -1352,7 +1338,7 @@
       </div>
     </section>
 
-    <!-- 4. PRIMARY DASHBOARD ROW (Three modular rounded dark panels) -->
+    <!-- 4. PRIMARY DASHBOARD ROW -->
     <section class="primary-dashboard-row">
       <!-- Panel 1: Hora y Fecha Comarca Lagunera -->
       <div class="dash-panel">
@@ -1370,11 +1356,11 @@
       <div class="dash-panel">
         <div class="dash-panel-header">
           <span class="panel-tag">CANAL WHATSAPP</span>
-          <span class="panel-accent-badge" style="background:rgba(50,212,102,0.15); border-color:rgba(50,212,102,0.35); color:#86efac;">PUENTE 24/7</span>
+          <span class="panel-accent-badge" style="background:rgba(50,212,102,0.12); border-color:rgba(50,212,102,0.3); color:#86efac;">PUENTE 24/7</span>
         </div>
         <div class="panel-main-val" id="dash-wa-status-text">Baileys &amp; Meta Cloud</div>
         <div class="panel-sub-line">
-          <span style="width:6px; height:6px; border-radius:50%; background:var(--accent-amber); display:inline-block;"></span>
+          <span class="wa-status-dot" id="dash-wa-status-dot"></span>
           <span id="dash-wa-status-desc">Esperando vinculación QR en puerto 3000</span>
         </div>
       </div>
@@ -1410,14 +1396,14 @@
 
     <!-- 6. INTERACTIVE AGENT & AVATAR WORKSPACE -->
     <section class="agent-workspace-grid">
-      <!-- Columna Avatar 3D -->
+      <!-- Columna Avatar 3D (Cleanly framed inside this card!) -->
       <div class="avatar-card-panel">
         <div class="avatar-overlay-header">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; color:#ffffff;">UNIDAD 3D SEBAX</span>
-          </div>
-          <span id="agent-state" style="font-size:0.68rem; color:var(--text-muted); font-family:var(--font-mono);">Listo para órdenes</span>
+          <span class="avatar-panel-title">UNIDAD 3D SEBAX</span>
+          <span id="agent-state" class="avatar-panel-status">Listo</span>
         </div>
+
+        <div id="canvas-container"></div>
 
         <div class="avatar-pedestal-pill">
           <span class="pedestal-dot"></span>
@@ -1431,7 +1417,7 @@
           <div class="agent-header-brand">
             <span class="agent-brand-title">SEBAX AI</span>
             <div class="thinking-orb-badge" title="Estado cognitivo">
-              <canvas id="speech-thinking-orb" width="16" height="16" style="border-radius:50%;"></canvas>
+              <canvas id="speech-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
             </div>
           </div>
 
@@ -1446,7 +1432,7 @@
 
         <!-- Speech Bubble -->
         <div class="speech-bubble" id="speech-bubble">
-          Sebax en línea. Soy tu agente de desarrollo comercial de SSSSolutions. Escribe una orden, consulta métricas o dicta por voz.
+          Sebax en línea. Soy tu agente comercial de SSSSolutions. Escribe una orden, consulta prospectos o dicta por voz.
         </div>
 
         <div class="speech-footer">
@@ -1471,7 +1457,7 @@
         <div class="input-bar-wrap">
           <input type="text" id="user-input" placeholder="Escribe una orden comercial o técnica..." autocomplete="off">
           <button class="btn-circle-action" id="mic-btn" title="Hablar por voz">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
               <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
               <line x1="12" y1="19" x2="12" y2="23"/>
@@ -1479,7 +1465,7 @@
             </svg>
           </button>
           <button class="btn-circle-action" id="send-btn" title="Enviar orden">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="22" y1="2" x2="11" y2="13"/>
               <polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>
@@ -1488,10 +1474,9 @@
       </div>
     </section>
 
-    <!-- 7. BOTTOM METRICS ROW (Large rounded metric cards) -->
+    <!-- 7. BOTTOM METRICS ROW -->
     <section class="bottom-metrics-row">
-      <!-- Métrica 1 -->
-      <div class="metric-card-large" onclick="openLeadsModal()" style="cursor:pointer;" title="Ver tabla de prospectos">
+      <div class="metric-card-large" onclick="openLeadsModal()" title="Ver tabla de prospectos">
         <span class="metric-card-label">TOTAL PROSPECTOS</span>
         <div class="oversized-metric" id="stat-total-dash">77</div>
         <div class="metric-supporting-line">
@@ -1499,8 +1484,7 @@
         </div>
       </div>
 
-      <!-- Métrica 2 -->
-      <div class="metric-card-large" onclick="openLeadsModal()" style="cursor:pointer;" title="Ver contactados">
+      <div class="metric-card-large" onclick="openLeadsModal()" title="Ver contactados">
         <span class="metric-card-label">PROPUESTAS ENVIADAS</span>
         <div class="oversized-metric" id="stat-contacted-dash">7</div>
         <div class="metric-supporting-line">
@@ -1508,8 +1492,7 @@
         </div>
       </div>
 
-      <!-- Métrica 3 -->
-      <div class="metric-card-large" onclick="openAgendaModal()" style="cursor:pointer;" title="Ver agenda de citas">
+      <div class="metric-card-large" onclick="openAgendaModal()" title="Ver agenda de citas">
         <span class="metric-card-label">REUNIONES COMERCIALES</span>
         <div class="oversized-metric" id="stat-agenda-dash">1</div>
         <div class="metric-supporting-line">
@@ -1519,7 +1502,7 @@
     </section>
   </div>
 
-  <!-- MODAL / DRAWER (Prospectos, Demos, Agenda, WhatsApp) -->
+  <!-- MODAL / DRAWER -->
   <div class="leads-modal" id="leads-modal">
     <div class="leads-sheet">
       <div class="sheet-header">
@@ -1528,7 +1511,7 @@
           <div class="sheet-subtitle" id="sheet-header-sub">Gestión comercial y técnica en Torreón, Gómez Palacio y Lerdo</div>
         </div>
         <button class="btn-close" id="btn-close-leads">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
@@ -1562,21 +1545,20 @@
           </div>
 
           <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
               <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-total">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Total Leads</div>
+              <div style="font-size:0.66rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Total Leads</div>
             </div>
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
               <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-contacted">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Contactados</div>
+              <div style="font-size:0.66rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Contactados</div>
             </div>
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
               <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-replied">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Respondieron</div>
+              <div style="font-size:0.66rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Respondieron</div>
             </div>
           </div>
 
-          <!-- Formulario de Campaña Rápida -->
           <div class="campaign-box">
             <div class="campaign-box-title">
               <span>Lanzar Campaña Rápida</span>
@@ -1615,30 +1597,29 @@
               <span>Enviar WhatsApp con portafolio e Instagram automáticamente</span>
             </label>
             <button class="btn-launch" id="btn-start-campaign" onclick="launchCampaign()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
               <span>Iniciar Prospección y Enviar Mensajes</span>
             </button>
           </div>
 
-          <!-- Registro de Prospectos -->
           <div>
-            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#ffffff;">Registro de Negocios Prospectados</div>
+            <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px; color:#ffffff;">Registro de Negocios Prospectados</div>
             <div class="leads-list" id="leads-container">
-              <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando prospectos...</div>
+              <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.8rem;">Cargando prospectos...</div>
             </div>
           </div>
         </div>
 
         <!-- Pestaña Prototipos en Vivo -->
         <div class="tab-content" id="tab-content-demos">
-          <div style="background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px;">
-            <div style="font-weight:800; font-size:0.95rem; color:#ffffff; margin-bottom:4px;">Generador Instantáneo de Sitios y Menús Digitales</div>
-            <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.4; margin-bottom:12px;">
+          <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px;">
+            <div style="font-weight:800; font-size:0.9rem; color:#ffffff; margin-bottom:3px;">Generador Instantáneo de Sitios y Menús Digitales</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4; margin-bottom:10px;">
               Crea un prototipo interactivo real para cualquier negocio de La Laguna con catálogo y pedidos a WhatsApp.
             </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px; margin-bottom:10px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:7px; margin-bottom:8px;">
               <input type="text" id="demo-name" placeholder="Nombre (ej. Café Central)" class="form-input">
               <select id="demo-niche" class="form-select">
                 <option value="cafeteria">Cafetería de Especialidad</option>
@@ -1656,83 +1637,83 @@
           </div>
 
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-weight:700; font-size:0.82rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Prototipos Generados</div>
-            <button onclick="loadDemosData()" style="background:transparent; border:none; color:#ffffff; font-size:0.78rem; cursor:pointer; font-weight:600;">Actualizar</button>
+            <div style="font-weight:700; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Prototipos Generados</div>
+            <button onclick="loadDemosData()" style="background:transparent; border:none; color:#ffffff; font-size:0.75rem; cursor:pointer; font-weight:600;">Actualizar</button>
           </div>
 
-          <div id="demos-list-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+          <div id="demos-list-container" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
 
         <!-- Pestaña Citas y Agenda -->
         <div class="tab-content" id="tab-content-agenda">
-          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-total">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Total Citas</div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:1.25rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-total">0</div>
+              <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Total Citas</div>
             </div>
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-confirmed">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Confirmadas</div>
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:1.25rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-confirmed">0</div>
+              <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">Confirmadas</div>
             </div>
-            <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center;">
-              <div style="font-size:1.3rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-pending">0</div>
-              <div style="font-size:0.68rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">En Negociación</div>
+            <div style="background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px; text-align:center;">
+              <div style="font-size:1.25rem; font-weight:800; font-family:var(--font-mono); color:#ffffff;" id="stat-agenda-pending">0</div>
+              <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; margin-top:2px;">En Negociación</div>
             </div>
           </div>
 
           <div class="campaign-box">
             <div class="campaign-box-title">
               <span>Agendar Reunión o Llamada Comercial</span>
-              <span style="font-size:0.7rem; color:var(--text-dim); font-weight:normal;" id="agenda-status-msg"></span>
+              <span style="font-size:0.68rem; color:var(--text-dim);" id="agenda-status-msg"></span>
             </div>
             <div class="form-row">
               <input type="text" class="form-input" id="agenda-business" placeholder="Negocio / Empresa">
               <input type="text" class="form-input" id="agenda-client" placeholder="Persona de contacto">
             </div>
-            <div class="form-row" style="margin-top:8px;">
+            <div class="form-row" style="margin-top:6px;">
               <input type="text" class="form-input" id="agenda-phone" placeholder="Teléfono WhatsApp">
               <input type="text" class="form-input" id="agenda-datetime" placeholder="Fecha y hora (ej. Mañana 11:00 AM)">
             </div>
-            <div style="margin-top:8px;">
+            <div style="margin-top:6px;">
               <input type="text" class="form-input" id="agenda-notes" placeholder="Notas (ej. Interesado en sitio web)">
             </div>
-            <button class="btn-launch" id="btn-save-appointment" style="margin-top:10px;" onclick="saveNewAppointment()">
+            <button class="btn-launch" id="btn-save-appointment" style="margin-top:8px;" onclick="saveNewAppointment()">
               Guardar Cita y Notificar
             </button>
           </div>
 
           <div>
-            <div style="font-size:0.84rem; font-weight:700; margin-bottom:10px; color:#ffffff;">Citas Programadas</div>
+            <div style="font-size:0.8rem; font-weight:700; margin-bottom:8px; color:#ffffff;">Citas Programadas</div>
             <div class="leads-list" id="appointments-container">
-              <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.82rem;">Cargando agenda...</div>
+              <div style="text-align:center; padding:16px; color:var(--text-dim); font-size:0.8rem;">Cargando agenda...</div>
             </div>
           </div>
         </div>
 
         <!-- Pestaña WhatsApp -->
         <div class="tab-content" id="tab-content-whatsapp">
-          <div id="wa-tab-connected-view" style="display:none; text-align:center; padding:2rem 1rem;">
-            <div style="display:inline-flex; align-items:center; gap:6px; padding:6px 16px; border-radius:20px; background:rgba(50,212,102,0.15); color:var(--accent-green); font-weight:700; font-size:0.8rem; text-transform:uppercase; margin-bottom:1rem; border:1px solid rgba(50,212,102,0.35);">
-              <span style="width:8px; height:8px; border-radius:50%; background:var(--accent-green);"></span> EN LÍNEA Y OPERATIVO
+          <div id="wa-tab-connected-view" style="display:none; text-align:center; padding:1.5rem 1rem;">
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:5px 14px; border-radius:20px; background:rgba(50,212,102,0.15); color:var(--accent-green); font-weight:700; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.8rem; border:1px solid rgba(50,212,102,0.35);">
+              <span style="width:7px; height:7px; border-radius:50%; background:var(--accent-green);"></span> EN LÍNEA Y OPERATIVO
             </div>
-            <div style="font-size:1.15rem; font-weight:800; color:#ffffff; margin-bottom:0.4rem;">WhatsApp Conectado con Éxito</div>
-            <div style="font-size:0.84rem; color:var(--text-muted); line-height:1.5; max-width:400px; margin:0 auto 1.4rem auto;" id="wa-connected-user-desc">
+            <div style="font-size:1.1rem; font-weight:800; color:#ffffff; margin-bottom:0.3rem;">WhatsApp Conectado con Éxito</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); line-height:1.45; max-width:380px; margin:0 auto 1.2rem auto;" id="wa-connected-user-desc">
               Sebax está activo 24/7 atendiendo clientes y prospectando negocios en La Laguna.
             </div>
-            <div style="display:flex; flex-direction:column; gap:8px; max-width:320px; margin:0 auto;">
+            <div style="display:flex; flex-direction:column; gap:6px; max-width:300px; margin:0 auto;">
               <button class="btn-launch" onclick="retryUnsentLeadsUi()">
                 Reintentar Prospectos Pendientes Ahora
               </button>
-              <button class="btn-toggle-auto" onclick="resetWhatsAppSessionUi()" style="padding:10px;">
+              <button class="btn-toggle-auto" onclick="resetWhatsAppSessionUi()" style="padding:8px;">
                 Desvincular / Cambiar Número
               </button>
             </div>
           </div>
 
           <div id="wa-tab-pairing-view">
-            <div class="autopilot-banner" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.3); margin-bottom:1.2rem;">
+            <div class="autopilot-banner" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.3); margin-bottom:1rem;">
               <div class="autopilot-left">
-                <div class="autopilot-dot" style="background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></div>
+                <div class="autopilot-dot" style="background:#f59e0b; box-shadow:0 0 6px #f59e0b;"></div>
                 <div>
                   <div class="autopilot-title" style="color:#fbbf24;">WhatsApp Pendiente de Vinculación</div>
                   <div class="autopilot-desc">Vincula tu cuenta una sola vez para que Sebax pueda enviar mensajes y reportes 24/7.</div>
@@ -1740,14 +1721,14 @@
               </div>
             </div>
 
-            <div style="display:flex; gap:6px; background:var(--panel); padding:4px; border-radius:12px; margin-bottom:1.2rem; border:1px solid var(--border);">
+            <div style="display:flex; gap:6px; background:var(--panel); padding:4px; border-radius:10px; margin-bottom:1rem; border:1px solid var(--border);">
               <button type="button" id="subtab-code-btn" class="sheet-tab active" style="flex:1; text-align:center;" onclick="switchWaSubtab('code')">Código Telefónico (Celular)</button>
               <button type="button" id="subtab-qr-btn" class="sheet-tab" style="flex:1; text-align:center;" onclick="switchWaSubtab('qr')">Escanear QR (PC)</button>
             </div>
 
             <!-- Opción 1: Código de 8 dígitos -->
             <div id="wa-subtab-code">
-              <div class="campaign-box" style="margin-bottom:1rem;">
+              <div class="campaign-box" style="margin-bottom:0.8rem;">
                 <div class="form-row">
                   <input type="tel" class="form-input" id="wa-sheet-phone" value="8719164677" placeholder="8719164677">
                   <button class="btn-launch" id="btn-sheet-pairing" onclick="requestSheetPairingCode()">
@@ -1756,18 +1737,18 @@
                 </div>
               </div>
 
-              <div id="wa-sheet-code-box" style="display:none; margin:1rem 0; padding:16px; background:var(--panel-elevated); border:1.5px dashed var(--accent-violet); border-radius:16px; text-align:center;">
-                <div style="font-size:0.72rem; color:var(--text-muted); font-weight:600; margin-bottom:6px;">Tu código de vinculación de 8 dígitos:</div>
-                <div id="wa-sheet-code-text" style="font-family:var(--font-mono); font-size:1.8rem; font-weight:800; letter-spacing:4px; color:#ffffff; margin-bottom:8px;">----</div>
+              <div id="wa-sheet-code-box" style="display:none; margin:0.8rem 0; padding:14px; background:var(--panel-elevated); border:1.5px dashed var(--accent-violet); border-radius:14px; text-align:center;">
+                <div style="font-size:0.7rem; color:var(--text-muted); font-weight:600; margin-bottom:4px;">Tu código de vinculación de 8 dígitos:</div>
+                <div id="wa-sheet-code-text" style="font-family:var(--font-mono); font-size:1.6rem; font-weight:800; letter-spacing:4px; color:#ffffff; margin-bottom:6px;">----</div>
                 <button class="btn-toggle-auto" onclick="copySheetCode()">Copiar Código</button>
               </div>
 
-              <div style="background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px 16px; font-size:0.78rem; color:var(--text-muted); line-height:1.55;">
-                <div style="font-weight:700; margin-bottom:6px; color:#ffffff;">Instrucciones para vincular en tu celular:</div>
+              <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px 14px; font-size:0.75rem; color:var(--text-muted); line-height:1.5;">
+                <div style="font-weight:700; margin-bottom:4px; color:#ffffff;">Instrucciones para vincular en tu celular:</div>
                 <ol style="padding-left:18px; margin:0;">
-                  <li style="margin-bottom:4px;">Abre <b>WhatsApp</b> en este teléfono.</li>
-                  <li style="margin-bottom:4px;">Toca <b>Ajustes</b> &gt; <b>Dispositivos vinculados</b> &gt; <b>Vincular un dispositivo</b>.</li>
-                  <li style="margin-bottom:4px;">Toca abajo en: <b>Vincular con el número de teléfono</b>.</li>
+                  <li style="margin-bottom:3px;">Abre <b>WhatsApp</b> en este teléfono.</li>
+                  <li style="margin-bottom:3px;">Toca <b>Ajustes</b> &gt; <b>Dispositivos vinculados</b> &gt; <b>Vincular un dispositivo</b>.</li>
+                  <li style="margin-bottom:3px;">Toca abajo en: <b>Vincular con el número de teléfono</b>.</li>
                   <li>Ingresa el código de 8 dígitos generado arriba.</li>
                 </ol>
               </div>
@@ -1775,11 +1756,11 @@
 
             <!-- Opción 2: QR -->
             <div id="wa-subtab-qr" style="display:none; text-align:center;">
-              <div style="background:#ffffff; padding:14px; border-radius:18px; border:1px solid var(--border); display:inline-block; margin-bottom:1rem;">
-                <img id="wa-sheet-qr-img" src="" alt="QR WhatsApp" style="display:none; max-width:240px; border-radius:10px; margin:0 auto;">
-                <div id="wa-sheet-qr-loader" style="padding:40px 20px; font-size:0.8rem; color:#64748b;">Cargando código QR...</div>
+              <div style="background:#ffffff; padding:12px; border-radius:16px; border:1px solid var(--border); display:inline-block; margin-bottom:0.8rem;">
+                <img id="wa-sheet-qr-img" src="" alt="QR WhatsApp" style="display:none; max-width:220px; border-radius:8px; margin:0 auto;">
+                <div id="wa-sheet-qr-loader" style="padding:36px 18px; font-size:0.78rem; color:#64748b;">Cargando código QR...</div>
               </div>
-              <div style="background:var(--panel); border-radius:14px; padding:12px 14px; font-size:0.78rem; color:var(--text-muted); text-align:left;">
+              <div style="background:var(--panel); border-radius:12px; padding:10px 12px; font-size:0.74rem; color:var(--text-muted); text-align:left;">
                 Apunta la cámara de WhatsApp de tu celular al código QR para vincularlo inmediatamente.
               </div>
             </div>
@@ -1789,7 +1770,6 @@
     </div>
   </div>
 
-  <!-- Clock updater & bottom metrics sync -->
   <script>
     function updateLagunaClock() {
       const elTime = document.getElementById("laguna-live-time");
@@ -2680,4 +2660,5 @@
   </script>
 </body>
 </html>
+
 
