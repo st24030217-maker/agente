@@ -1033,6 +1033,86 @@
       max-height: 70px;
       overflow-y: auto;
     }
+
+    /* Avatar Oficial Sebax Stage */
+    .avatar-stage-box {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin: 10px 0;
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at center, #1c1c22 0%, #0d0d10 85%);
+      border: 1px solid #24242a;
+      overflow: hidden;
+      min-height: 260px;
+    }}
+
+    .avatar-ambient-glow {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      transition: all 0.4s ease;
+    }}
+
+    .avatar-robot-img {
+      max-width: 230px;
+      max-height: 230px;
+      width: 82%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      animation: avatar-float 4.5s ease-in-out infinite;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      z-index: 2;
+    }}
+
+    @keyframes avatar-float {
+      0%, 100% {
+        transform: translateY(0px) scale(1);
+      }
+      50% {
+        transform: translateY(-8px) scale(1.02);
+      }
+    }
+
+    /* Speaking State */
+    .avatar-stage-box.speaking .avatar-robot-img {
+      animation: avatar-speaking 0.35s ease-in-out infinite alternate;
+      box-shadow: 0 18px 48px rgba(50, 212, 102, 0.25);
+    }
+    .avatar-stage-box.speaking .avatar-ambient-glow {
+      background: radial-gradient(circle, rgba(50, 212, 102, 0.3) 0%, transparent 70%);
+      transform: scale(1.3);
+    }
+
+    @keyframes avatar-speaking {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-5px) scale(1.03); }
+    }
+
+    /* Thinking State */
+    .avatar-stage-box.thinking .avatar-robot-img {
+      animation: avatar-thinking 1.2s ease-in-out infinite alternate;
+      box-shadow: 0 18px 48px rgba(168, 85, 247, 0.25);
+    }
+    .avatar-stage-box.thinking .avatar-ambient-glow {
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%);
+      transform: scale(1.2);
+    }
+
+    @keyframes avatar-thinking {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-4px) rotate(1.5deg); }
+    }
+
   </style>
 </head>
 <body>
@@ -1093,18 +1173,21 @@
 
     <!-- 3. HERO INTERACTION (3D Head + Chat) -->
     <section class="agent-workspace-grid">
-      <!-- Columna Avatar 3D (Cleanly framed inside this card!) -->
+      <!-- Columna Avatar Oficial Sebax AI -->
       <div class="avatar-card-panel">
         <div class="avatar-overlay-header">
-          <span class="avatar-panel-title">UNIDAD 3D SEBAX</span>
+          <span class="avatar-panel-title">AVATAR OFICIAL · SEBAX</span>
           <span id="agent-state" class="avatar-panel-status">Listo</span>
         </div>
 
-        <div id="canvas-container"></div>
+        <div class="avatar-stage-box" id="avatar-stage">
+          <div class="avatar-ambient-glow" id="avatar-glow"></div>
+          <img src="/agente_ia_minimal_blanco_negro_tres_cuartos.png" alt="Sebax AI Avatar" id="avatar-img" class="avatar-robot-img">
+        </div>
 
         <div class="avatar-pedestal-pill">
-          <span class="pedestal-dot"></span>
-          <span class="pedestal-title">SEBAX AI HEAD UNIT</span>
+          <span class="pedestal-dot" id="pedestal-dot"></span>
+          <span class="pedestal-title">SEBAX AI CORE UNIT</span>
         </div>
       </div>
 
@@ -1500,6 +1583,36 @@
   </div>
 
   <script>
+
+    // Avatar reactive state manager
+    window.avatar = {
+      setSpeaking: function(val) {
+        const stage = document.getElementById("avatar-stage");
+        const dot = document.getElementById("pedestal-dot");
+        if (!stage) return;
+        if (val) {
+          stage.classList.add("speaking");
+          stage.classList.remove("thinking");
+          if (dot) dot.style.background = "#32d466";
+        } else {
+          stage.classList.remove("speaking");
+        }
+      },
+      setThinking: function(val) {
+        const stage = document.getElementById("avatar-stage");
+        const dot = document.getElementById("pedestal-dot");
+        if (!stage) return;
+        if (val) {
+          stage.classList.add("thinking");
+          stage.classList.remove("speaking");
+          if (dot) dot.style.background = "#a855f7";
+        } else {
+          stage.classList.remove("thinking");
+          if (dot) dot.style.background = "#32d466";
+        }
+      }
+    };
+
     function updateLagunaClock() {
       const elTime = document.getElementById("laguna-live-time");
       const elDate = document.getElementById("laguna-live-date");
@@ -1517,6 +1630,36 @@
   <script src="/thinking-orbs.js"></script>
   <script src="/avatar.js"></script>
   <script>
+
+    // Avatar reactive state manager
+    window.avatar = {
+      setSpeaking: function(val) {
+        const stage = document.getElementById("avatar-stage");
+        const dot = document.getElementById("pedestal-dot");
+        if (!stage) return;
+        if (val) {
+          stage.classList.add("speaking");
+          stage.classList.remove("thinking");
+          if (dot) dot.style.background = "#32d466";
+        } else {
+          stage.classList.remove("speaking");
+        }
+      },
+      setThinking: function(val) {
+        const stage = document.getElementById("avatar-stage");
+        const dot = document.getElementById("pedestal-dot");
+        if (!stage) return;
+        if (val) {
+          stage.classList.add("thinking");
+          stage.classList.remove("speaking");
+          if (dot) dot.style.background = "#a855f7";
+        } else {
+          stage.classList.remove("thinking");
+          if (dot) dot.style.background = "#32d466";
+        }
+      }
+    };
+
     const speechBubble = document.getElementById("speech-bubble");
     const agentState = document.getElementById("agent-state");
     const userInput = document.getElementById("user-input");
