@@ -25,6 +25,33 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const PORT = process.env.BRIDGE_PORT || 3000;
 const AGENT_WEBHOOK_URL = process.env.AGENT_WEBHOOK_URL || "http://127.0.0.1:8000/webhook/whatsapp";
 
+async function callFastAPI(endpoint, body) {
+  const candidatePorts = [
+    process.env.PORT ? Number(process.env.PORT) : null,
+    8000,
+    10000
+  ].filter(p => typeof p === "number" && !isNaN(p) && p > 0);
+  const uniquePorts = [...new Set(candidatePorts)];
+
+  for (const p of uniquePorts) {
+    try {
+      const url = `http://127.0.0.1:${p}${endpoint}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      // Intenta con el siguiente puerto
+    }
+  }
+  return null;
+}
+
 const app = express();
 app.use(express.json());
 
@@ -44,7 +71,10 @@ function normalizePhone(phone) {
 }
 
 function isSelfUser(jid) {
-  if (!jid || !sock || !sock.user) return false;
+  if (!jid) return false;
+  const digits = jid.split("@")[0].replace(/\D/g, "");
+  if (digits.includes("8719164677")) return true;
+  if (!sock || !sock.user) return false;
   try {
     if (areJidsSameUser(jid, sock.user.id)) return true;
     if (sock.user.lid && areJidsSameUser(jid, sock.user.lid)) return true;
@@ -541,6 +571,14 @@ async function startWhatsApp() {
 
       const isSelf = isSelfUser(remoteJid);
 
+      if (remoteJid.includes("broadcast") || remoteJid.includes("@newsletter") || remoteJid.endsWith("@g.us")) {
+        return;
+      }
+
+      if (msg.key.fromMe && !isSelf) {
+        return;
+      }
+
       // Si es un prospecto respondiendo a una propuesta
       if (!isSelf) {
         if (remoteJid.endsWith("@g.us") || remoteJid.includes("@newsletter")) {
@@ -556,47 +594,25 @@ async function startWhatsApp() {
         if (incomingText && incomingText.trim() !== "") {
           let leadReplied = false;
           try {
-            const resp = await fetch("http://127.0.0.1:8000/api/leads/incoming", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ sender: remoteJid, message: incomingText }),
-              signal: AbortSignal.timeout(25000)
-            });
-
-            if (resp.ok) {
-              const data = await resp.json();
-              if (data.is_lead && data.reply) {
-                const sent = await sock.sendMessage(remoteJid, { text: data.reply });
-                if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
-                console.log(` [Sebax respondio automaticamente al prospecto ${remoteJid}] -> "${data.reply}"`);
-                leadReplied = true;
-              }
+            const data = await callFastAPI("/api/leads/incoming", { sender: remoteJid, message: incomingText });
+            if (data && data.is_lead && data.reply) {
+              const sent = await sock.sendMessage(remoteJid, { text: data.reply });
+              if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
+              console.log(` [Sebax respondio al prospecto ${remoteJid}] -> "${data.reply}"`);
+              leadReplied = true;
             }
           } catch (e) {
-            console.error("Error al procesar mensaje de prospecto entrante:", e.message);
+            console.error("Error al procesar mensaje entrante:", e.message);
           }
 
           if (!leadReplied) {
-            // Es un nuevo cliente, prospecto o usuario: procesar con Sebax AI
             try {
-              const response = await fetch(AGENT_WEBHOOK_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  sender: remoteJid,
-                  message: incomingText
-                }),
-                signal: AbortSignal.timeout(90000)
-              });
-
-              if (response.ok) {
-                const data = await response.json();
-                const replyText = data?.reply || "";
-                if (replyText) {
-                  const sent = await sock.sendMessage(remoteJid, { text: replyText });
-                  if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
-                  console.log(` [Sebax respondio a ${remoteJid}] -> "${replyText}"`);
-                }
+              const data = await callFastAPI("/webhook/whatsapp", { sender: remoteJid, message: incomingText });
+              const replyText = data?.reply || "";
+              if (replyText) {
+                const sent = await sock.sendMessage(remoteJid, { text: replyText });
+                if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
+                console.log(` [Sebax respondio a ${remoteJid}] -> "${replyText}"`);
               }
             } catch (err) {
               console.error("Error al obtener respuesta de Sebax para", remoteJid, err.message);
@@ -619,22 +635,11 @@ async function startWhatsApp() {
 
       let replyText = "";
       try {
-        const response = await fetch(AGENT_WEBHOOK_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sender: "self_user",
-            message: text
-          }),
-          signal: AbortSignal.timeout(90000)
+        const data = await callFastAPI("/webhook/whatsapp", {
+          sender: "self_user",
+          message: text
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          replyText = data?.reply || "";
-        } else {
-          console.error(`Error HTTP ${response.status} desde Agente Python`);
-        }
+        replyText = data?.reply || "";
       } catch (err) {
         console.error("Error al conectar con agente Python:", err.message);
       }
