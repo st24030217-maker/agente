@@ -23,8 +23,8 @@ class Settings(BaseModel):
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
-    # Meta WhatsApp Cloud API Oficial
-    meta_wa_token: str = os.getenv("META_WA_TOKEN", "EAAUyJT420vsBS73cPjIe6YCahMMNYEEkbFrUQZAIz7BZCdUCIZC2ZAMXzdDd1AsOjSDec7C1HQjezDpRZCr4gWcfupvYyedFjQV2pW10K2P4k8zXnroJfNSCkWpqRYLFqlRA8I0tjXgrSpsxySdI87rq7HMmz4EUIrHaELSaegZCDorUzhtHI681FZCeSa7NBndV5bCFvGsVeZAafZAQY5Qc3BZCMwk88JZC01OY5mZAqifCJjXW8Q0CFrP9iddFVgF1MnqW3fR1tZBnSLU4w0VH9wJdZB")
+    # Meta WhatsApp Cloud API Oficial (Token Permanente de Usuario del Sistema)
+    meta_wa_token: str = os.getenv("META_WA_TOKEN", "EAAUyJT420vsBSyU0ZAn4jnpz2NncsPYCT1b2EsjCFaqZBIUykb11qWGY9G5YZCYTkRb9pfEwsapllwgyIY9scM2NBfOsWMEUL9YpPzZBcqbwh5TIJiYn5woGVx88WvrJYrx2hGt8NInFdkyZA5a6DOhkeePuQrSB6itn8ptc6qDvIYJwE7ZCjEtW1bMbylLgZDZD")
     meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1362013893668994")
     meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
 
