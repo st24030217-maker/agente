@@ -1048,9 +1048,36 @@
 
 
 
+    /* 3D Topography Background Container (React Bits @react-bits/Topography-JS-CSS) */
+    #topography-bg {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.48;
+    }
+
+    .topography-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .workspace-frame {
+      position: relative;
+      z-index: 2;
+    }
   </style>
+  <link rel="stylesheet" href="/prompt-bar.css">
 </head>
 <body>
+  <!-- 3D Topography Background (React Bits @react-bits/Topography-JS-CSS) -->
+  <div id="topography-bg" class="topography-container">
+    <canvas id="topography-canvas" class="topography-canvas" aria-hidden="true"></canvas>
+  </div>
+
   <!-- Audio persistente para voz TTS -->
   <audio id="voice-player" playsinline preload="auto"></audio>
 
@@ -1157,23 +1184,59 @@
           </button>
         </div>
 
-        <!-- Input Bar -->
-        <div class="input-bar-wrap">
-          <input type="text" id="user-input" placeholder="Escribe una orden para Sebax..." autocomplete="off">
-          <button class="btn-circle-action" id="mic-btn" title="Hablar por voz">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </button>
-          <button class="btn-circle-action" id="send-btn" title="Enviar orden">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
+        <!-- React Bits PromptBar (@react-bits/PromptBar-JS-CSS) -->
+        <div class="prompt-bar" id="prompt-bar-root">
+          <!-- Floating Command / Model Menu -->
+          <div class="prompt-bar__menu" id="prompt-menu" style="display:none;"></div>
+
+          <div class="prompt-bar__field" id="prompt-field">
+            <canvas id="prompt-sparks" class="prompt-bar__sparks"></canvas>
+            
+            <textarea
+              id="user-input"
+              class="prompt-bar__input"
+              rows="1"
+              placeholder="Escribe una orden o escribe / para comandos..."
+              autocomplete="off"
+            ></textarea>
+
+            <div class="prompt-bar__bar">
+              <button type="button" class="prompt-bar__tool" id="prompt-plus-btn" title="Comandos y fuentes">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+
+              <button type="button" class="prompt-bar__pick" id="prompt-model-btn" title="Modelo cognitivo">
+                <span>Gemini 3.5 Flash</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+
+              <div class="prompt-bar__spacer"></div>
+
+              <button type="button" class="prompt-bar__tool" id="mic-btn" title="Dictar por voz">
+                <svg id="mic-idle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+                <div id="mic-eq-icon" class="prompt-bar__eq" style="display:none;">
+                  <i></i><i></i><i></i>
+                </div>
+              </button>
+
+              <button type="button" class="prompt-bar__send" id="send-btn" title="Enviar orden">
+                <svg class="prompt-bar__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1544,6 +1607,8 @@
 
   <script src="/thinking-orbs.js"></script>
   <script type="module" src="/crystalized-ball.js"></script>
+  <script type="module" src="/topography.js"></script>
+  <script src="/prompt-bar.js"></script>
   <script>
 
     const speechBubble = document.getElementById("speech-bubble");

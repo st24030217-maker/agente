@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-crystal-v15";
+const CACHE_NAME = "sebax-topography-promptbar-v16";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();

@@ -1,0 +1,277 @@
+/* React Bits PromptBar CSS (@react-bits/PromptBar-JS-CSS) adapted for Sebax AI Dark Dots UI */
+.prompt-bar {
+  --pb-bg: #141418;
+  --pb-ink: #f5f5f5;
+  --pb-menu: #1d1d22;
+  --pb-w: 100%;
+  --pb-radius: 16px;
+  --pb-press: 0.96;
+  --pb-spark: #a855f7;
+  --pb-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --pb-muted: rgba(245, 245, 245, 0.55);
+  --pb-hover: rgba(255, 255, 255, 0.08);
+
+  position: relative;
+  width: 100%;
+  color: var(--pb-ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.prompt-bar__menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--pb-menu);
+  border: 1px solid #2e2e36;
+  box-shadow:
+    0 16px 36px -10px rgba(0, 0, 0, 0.7),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  transform-origin: bottom center;
+  animation: prompt-bar-pop 180ms var(--pb-ease-out) both;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.prompt-bar__menu[data-kind='model'] {
+  right: auto;
+  width: 220px;
+  transform-origin: bottom left;
+}
+
+@keyframes prompt-bar-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+
+.prompt-bar__row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+
+.prompt-bar__row:hover {
+  background: var(--pb-hover);
+}
+
+.prompt-bar__row-icon {
+  display: inline-flex;
+  flex: none;
+  justify-content: center;
+  width: 20px;
+  color: #a855f7;
+}
+
+.prompt-bar__row-name {
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.prompt-bar__row-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--pb-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.prompt-bar__field {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--pb-radius);
+  background: var(--pb-bg);
+  border: 1px solid #27272e;
+  cursor: text;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.prompt-bar__field:focus-within {
+  border-color: #3f3f4a;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(168, 85, 247, 0.25);
+}
+
+.prompt-bar__sparks {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.prompt-bar__input {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+  resize: none;
+  outline: none;
+  min-height: 24px;
+  max-height: 110px;
+  overflow-wrap: anywhere;
+}
+
+.prompt-bar__input::placeholder {
+  color: rgba(245, 245, 245, 0.4);
+}
+
+.prompt-bar__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.prompt-bar__spacer {
+  flex: 1 1 auto;
+}
+
+.prompt-bar__tool,
+.prompt-bar__pick,
+.prompt-bar__send {
+  flex: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.prompt-bar__tool {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(245, 245, 245, 0.65);
+  transition: background-color 150ms ease, color 150ms ease, transform 160ms var(--pb-ease-out);
+}
+
+.prompt-bar__tool:hover {
+  background: var(--pb-hover);
+  color: #fff;
+}
+
+.prompt-bar__tool:active {
+  transform: scale(0.94);
+}
+
+.prompt-bar__pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(245, 245, 245, 0.85);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.prompt-bar__pick:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.prompt-bar__eq {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 14px;
+}
+
+.prompt-bar__eq i {
+  display: block;
+  width: 2.5px;
+  height: 100%;
+  border-radius: 999px;
+  background: #32d466;
+  transform-origin: center;
+  animation: prompt-bar-eq 800ms ease-in-out infinite;
+}
+
+.prompt-bar__eq i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.prompt-bar__eq i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes prompt-bar-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.prompt-bar__send {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  transition: background-color 200ms ease, color 200ms ease, transform 160ms var(--pb-ease-out);
+}
+
+.prompt-bar__send[data-armed] {
+  background: #f5f5f5;
+  color: #09090b;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
+}
+
+.prompt-bar__send:active {
+  transform: scale(0.94);
+}
+
+.prompt-bar__glyph {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
