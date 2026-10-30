@@ -1130,6 +1130,7 @@
         <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal(event)">Prospectos (<span id="nav-leads-count">77</span>)</button>
         <button class="nav-segmented-btn" id="btn-open-demos" onclick="openDemosTab(event)">Prototipos Web</button>
         <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal(event)">Citas y Agenda</button>
+        <button class="nav-segmented-btn" id="btn-open-wa" onclick="openWhatsAppTab(event)">Conectar WhatsApp</button>
       </div>
     </nav>
 
@@ -1847,6 +1848,8 @@
         document.getElementById("btn-open-demos")?.classList.add("active");
       } else if (tab === "agenda") {
         document.getElementById("btn-open-agenda")?.classList.add("active");
+      } else if (tab === "whatsapp") {
+        document.getElementById("btn-open-wa")?.classList.add("active");
       }
     }
 
@@ -1883,9 +1886,11 @@
     // Evitar que hacer clic en el fondo o en los botones cierre la vista
     // NO se cierra al hacer clic en el backdrop
 
-    function openWhatsAppTab() {
+    function openWhatsAppTab(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       leadsModal.classList.add("active");
       switchTab("whatsapp");
+      updateNavButtons("whatsapp");
     }
 
     function switchTab(tab) {
@@ -1937,12 +1942,17 @@
       }
     }
 
+    let qrPollTimer = null;
     function switchWaSubtab(sub) {
       document.getElementById("subtab-code-btn").classList.toggle("active", sub === "code");
       document.getElementById("subtab-qr-btn").classList.toggle("active", sub === "qr");
       document.getElementById("wa-subtab-code").style.display = sub === "code" ? "block" : "none";
       document.getElementById("wa-subtab-qr").style.display = sub === "qr" ? "block" : "none";
-      if (sub === "qr") loadSheetQrData();
+      if (qrPollTimer) clearInterval(qrPollTimer);
+      if (sub === "qr") {
+        loadSheetQrData();
+        qrPollTimer = setInterval(loadSheetQrData, 3500);
+      }
     }
 
     async function loadSheetQrData() {
@@ -1951,6 +1961,14 @@
         const data = await res.json();
         const img = document.getElementById("wa-sheet-qr-img");
         const loader = document.getElementById("wa-sheet-qr-loader");
+        if (data.status === "open") {
+          img.style.display = "none";
+          loader.innerHTML = '<div style="color:#22c55e; font-weight:800; font-size:0.9rem;">✓ WhatsApp Conectado Exitosamente</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Sebax ya está activo 24/7</div>';
+          loader.style.display = "block";
+          if (qrPollTimer) clearInterval(qrPollTimer);
+          checkWhatsAppStatus();
+          return;
+        }
         if (data.qr) {
           img.src = data.qr;
           img.style.display = "block";

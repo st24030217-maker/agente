@@ -36,9 +36,9 @@ const botSentMessageIds = new Set();
 function normalizePhone(phone) {
   let clean = (phone || "").toString().replace(/\D/g, "");
   if (clean.length === 10) {
-    clean = "521" + clean;
-  } else if (clean.length === 12 && clean.startsWith("52") && !clean.startsWith("521")) {
-    clean = "521" + clean.slice(2);
+    clean = "52" + clean;
+  } else if (clean.length === 13 && clean.startsWith("521")) {
+    clean = "52" + clean.slice(3);
   }
   return clean;
 }
@@ -85,10 +85,10 @@ app.get("/qr-data", async (req, res) => {
 
 app.post("/pairing-code", async (req, res) => {
   try {
-    const phone = req.body?.phone || "5218719164677";
-    const clean = normalizePhone(phone);
+    const rawPhone = req.body?.phone || "8719164677";
+    let clean = normalizePhone(rawPhone);
     if (clean.length < 10) {
-      return res.status(400).json({ error: "Número no válido. Debe incluir clave lada (ej. 8711234567 o 5218711234567)." });
+      return res.status(400).json({ error: "Número no válido. Ingresa tu número de 10 dígitos (ej. 8719164677)." });
     }
     if (!sock) {
       return res.status(503).json({ error: "El conector de WhatsApp está arrancando. Intenta en 5 segundos." });
@@ -97,7 +97,18 @@ app.post("/pairing-code", async (req, res) => {
       return res.json({ already_connected: true });
     }
 
-    const rawCode = await sock.requestPairingCode(clean);
+    let rawCode;
+    try {
+      rawCode = await sock.requestPairingCode(clean);
+    } catch (pairErr) {
+      console.warn("Fallo con formato", clean, pairErr.message, "- Intentando alternativa...");
+      if (clean.startsWith("52") && !clean.startsWith("521")) {
+        const altDigits = "521" + clean.slice(2);
+        rawCode = await sock.requestPairingCode(altDigits);
+      } else {
+        throw pairErr;
+      }
+    }
     const formattedCode = rawCode ? rawCode.match(/.{1,4}/g)?.join("-") || rawCode : "";
     res.json({ success: true, code: formattedCode });
   } catch (err) {
