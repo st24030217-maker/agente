@@ -33,6 +33,7 @@ class Settings(BaseModel):
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
+    whatsapp_provider: str = os.getenv("WHATSAPP_PROVIDER", "baileys").strip().lower()
     whatsapp_auth_dir: str = str(WHATSAPP_AUTH_DIR)
     # Meta WhatsApp Cloud API credentials must be provided through the environment.
     meta_wa_token: str = os.getenv("META_WA_TOKEN", "")

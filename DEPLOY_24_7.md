@@ -49,12 +49,17 @@ Render usa almacenamiento efímero por defecto. Sin un disco persistente, un rei
 1. Despliega la versión actual del repositorio como servicio Docker y configura `GEMINI_API_KEY` y `GEMINI_MODEL=gemini-3.5-flash-lite`.
 2. En **Settings > Disks**, crea un disco persistente montado en `/var/data`. Los discos persistentes requieren un tipo de instancia de Render que los admita.
 3. En **Environment**, configura:
+   - `WHATSAPP_PROVIDER=cloud_api`
+   - `META_WA_TOKEN`: token de acceso para el número registrado en Cloud API
+   - `META_WA_PHONE_NUMBER_ID`: ID del número real registrado en Meta (no el número de prueba)
+   - `META_WA_VERIFY_TOKEN`: valor secreto elegido para verificar el webhook
+   - `ALLOWED_NUMBERS`: teléfonos permitidos, incluyendo el prefijo de país
    - `WHATSAPP_AUTH_DIR=/var/data/whatsapp-auth`
    - `DATA_DIR=/var/data/data`
-4. Guarda los cambios y espera a que termine el despliegue.
-5. Abre **Conectar WhatsApp** y escanea de nuevo el QR una sola vez. Confirma que `/api/bridge/status` reporte `"status":"open"` y un usuario vinculado.
+4. En Meta Developers, configura el callback `https://agente-hgba.onrender.com/webhook/whatsapp`, usa el mismo `META_WA_VERIFY_TOKEN` y suscribe la aplicación a los eventos de mensajes de WhatsApp.
+5. Guarda los cambios y espera a que termine el despliegue. En modo Cloud API no hace falta escanear un QR; el número debe aparecer registrado en Meta y `/api/status` debe indicar `whatsapp_provider: "cloud_api"`.
 
-La sesión vinculada antes de montar el disco puede haberse perdido. Si Render muestra `qr_ready`, hay que volver a escanear después de configurar el almacenamiento persistente.
+La Cloud API usa un número de teléfono registrado en la plataforma de Meta. El número de prueba no sirve como el número remitente de tu agente. La sesión QR de Baileys es un método aparte y no se usa cuando `WHATSAPP_PROVIDER=cloud_api`.
 
 ### C. Despliegue en un VPS Linux (Ubuntu 24.04 / Hetzner / DigitalOcean / Hostinger)
 1. Conéctate a tu servidor por SSH.

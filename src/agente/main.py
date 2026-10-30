@@ -230,6 +230,11 @@ def create_demo_api(payload: DemoCreateRequest):
 @app.get("/qr")
 async def get_qr_page():
     """Proxy para mostrar el código QR de vinculación de WhatsApp directamente en el navegador."""
+    if settings.whatsapp_provider == "cloud_api":
+        return Response(
+            content="<h3>WhatsApp Cloud API está seleccionado. Esta integración no usa código QR.</h3>",
+            media_type="text/html"
+        )
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr", timeout=10.0)
@@ -240,6 +245,13 @@ async def get_qr_page():
 @app.get("/api/bridge/status")
 async def get_bridge_status():
     """Estado de conexión del conector de WhatsApp."""
+    if settings.whatsapp_provider == "cloud_api":
+        credentials_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
+        return {
+            "status": "cloud_api_configured" if credentials_configured else "cloud_api_unconfigured",
+            "user": None,
+            "webhook_configured": bool(settings.meta_wa_verify_token)
+        }
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/status", timeout=5.0)
@@ -250,6 +262,9 @@ async def get_bridge_status():
 @app.get("/qr-data")
 async def get_qr_data_proxy():
     """Proxy para datos del QR en tiempo real."""
+    if settings.whatsapp_provider == "cloud_api":
+        status = await get_bridge_status()
+        return {**status, "qr": None}
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr-data", timeout=5.0)
@@ -314,11 +329,13 @@ async def restore_bridge_session(request: Request):
 @app.get("/api/status")
 async def api_status():
     bridge_status = await get_bridge_status()
+    cloud_api_mode = settings.whatsapp_provider == "cloud_api"
     return {
         "status": "online",
         "agent": "Sebax",
         "model": settings.gemini_model,
-        "whatsapp_connected": bridge_status.get("status") == "open",
+        "whatsapp_provider": settings.whatsapp_provider,
+        "whatsapp_connected": None if cloud_api_mode else bridge_status.get("status") == "open",
         "whatsapp_status": bridge_status.get("status", "unknown")
     }
 

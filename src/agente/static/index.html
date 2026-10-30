@@ -1533,6 +1533,13 @@
             </div>
           </div>
 
+          <div id="wa-tab-cloud-view" style="display:none; text-align:center; padding:1.5rem 1rem;">
+            <div style="font-size:1.1rem; font-weight:800; color:#ffffff; margin-bottom:0.5rem;">Modo WhatsApp Cloud API</div>
+            <div id="wa-cloud-status-desc" style="font-size:0.8rem; color:var(--text-muted); line-height:1.5; max-width:440px; margin:0 auto;">
+              Esta integración oficial no usa QR. Registra un número real en Meta y configura sus credenciales y webhook en Render.
+            </div>
+          </div>
+
           <div id="wa-tab-pairing-view">
             <div class="autopilot-banner" style="background:rgba(245, 158, 11, 0.1); border-color:rgba(245, 158, 11, 0.3); margin-bottom:1rem;">
               <div class="autopilot-left">
@@ -2032,6 +2039,13 @@
         const data = await res.json();
         const img = document.getElementById("wa-sheet-qr-img");
         const loader = document.getElementById("wa-sheet-qr-loader");
+        if (data.status === "cloud_api_configured" || data.status === "cloud_api_unconfigured") {
+          img.style.display = "none";
+          loader.textContent = "Cloud API seleccionada. No se requiere código QR; revisa la configuración de Meta y Render.";
+          loader.style.display = "block";
+          if (qrPollTimer) clearInterval(qrPollTimer);
+          return;
+        }
         if (data.status === "open") {
           img.style.display = "none";
           loader.innerHTML = '<div style="color:#22c55e; font-weight:800; font-size:0.9rem;">✓ Sesión de WhatsApp conectada</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">La conexión está activa en este momento.</div>';
@@ -2131,9 +2145,12 @@
         const label = document.getElementById("wa-status-label");
         const connectedView = document.getElementById("wa-tab-connected-view");
         const pairingView = document.getElementById("wa-tab-pairing-view");
+        const cloudView = document.getElementById("wa-tab-cloud-view");
+        const cloudDesc = document.getElementById("wa-cloud-status-desc");
         const userDesc = document.getElementById("wa-connected-user-desc");
 
         const isOnline = data.status === "open";
+        const isCloudApi = data.status === "cloud_api_configured" || data.status === "cloud_api_unconfigured";
         if (dot) {
           if (isOnline) {
             dot.classList.add("connected");
@@ -2143,12 +2160,18 @@
         }
         if (btn && label) {
           btn.className = isOnline ? "glass-pill wa-status-pill connected" : "glass-pill wa-status-pill disconnected";
-          label.textContent = isOnline ? "WhatsApp Conectado" : "WhatsApp";
+          label.textContent = isOnline ? "WhatsApp Conectado" : (isCloudApi ? "WhatsApp Cloud API" : "WhatsApp");
         }
 
         if (connectedView && pairingView) {
           connectedView.style.display = isOnline ? "block" : "none";
-          pairingView.style.display = isOnline ? "none" : "block";
+          pairingView.style.display = isOnline || isCloudApi ? "none" : "block";
+          if (cloudView) cloudView.style.display = isCloudApi ? "block" : "none";
+          if (cloudDesc && isCloudApi) {
+            cloudDesc.textContent = data.status === "cloud_api_configured"
+              ? "Credenciales Cloud API encontradas. Falta confirmar que el número real esté registrado en Meta y que el webhook esté suscrito a mensajes."
+              : "Faltan META_WA_TOKEN o META_WA_PHONE_NUMBER_ID en Render. Esta integración oficial no usa QR.";
+          }
           if (isOnline && userDesc && data.user && data.user.id) {
             userDesc.textContent = "Conectado al numero " + data.user.id.split("@")[0] + ". Sebax esta activo 24/7 en Torreon, Gomez y Lerdo.";
           }
@@ -2721,4 +2744,3 @@
   </script>
 </body>
 </html>
-
