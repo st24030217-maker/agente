@@ -21,3 +21,5 @@ data/
 *.sqlite
 *.log
 *.mp3
+
+scratch/

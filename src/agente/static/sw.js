@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-full-v12";
+const CACHE_NAME = "sebax-crystal-v15";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
