@@ -21,6 +21,11 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
             target = settings.allowed_numbers[0] if settings.allowed_numbers else ""
         
         clean_target = "".join(filter(str.isdigit, target))
+        # Normalización para números celulares de México en Meta Cloud API (remover el '1' después de 52)
+        if clean_target.startswith("521") and len(clean_target) == 13:
+            clean_target = "52" + clean_target[3:]
+        elif len(clean_target) == 10:
+            clean_target = "52" + clean_target
         if clean_target:
             headers = {
                 "Authorization": f"Bearer {settings.meta_wa_token}",

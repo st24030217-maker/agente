@@ -15,7 +15,7 @@ class Settings(BaseModel):
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
     allowed_numbers: list[str] = [
         num.strip() 
-        for num in os.getenv("ALLOWED_NUMBERS", "").split(",") 
+        for num in os.getenv("ALLOWED_NUMBERS", "528719164677,5218719164677").split(",") 
         if num.strip()
     ]
     # Directorio de trabajo predeterminado para herramientas de código y terminal
