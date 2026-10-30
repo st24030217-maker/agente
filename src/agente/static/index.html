@@ -2056,15 +2056,23 @@
         const res = await fetch("/api/bridge/status");
         const data = await res.json();
         const btn = document.getElementById("wa-status-btn");
+        const dot = document.getElementById("wa-status-dot");
         const label = document.getElementById("wa-status-label");
         const connectedView = document.getElementById("wa-tab-connected-view");
         const pairingView = document.getElementById("wa-tab-pairing-view");
         const userDesc = document.getElementById("wa-connected-user-desc");
 
         const isOnline = data.status === "open";
+        if (dot) {
+          if (isOnline) {
+            dot.classList.add("connected");
+          } else {
+            dot.classList.remove("connected");
+          }
+        }
         if (btn && label) {
           btn.className = isOnline ? "glass-pill wa-status-pill connected" : "glass-pill wa-status-pill disconnected";
-          label.textContent = isOnline ? "WhatsApp" : "WhatsApp";
+          label.textContent = isOnline ? "WhatsApp Conectado" : "WhatsApp";
         }
 
         if (connectedView && pairingView) {

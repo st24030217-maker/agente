@@ -172,7 +172,8 @@ async def whatsapp_webhook(request: Request):
 
     logger.info("Mensaje Baileys recibido de [%s]: %s", sender, message)
 
-    if settings.allowed_numbers:
+    is_self = sender.lower() in ["self", "self_user", "yo", "mismo"]
+    if settings.allowed_numbers and not is_self:
         sender_digits = "".join(filter(str.isdigit, sender))
         is_allowed = any(
             "".join(filter(str.isdigit, allowed)) in sender_digits
@@ -186,7 +187,7 @@ async def whatsapp_webhook(request: Request):
         coordinator.reset_chat(sender)
         return {"reply": "Conversacion y contexto reiniciados exitosamente."}
 
-    reply = await coordinator.process_message(chat_id=sender, message=message, is_admin=False)
+    reply = await coordinator.process_message(chat_id=sender, message=message, is_admin=is_self)
     return {"reply": reply}
 
 @app.post("/chat")

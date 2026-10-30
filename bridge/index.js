@@ -554,6 +554,7 @@ async function startWhatsApp() {
           "";
 
         if (incomingText && incomingText.trim() !== "") {
+          let leadReplied = false;
           try {
             const resp = await fetch("http://127.0.0.1:8000/api/leads/incoming", {
               method: "POST",
@@ -566,14 +567,40 @@ async function startWhatsApp() {
               const data = await resp.json();
               if (data.is_lead && data.reply) {
                 const sent = await sock.sendMessage(remoteJid, { text: data.reply });
-                if (sent?.key?.id) {
-                  botSentMessageIds.add(sent.key.id);
-                }
+                if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
                 console.log(` [Sebax respondio automaticamente al prospecto ${remoteJid}] -> "${data.reply}"`);
+                leadReplied = true;
               }
             }
           } catch (e) {
             console.error("Error al procesar mensaje de prospecto entrante:", e.message);
+          }
+
+          if (!leadReplied) {
+            // Es un nuevo cliente, prospecto o usuario: procesar con Sebax AI
+            try {
+              const response = await fetch(AGENT_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  sender: remoteJid,
+                  message: incomingText
+                }),
+                signal: AbortSignal.timeout(90000)
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                const replyText = data?.reply || "";
+                if (replyText) {
+                  const sent = await sock.sendMessage(remoteJid, { text: replyText });
+                  if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
+                  console.log(` [Sebax respondio a ${remoteJid}] -> "${replyText}"`);
+                }
+              }
+            } catch (err) {
+              console.error("Error al obtener respuesta de Sebax para", remoteJid, err.message);
+            }
           }
         }
         return;

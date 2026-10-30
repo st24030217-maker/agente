@@ -13,9 +13,11 @@ DATA_DIR.mkdir(exist_ok=True)
 class Settings(BaseModel):
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+    # Lista blanca de números autorizados separados por coma con código de país.
+    # Si se deja vacío (por defecto), Sebax responderá como agente comercial público a cualquier chat que le escriba.
     allowed_numbers: list[str] = [
         num.strip() 
-        for num in os.getenv("ALLOWED_NUMBERS", "528719164677,5218719164677").split(",") 
+        for num in os.getenv("ALLOWED_NUMBERS", "").split(",") 
         if num.strip()
     ]
     # Directorio de trabajo predeterminado para herramientas de código y terminal
