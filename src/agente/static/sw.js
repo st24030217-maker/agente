@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-avatar-v11";
+const CACHE_NAME = "sebax-full-v12";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();

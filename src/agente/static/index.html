@@ -2502,8 +2502,88 @@
       micBtn.title = "Reconocimiento de voz no soportado";
     }
 
+    
+    // ----------------------------------------------------
+    // PROTOTIPOS WEB & DEMOS HANDLERS
+    // ----------------------------------------------------
+    function openDemosTab() {
+      openLeadsModal();
+      switchTab('demos');
+    }
+
+    async function loadDemosData() {
+      const container = document.getElementById("demos-list-container");
+      if (!container) return;
+      container.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem;">Cargando prototipos web...</div>';
+      try {
+        const res = await fetch("/api/demos");
+        const demos = await res.json();
+        if (!demos || demos.length === 0) {
+          container.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.8rem;">No hay prototipos generados aún.</div>';
+          return;
+        }
+        container.innerHTML = demos.map(d => `
+          <div class="lead-card">
+            <div class="lead-card-header">
+              <div class="lead-name">${escapeHtml(d.business_name)}</div>
+              <span class="lead-status-tag" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); color:#fbbf24;">${escapeHtml(d.niche_title || d.niche)}</span>
+            </div>
+            <div class="lead-meta-line">${escapeHtml(d.tagline || '')} · ${escapeHtml(d.city || '')}</div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+              <a href="/demo/${escapeHtml(d.slug)}" target="_blank" class="btn-launch" style="padding:6px 14px; font-size:0.74rem; text-decoration:none;">Ver Prototipo</a>
+              <button class="btn-toggle-auto" style="padding:6px 12px; font-size:0.74rem;" onclick="navigator.clipboard.writeText(window.location.origin + '/demo/${escapeHtml(d.slug)}'); alert('Enlace del demo copiado al portapapeles');">Copiar Link</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = `<div style="color:#ef4444; font-size:0.8rem; text-align:center;">Error al cargar prototipos: ${e.message}</div>`;
+      }
+    }
+
+    async function createDemoFromUi() {
+      const name = document.getElementById("demo-name").value.trim();
+      if (!name) {
+        alert("Por favor escribe el nombre del negocio");
+        return;
+      }
+      const niche = document.getElementById("demo-niche").value;
+      const city = document.getElementById("demo-city").value.trim() || "Torreón, Coahuila";
+      try {
+        const res = await fetch("/api/demos/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ business_name: name, niche: niche, city: city })
+        });
+        const data = await res.json();
+        alert("¡Prototipo interactivo generado con éxito para " + name + "!");
+        document.getElementById("demo-name").value = "";
+        loadDemosData();
+        window.open("/demo/" + data.slug, "_blank");
+      } catch (e) {
+        alert("Error al generar prototipo: " + e.message);
+      }
+    }
+
+    function toggleReplayVoice() {
+      if (isSpeaking) {
+        stopVoice();
+      } else if (lastSpokenText) {
+        playNeuralVoice(lastSpokenText);
+      } else {
+        const bubble = document.getElementById("speech-bubble");
+        if (bubble && bubble.textContent) {
+          playNeuralVoice(bubble.textContent);
+        }
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       initThinkingOrbs();
+      checkWhatsAppStatus();
+      loadLeadsData();
+      loadAppointmentsData();
+      loadAutopilotStatus();
+      loadDemosData();
       const urlParams = new URLSearchParams(window.location.search);
       const action = urlParams.get("action");
       if (action === "leads") {
