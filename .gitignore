@@ -11,13 +11,14 @@ build/
 node_modules/
 npm-debug.log*
 
-# WhatsApp Baileys Auth Session (IMPORTANTE: contiene tus credenciales de sesión)
+# WhatsApp Baileys Auth Session
 bridge/auth_info_baileys/
 auth_info_baileys/
 
-# Environment and Data
+# Environment and Temporary Files
 .env
-data/
+data/*.mp3
+data/*.sqlite
 *.sqlite
 *.log
 *.mp3

@@ -1,0 +1,182 @@
+{
+  "cafe-morelos-cafeteria": {
+    "slug": "cafe-morelos-cafeteria",
+    "business_name": "Café Morelos",
+    "niche": "cafeteria",
+    "niche_key": "cafeteria",
+    "niche_title": "Cafetería de Especialidad",
+    "tagline": "Café de origen, repostería artesanal y momentos únicos en La Laguna.",
+    "city": "Torreón, Coahuila",
+    "phone": "5218719164677",
+    "primary_color": "#f59e0b",
+    "accent_color": "#d97706",
+    "bg_color": "#0c0a09",
+    "categories": [
+      "Café Caliente",
+      "Bebidas Frías",
+      "Repostería",
+      "Desayunos"
+    ],
+    "items": [
+      {
+        "id": "c1",
+        "name": "Americano de Especialidad",
+        "cat": "Café Caliente",
+        "price": 55,
+        "desc": "Extracción doble de granos seleccionados de Chiapas y Oaxaca con notas a chocolate y avellana."
+      },
+      {
+        "id": "c2",
+        "name": "Flat White Artesanal",
+        "cat": "Café Caliente",
+        "price": 68,
+        "desc": "Doble ristretto con microespuma de leche sedosa a temperatura perfecta."
+      },
+      {
+        "id": "c3",
+        "name": "Cold Brew Nitro Lagunero",
+        "cat": "Bebidas Frías",
+        "price": 75,
+        "desc": "Maceración en frío por 18 horas infusionado con nitrógeno para una textura cremosa."
+      },
+      {
+        "id": "c4",
+        "name": "Iced Matcha Latte",
+        "cat": "Bebidas Frías",
+        "price": 80,
+        "desc": "Matcha ceremonial japonés con leche de avena y un toque de vainilla natural."
+      },
+      {
+        "id": "c5",
+        "name": "Croissant Francés de Mantequilla",
+        "cat": "Repostería",
+        "price": 52,
+        "desc": "Hojaldrado tradicional con mantequilla de alta calidad, dorado y crujiente."
+      },
+      {
+        "id": "c6",
+        "name": "Toast de Aguacate y Huevo Poché",
+        "cat": "Desayunos",
+        "price": 98,
+        "desc": "Pan rústico de masa madre, aguacate fresco, semillas tostadas y aceite de oliva virgen."
+      }
+    ],
+    "created_at": "2026-10-28 16:14:26",
+    "agency_name": "SSSSolutions",
+    "agency_instagram": "https://www.instagram.com/ssss.olutions",
+    "agency_portfolio": "https://st24030217-maker.github.io/cv-salinas/"
+  },
+  "tacos-el-huasteco-restaurante": {
+    "slug": "tacos-el-huasteco-restaurante",
+    "business_name": "Tacos El Huasteco",
+    "niche": "restaurante",
+    "niche_key": "restaurante",
+    "niche_title": "Restaurante y Cocina Urbana",
+    "tagline": "Sabor auténtico, ingredientes de primera y servicio directo a tu mesa o domicilio.",
+    "city": "Gómez Palacio, Dgo",
+    "phone": "5218719164677",
+    "primary_color": "#ef4444",
+    "accent_color": "#dc2626",
+    "bg_color": "#09090b",
+    "categories": [
+      "Especialidades",
+      "Tacos y Costras",
+      "Entradas",
+      "Bebidas"
+    ],
+    "items": [
+      {
+        "id": "r1",
+        "name": "Orden de Tacos al Pastor Especial (5 piezas)",
+        "cat": "Tacos y Costras",
+        "price": 95,
+        "desc": "Carne marinada con receta secreta, piña asada, cebolla y cilantro en tortilla hecha a mano."
+      },
+      {
+        "id": "r2",
+        "name": "Costra de Arrachera con Queso Menonita",
+        "cat": "Tacos y Costras",
+        "price": 115,
+        "desc": "Arrachera marinada al carbón envuelta en costra crujiente de queso sobre tortilla de harina."
+      },
+      {
+        "id": "r3",
+        "name": "Gringa Suprema de Asada",
+        "cat": "Especialidades",
+        "price": 85,
+        "desc": "Doble tortilla de harina con queso fundido y carne asada al punto."
+      },
+      {
+        "id": "r4",
+        "name": "Guacamole Tradicional con Totopos",
+        "cat": "Entradas",
+        "price": 80,
+        "desc": "Aguacate fresco preparado al momento con pico de gallo y totopos de maíz azul."
+      },
+      {
+        "id": "r5",
+        "name": "Agua Fresca Natural de Temporada (1 Litro)",
+        "cat": "Bebidas",
+        "price": 45,
+        "desc": "Horchata artesanal con canela o Jamaica fresca 100% natural."
+      }
+    ],
+    "created_at": "2026-10-28 16:14:26",
+    "agency_name": "SSSSolutions",
+    "agency_instagram": "https://www.instagram.com/ssss.olutions",
+    "agency_portfolio": "https://st24030217-maker.github.io/cv-salinas/"
+  },
+  "pasteleria-la-petite-pasteleria": {
+    "slug": "pasteleria-la-petite-pasteleria",
+    "business_name": "Pastelería La Petite",
+    "niche": "pasteleria",
+    "niche_key": "pasteleria",
+    "niche_title": "Pastelería y Repostería Fina",
+    "tagline": "Diseños personalizados, texturas delicadas y el toque dulce que tus eventos merecen.",
+    "city": "Torreón, Coahuila",
+    "phone": "5218719164677",
+    "primary_color": "#ec4899",
+    "accent_color": "#db2777",
+    "bg_color": "#0b0a0f",
+    "categories": [
+      "Pasteles de Línea",
+      "Individuales",
+      "Galletas",
+      "Postres Especiales"
+    ],
+    "items": [
+      {
+        "id": "p1",
+        "name": "Pastel Tres Leches Frutos Rojos (12 personas)",
+        "cat": "Pasteles de Línea",
+        "price": 380,
+        "desc": "Bizcocho esponjoso bañado en infusión de tres leches con fresas, zarzamoras y crema batida."
+      },
+      {
+        "id": "p2",
+        "name": "Cheesecake Horneado Estilo Nueva York",
+        "cat": "Pasteles de Línea",
+        "price": 360,
+        "desc": "Cremoso con base de galleta de mantequilla y coulis artesanal de frutos silvestres."
+      },
+      {
+        "id": "p3",
+        "name": "Caja de Cupcakes Gourmet (6 piezas)",
+        "cat": "Individuales",
+        "price": 180,
+        "desc": "Sabores surtidos: Red Velvet, Chocolate Belga, Zanahoria con Nuez y Vainilla Francesa."
+      },
+      {
+        "id": "p4",
+        "name": "Galletas Choco-Nut Rellenas (4 piezas)",
+        "cat": "Galletas",
+        "price": 125,
+        "desc": "Galletas gigantes con chispas de chocolate belga y centro líquido de avellana."
+      }
+    ],
+    "created_at": "2026-10-28 16:14:26",
+    "agency_name": "SSSSolutions",
+    "agency_instagram": "https://www.instagram.com/ssss.olutions",
+    "agency_portfolio": "https://st24030217-maker.github.io/cv-salinas/"
+  }
+}

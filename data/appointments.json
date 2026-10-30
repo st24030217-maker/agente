@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "business_name": "Taller Mecánico El Rayo",
+    "client_name": "Don Raymundo",
+    "phone": "8711234567",
+    "date_time": "Mañana 11:00 AM",
+    "notes": "Interesado en cotizacion",
+    "status": "confirmada",
+    "created_at": "2026-10-27 18:56:27"
+  }
+]

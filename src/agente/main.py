@@ -279,6 +279,34 @@ async def post_bridge_reset():
         except Exception as e:
             return {"error": str(e)}
 
+@app.get("/api/bridge/backup")
+def backup_bridge_session():
+    """Genera un backup en memoria de los archivos de autenticación de Baileys."""
+    auth_dir = BASE_DIR / "bridge" / "auth_info_baileys"
+    if not auth_dir.exists():
+        return {"error": "No auth dir found", "files": {}}
+    files = {}
+    for f in auth_dir.glob("*"):
+        if f.is_file():
+            try:
+                files[f.name] = f.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+    return {"files": files, "count": len(files)}
+
+@app.post("/api/bridge/restore")
+async def restore_bridge_session(request: Request):
+    """Restaura los archivos de autenticación de Baileys desde un backup."""
+    data = await request.json()
+    files = data.get("files", {})
+    if not files:
+        return {"error": "No files provided"}
+    auth_dir = BASE_DIR / "bridge" / "auth_info_baileys"
+    auth_dir.mkdir(parents=True, exist_ok=True)
+    for name, content in files.items():
+        (auth_dir / name).write_text(content, encoding="utf-8")
+    return {"success": True, "restored": len(files)}
+
 @app.get("/api/status")
 def api_status():
     return {
