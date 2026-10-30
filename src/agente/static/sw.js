@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-topography-promptbar-v16";
+const CACHE_NAME = "sebax-fixed-nav-v17";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();

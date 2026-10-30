@@ -587,7 +587,7 @@
     /* 4. PRIMARY DASHBOARD PANELS (3 Panels) */
     .primary-dashboard-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1.2fr;
+      grid-template-columns: 1fr;
       gap: 14px;
     }
 
@@ -1122,14 +1122,14 @@
     <nav class="nav-workspace-row">
       <div class="nav-active-pill">
         <span class="pill-dot"></span>
-        <span>Sebax Commercial Workspace</span>
+        <span>SEBAX</span>
       </div>
 
       <div class="nav-segmented-bar">
-        <button class="nav-segmented-btn active" onclick="switchTab('leads'); closeLeadsModal();">Chat &amp; Asistente</button>
-        <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal()">Prospectos (<span id="nav-leads-count">77</span>)</button>
-        <button class="nav-segmented-btn" onclick="openDemosTab()">Prototipos Web</button>
-        <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal()">Citas y Agenda</button>
+        <button class="nav-segmented-btn active" id="nav-btn-chat" onclick="openChatTab()">Chat &amp; Asistente</button>
+        <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal(event)">Prospectos (<span id="nav-leads-count">77</span>)</button>
+        <button class="nav-segmented-btn" id="btn-open-demos" onclick="openDemosTab(event)">Prototipos Web</button>
+        <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal(event)">Citas y Agenda</button>
       </div>
     </nav>
 
@@ -1255,30 +1255,7 @@
         </div>
       </div>
 
-      <!-- Panel 2: Conexión WhatsApp -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">
-          <span class="panel-tag">CANAL WHATSAPP</span>
-          <span class="panel-accent-badge" style="background:rgba(50,212,102,0.12); border-color:rgba(50,212,102,0.3); color:#86efac;">PUENTE 24/7</span>
-        </div>
-        <div class="panel-main-val" id="dash-wa-status-text">Baileys &amp; Meta Cloud</div>
-        <div class="panel-sub-line">
-          <span class="wa-status-dot" id="dash-wa-status-dot"></span>
-          <span id="dash-wa-status-desc">Esperando vinculación QR en puerto 3000</span>
-        </div>
-      </div>
 
-      <!-- Panel 3: Piloto Automático 24/7 -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">
-          <span class="panel-tag">PILOTO AUTOMÁTICO</span>
-          <span class="panel-accent-badge">ROTACIÓN CONTINUA</span>
-        </div>
-        <div class="panel-main-val">Ciclo Activo · Cada 25m</div>
-        <div class="panel-sub-line">
-          <span>Próximo lote: 2 prospectos</span> · Giros: Cafeterías, dulcerías, florerías
-        </div>
-      </div>
     </section>
 
     <!-- 5. EXECUTIVE METRICS ROW -->
@@ -1311,7 +1288,7 @@
 
   <!-- MODAL / DRAWER -->
   <div class="leads-modal" id="leads-modal">
-    <div class="leads-sheet">
+    <div class="leads-sheet" onclick="event.stopPropagation()">
       <div class="sheet-header">
         <div>
           <div class="sheet-title" id="sheet-header-title">Centro de Operaciones SSSSolutions</div>
@@ -1859,26 +1836,52 @@
       sendCommand(q);
     }
 
-    // Modal de Leads, Piloto Automatico y Agenda
-    function openLeadsModal() {
+    // Navegación Segura entre Secciones (Sin Cierres Inesperados)
+    function updateNavButtons(tab) {
+      document.querySelectorAll(".nav-segmented-btn").forEach(btn => btn.classList.remove("active"));
+      if (tab === "chat") {
+        document.getElementById("nav-btn-chat")?.classList.add("active");
+      } else if (tab === "leads") {
+        document.getElementById("btn-open-leads")?.classList.add("active");
+      } else if (tab === "demos") {
+        document.getElementById("btn-open-demos")?.classList.add("active");
+      } else if (tab === "agenda") {
+        document.getElementById("btn-open-agenda")?.classList.add("active");
+      }
+    }
+
+    function openChatTab() {
+      closeLeadsModal();
+      updateNavButtons("chat");
+    }
+
+    function openLeadsModal(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       leadsModal.classList.add("active");
       switchTab("leads");
+      updateNavButtons("leads");
       loadLeadsData();
       loadAutopilotStatus();
     }
-    function openAgendaModal() {
+
+    function openAgendaModal(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       leadsModal.classList.add("active");
       switchTab("agenda");
+      updateNavButtons("agenda");
       loadAppointmentsData();
     }
+
     function closeLeadsModal() {
       leadsModal.classList.remove("active");
+      updateNavButtons("chat");
     }
-    btnOpenLeads.addEventListener("click", openLeadsModal);
+
+    // Botón X exclusivo para cerrar
     btnCloseLeads.addEventListener("click", closeLeadsModal);
-    leadsModal.addEventListener("click", (e) => {
-      if (e.target === leadsModal) closeLeadsModal();
-    });
+
+    // Evitar que hacer clic en el fondo o en los botones cierre la vista
+    // NO se cierra al hacer clic en el backdrop
 
     function openWhatsAppTab() {
       leadsModal.classList.add("active");
@@ -2457,9 +2460,12 @@
     // ----------------------------------------------------
     // PROTOTIPOS WEB & DEMOS HANDLERS
     // ----------------------------------------------------
-    function openDemosTab() {
-      openLeadsModal();
+    function openDemosTab(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      leadsModal.classList.add("active");
       switchTab('demos');
+      updateNavButtons("demos");
+      loadDemosData();
     }
 
     async function loadDemosData() {
