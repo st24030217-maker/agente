@@ -36,6 +36,7 @@ async function callFastAPI(endpoint, body) {
   for (const p of uniquePorts) {
     try {
       const url = `http://127.0.0.1:${p}${endpoint}`;
+      console.log(`[callFastAPI] POST a ${url}...`);
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,12 +44,17 @@ async function callFastAPI(endpoint, body) {
         signal: AbortSignal.timeout(60000)
       });
       if (res.ok) {
-        return await res.json();
+        const json = await res.json();
+        console.log(`[callFastAPI] Exito en ${url}`);
+        return json;
+      } else {
+        console.warn(`[callFastAPI] Status HTTP ${res.status} desde ${url}`);
       }
     } catch (e) {
-      // Intenta con el siguiente puerto
+      console.warn(`[callFastAPI] Puerto ${p} falló: ${e.message}`);
     }
   }
+  console.error(`[callFastAPI] Ningun puerto respondio (${uniquePorts.join(", ")})`);
   return null;
 }
 
@@ -63,9 +69,11 @@ const botSentMessageIds = new Set();
 function normalizePhone(phone) {
   let clean = (phone || "").toString().replace(/\D/g, "");
   if (clean.length === 10) {
-    clean = "52" + clean;
+    clean = "521" + clean;
+  } else if (clean.length === 12 && clean.startsWith("52")) {
+    clean = "521" + clean.slice(2);
   } else if (clean.length === 13 && clean.startsWith("521")) {
-    clean = "52" + clean.slice(3);
+    // Ya tiene el formato oficial 521 para WhatsApp
   }
   return clean;
 }
@@ -557,11 +565,17 @@ async function startWhatsApp() {
 
   sock.ev.on("messages.upsert", async (m) => {
     try {
+      if (!m.messages || !m.messages.length) return;
+      console.log(`[messages.upsert] Evento recibido. Type: ${m.type}, Mensajes: ${m.messages.length}`);
       const msg = m.messages[0];
       if (!msg || !msg.message) return;
 
       const remoteJid = msg.key.remoteJid;
       if (!remoteJid) return;
+
+      if (remoteJid.includes("broadcast") || remoteJid.includes("@newsletter") || remoteJid.endsWith("@g.us")) {
+        return;
+      }
 
       // Descartar mensajes emitidos por el propio bot
       if (msg.key.id && botSentMessageIds.has(msg.key.id)) {
@@ -571,80 +585,66 @@ async function startWhatsApp() {
 
       const isSelf = isSelfUser(remoteJid);
 
-      if (remoteJid.includes("broadcast") || remoteJid.includes("@newsletter") || remoteJid.endsWith("@g.us")) {
-        return;
-      }
-
       if (msg.key.fromMe && !isSelf) {
         return;
       }
 
-      // Si es un prospecto respondiendo a una propuesta
-      if (!isSelf) {
-        if (remoteJid.endsWith("@g.us") || remoteJid.includes("@newsletter")) {
-          return;
-        }
+      // Extraer texto de cualquier contenedor (normal, efimero, vista unica, etc.)
+      const mObj =
+        msg.message?.ephemeralMessage?.message ||
+        msg.message?.viewOnceMessage?.message ||
+        msg.message?.viewOnceMessageV2?.message ||
+        msg.message?.documentWithCaptionMessage?.message ||
+        msg.message;
 
-        const incomingText =
-          msg.message.conversation ||
-          msg.message.extendedTextMessage?.text ||
-          msg.message.imageMessage?.caption ||
-          "";
+      const incomingText = (
+        mObj?.conversation ||
+        mObj?.extendedTextMessage?.text ||
+        mObj?.imageMessage?.caption ||
+        mObj?.videoMessage?.caption ||
+        ""
+      ).trim();
 
-        if (incomingText && incomingText.trim() !== "") {
-          let leadReplied = false;
-          try {
-            const data = await callFastAPI("/api/leads/incoming", { sender: remoteJid, message: incomingText });
-            if (data && data.is_lead && data.reply) {
-              const sent = await sock.sendMessage(remoteJid, { text: data.reply });
-              if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
-              console.log(` [Sebax respondio al prospecto ${remoteJid}] -> "${data.reply}"`);
-              leadReplied = true;
-            }
-          } catch (e) {
-            console.error("Error al procesar mensaje entrante:", e.message);
-          }
+      if (!incomingText) return;
 
-          if (!leadReplied) {
-            try {
-              const data = await callFastAPI("/webhook/whatsapp", { sender: remoteJid, message: incomingText });
-              const replyText = data?.reply || "";
-              if (replyText) {
-                const sent = await sock.sendMessage(remoteJid, { text: replyText });
-                if (sent?.key?.id) botSentMessageIds.add(sent.key.id);
-                console.log(` [Sebax respondio a ${remoteJid}] -> "${replyText}"`);
-              }
-            } catch (err) {
-              console.error("Error al obtener respuesta de Sebax para", remoteJid, err.message);
-            }
-          }
-        }
-        return;
-      }
-
-      // Chat personal de Sebastian
-      const text =
-        msg.message.conversation ||
-        msg.message.extendedTextMessage?.text ||
-        msg.message.imageMessage?.caption ||
-        "";
-
-      if (!text || text.trim() === "") return;
-
-      console.log(` [Chat Personal (Tu) | ${remoteJid}] -> "${text}"`);
+      console.log(`[Mensaje Entrante de ${remoteJid}] (isSelf: ${isSelf}) -> "${incomingText}"`);
 
       let replyText = "";
-      try {
-        const data = await callFastAPI("/webhook/whatsapp", {
-          sender: "self_user",
-          message: text
-        });
-        replyText = data?.reply || "";
-      } catch (err) {
-        console.error("Error al conectar con agente Python:", err.message);
+
+      if (isSelf) {
+        try {
+          const data = await callFastAPI("/webhook/whatsapp", {
+            sender: "self_user",
+            message: incomingText
+          });
+          replyText = data?.reply || "";
+        } catch (err) {
+          console.error("Error al conectar con agente Python para chat personal:", err.message);
+        }
+      } else {
+        let leadReplied = false;
+        try {
+          const data = await callFastAPI("/api/leads/incoming", { sender: remoteJid, message: incomingText });
+          if (data && data.is_lead && data.reply) {
+            replyText = data.reply;
+            leadReplied = true;
+          }
+        } catch (e) {
+          console.error("Error al procesar mensaje de prospecto:", e.message);
+        }
+
+        if (!leadReplied) {
+          try {
+            const data = await callFastAPI("/webhook/whatsapp", { sender: remoteJid, message: incomingText });
+            replyText = data?.reply || "";
+          } catch (err) {
+            console.error("Error al obtener respuesta de Sebax para", remoteJid, err.message);
+          }
+        }
       }
 
       if (replyText) {
+        console.log(`[Enviando respuesta a ${remoteJid}] -> "${replyText.slice(0, 60)}..."`);
         const sent = await sock.sendMessage(remoteJid, { text: replyText });
         if (sent?.key?.id) {
           botSentMessageIds.add(sent.key.id);
@@ -653,10 +653,10 @@ async function startWhatsApp() {
             botSentMessageIds.delete(first);
           }
         }
-        console.log(` Respuesta enviada con exito a tu WhatsApp!`);
+        console.log(`[Respuesta entregada con exito a ${remoteJid}]`);
       }
     } catch (err) {
-      console.error("Error al procesar mensaje entrante:", err);
+      console.error("Error critico en messages.upsert:", err);
     }
   });
 }

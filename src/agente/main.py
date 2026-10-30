@@ -482,6 +482,28 @@ async def render_keepalive_loop():
             pass
         await asyncio.sleep(600) # Ping cada 10 minutos
 
+@app.get("/api/debug/logs")
+async def get_debug_logs():
+    """Devuelve las últimas líneas de logs del supervisor y procesos en Render."""
+    logs = {}
+    log_files = [
+        "/var/log/supervisor/bridge.out.log",
+        "/var/log/supervisor/bridge.err.log",
+        "/var/log/supervisor/fastapi.out.log",
+        "/var/log/supervisor/fastapi.err.log",
+    ]
+    for lf in log_files:
+        p = Path(lf)
+        if p.exists():
+            try:
+                lines = p.read_text(encoding="utf-8", errors="replace").splitlines()
+                logs[p.name] = lines[-60:]
+            except Exception as e:
+                logs[p.name] = [f"Error al leer: {e}"]
+        else:
+            logs[p.name] = ["Archivo no encontrado"]
+    return logs
+
 # Montar interfaz web interactiva con el Avatar 3D
 if STATIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
