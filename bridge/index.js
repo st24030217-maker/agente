@@ -1,5 +1,3 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 import express from "express";
 import qrcodeTerminal from "qrcode-terminal";
 import QRCode from "qrcode";
@@ -19,11 +17,16 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "..");
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const PORT = process.env.BRIDGE_PORT || 3000;
 const AGENT_WEBHOOK_URL = process.env.AGENT_WEBHOOK_URL || "http://127.0.0.1:8000/webhook/whatsapp";
+const authFolderSetting = process.env.WHATSAPP_AUTH_DIR || path.join(__dirname, "auth_info_baileys");
+const AUTH_FOLDER = path.isAbsolute(authFolderSetting)
+  ? authFolderSetting
+  : path.resolve(PROJECT_ROOT, authFolderSetting);
 
 async function callFastAPI(endpoint, body) {
   const candidatePorts = [
@@ -41,7 +44,7 @@ async function callFastAPI(endpoint, body) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(60000)
+        signal: AbortSignal.timeout(180000)
       });
       if (res.ok) {
         const json = await res.json();
@@ -65,17 +68,83 @@ let currentQR = null;
 let connectionState = "starting";
 let sock = null;
 const botSentMessageIds = new Set();
+const processedIncomingMessageIds = new Set();
+const messageStatusById = new Map();
+const deliveryStatusWaiters = new Map();
+
+function getDeliveryStatusName(status) {
+  return ({ 0: "error", 1: "pending", 2: "server_ack", 3: "delivery_ack", 4: "read", 5: "played" })[status] || "unknown";
+}
+
+function waitForDeliveryStatus(messageId, timeoutMs = 15000) {
+  if (!messageId) return Promise.resolve(null);
+
+  const currentStatus = messageStatusById.get(messageId);
+  if (currentStatus === 0 || currentStatus >= 3) {
+    return Promise.resolve(currentStatus);
+  }
+
+  return new Promise(resolve => {
+    const timeout = setTimeout(() => {
+      deliveryStatusWaiters.delete(messageId);
+      resolve(messageStatusById.get(messageId) ?? null);
+    }, timeoutMs);
+
+    deliveryStatusWaiters.set(messageId, status => {
+      clearTimeout(timeout);
+      deliveryStatusWaiters.delete(messageId);
+      resolve(status);
+    });
+  });
+}
 
 function normalizePhone(phone) {
   let clean = (phone || "").toString().replace(/\D/g, "");
   if (clean.length === 10) {
-    clean = "521" + clean;
-  } else if (clean.length === 12 && clean.startsWith("52")) {
-    clean = "521" + clean.slice(2);
+    clean = "52" + clean;
   } else if (clean.length === 13 && clean.startsWith("521")) {
-    // Ya tiene el formato oficial 521 para WhatsApp
+    clean = "52" + clean.slice(3);
   }
   return clean;
+}
+
+function getPhoneJidCandidates(phone) {
+  const digits = (phone || "").toString().replace(/\D/g, "");
+  const candidates = new Set([normalizePhone(digits)]);
+
+  if (digits.length === 10) {
+    candidates.add(`521${digits}`);
+  } else if (digits.length === 12 && digits.startsWith("52")) {
+    candidates.add(`521${digits.slice(2)}`);
+  } else if (digits.length === 13 && digits.startsWith("521")) {
+    candidates.add(`52${digits.slice(3)}`);
+  }
+
+  return [...candidates].filter(Boolean).map(number => `${number}@s.whatsapp.net`);
+}
+
+async function resolveRecipientJid(destination) {
+  if (!destination || destination.endsWith("@lid") || destination.endsWith("@g.us")) {
+    return destination;
+  }
+
+  const number = destination.includes("@")
+    ? destination.split("@")[0].split(":")[0]
+    : destination;
+  const candidates = getPhoneJidCandidates(number);
+  if (!candidates.length) {
+    throw new Error("No se pudo identificar el número de WhatsApp destinatario.");
+  }
+
+  const matches = await sock.onWhatsApp(...candidates);
+  const match = matches?.find(result => result.exists && result.jid);
+  if (!match) {
+    throw new Error("El número indicado no aparece registrado en WhatsApp.");
+  }
+
+  const resolvedJid = match.jid;
+  console.log(`[Destinatario resuelto por WhatsApp: ${match.jid}; LID: ${match.lid || "no disponible"}]`);
+  return resolvedJid;
 }
 
 function isSelfUser(jid) {
@@ -96,6 +165,32 @@ function isSelfUser(jid) {
     }
   }
   return false;
+}
+
+async function getMessageRecipientJid(msg) {
+  const phoneJid = msg.key.senderPn || msg.key.participantPn;
+  if (phoneJid) {
+    return resolveRecipientJid(phoneJid);
+  }
+  return msg.key.remoteJid;
+}
+
+function getDiagnosticReply(message) {
+  const normalized = message
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+
+  if (/^(prueba|test|diagnostico)\b/.test(normalized)) {
+    return "Recibí tu mensaje de prueba. El canal de WhatsApp está activo; este mensaje no ejecuta herramientas comerciales.";
+  }
+
+  if (/^(hola|hey|buenas|buenos dias|buenas tardes|buenas noches)[.!?]*$/.test(normalized)) {
+    return "Hola. Recibí tu mensaje por WhatsApp y estoy listo para ayudarte.";
+  }
+
+  return "";
 }
 
 app.get("/status", (req, res) => {
@@ -157,9 +252,8 @@ app.post("/pairing-code", async (req, res) => {
 
 app.post("/reset", async (req, res) => {
   try {
-    const authFolder = path.resolve(__dirname, "auth_info_baileys");
     try {
-      fs.rmSync(authFolder, { recursive: true, force: true });
+      fs.rmSync(AUTH_FOLDER, { recursive: true, force: true });
     } catch (e) {}
     connectionState = "starting";
     currentQR = null;
@@ -439,7 +533,7 @@ app.get("/qr", async (req, res) => {
           document.getElementById('pairingView').style.display = 'none';
           document.getElementById('connectedView').style.display = 'block';
           if (user) {
-            document.getElementById('connectedUserText').textContent = 'Conectado a ' + user + '. Sebax esta operando 24/7.';
+            document.getElementById('connectedUserText').textContent = 'Sesión conectada a ' + user + '. La conexión está activa en este momento.';
           }
         }
 
@@ -490,24 +584,29 @@ app.post("/send", async (req, res) => {
     return res.status(400).json({ error: "El texto del mensaje no puede estar vacio." });
   }
   try {
-    let jid = to || sock.user.id;
-    if (!jid.includes("@")) {
-      const cleanDigits = normalizePhone(jid);
-      jid = `${cleanDigits}@s.whatsapp.net`;
-    }
+    const jid = to ? await resolveRecipientJid(to) : sock.user.id;
     const sent = await sock.sendMessage(jid, { text });
     if (sent?.key?.id) {
       botSentMessageIds.add(sent.key.id);
     }
-    res.json({ success: true, jid });
+    console.log(`[Mensaje aceptado por el socket para ${jid}; id: ${sent?.key?.id || "desconocido"}]`);
+    const deliveryStatus = await waitForDeliveryStatus(sent?.key?.id);
+    const delivered = deliveryStatus === 3 || deliveryStatus === 4 || deliveryStatus === 5;
+    res.json({
+      accepted: true,
+      delivered,
+      delivery_status: getDeliveryStatusName(deliveryStatus),
+      message_id: sent?.key?.id || null,
+      jid
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 async function startWhatsApp() {
-  const authFolder = path.resolve(__dirname, "auth_info_baileys");
-  const { state, saveCreds } = await useMultiFileAuthState(authFolder);
+  fs.mkdirSync(AUTH_FOLDER, { recursive: true });
+  const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
   const { version } = await fetchLatestBaileysVersion();
 
   sock = makeWASocket({
@@ -548,7 +647,7 @@ async function startWhatsApp() {
       } else {
         console.log("Sesion cerrada (Logged Out). Limpiando credenciales y generando nuevo QR...");
         try {
-          fs.rmSync(authFolder, { recursive: true, force: true });
+          fs.rmSync(AUTH_FOLDER, { recursive: true, force: true });
         } catch (e) {
           console.error("Error al limpiar authFolder:", e);
         }
@@ -564,99 +663,128 @@ async function startWhatsApp() {
   });
 
   sock.ev.on("messages.upsert", async (m) => {
-    try {
-      if (!m.messages || !m.messages.length) return;
-      console.log(`[messages.upsert] Evento recibido. Type: ${m.type}, Mensajes: ${m.messages.length}`);
-      const msg = m.messages[0];
-      if (!msg || !msg.message) return;
+    if (!m.messages || !m.messages.length) return;
+    console.log(`[messages.upsert] Evento recibido. Type: ${m.type}, Mensajes: ${m.messages.length}`);
 
-      const remoteJid = msg.key.remoteJid;
-      if (!remoteJid) return;
+    for (const msg of m.messages) {
+      try {
+        if (!msg?.message) continue;
 
-      if (remoteJid.includes("broadcast") || remoteJid.includes("@newsletter") || remoteJid.endsWith("@g.us")) {
-        return;
-      }
-
-      // Descartar mensajes emitidos por el propio bot
-      if (msg.key.id && botSentMessageIds.has(msg.key.id)) {
-        botSentMessageIds.delete(msg.key.id);
-        return;
-      }
-
-      const isSelf = isSelfUser(remoteJid);
-
-      if (msg.key.fromMe && !isSelf) {
-        return;
-      }
-
-      // Extraer texto de cualquier contenedor (normal, efimero, vista unica, etc.)
-      const mObj =
-        msg.message?.ephemeralMessage?.message ||
-        msg.message?.viewOnceMessage?.message ||
-        msg.message?.viewOnceMessageV2?.message ||
-        msg.message?.documentWithCaptionMessage?.message ||
-        msg.message;
-
-      const incomingText = (
-        mObj?.conversation ||
-        mObj?.extendedTextMessage?.text ||
-        mObj?.imageMessage?.caption ||
-        mObj?.videoMessage?.caption ||
-        ""
-      ).trim();
-
-      if (!incomingText) return;
-
-      console.log(`[Mensaje Entrante de ${remoteJid}] (isSelf: ${isSelf}) -> "${incomingText}"`);
-
-      let replyText = "";
-
-      if (isSelf) {
+        const remoteJid = msg.key.remoteJid;
+        if (!remoteJid) continue;
+        let recipientJid;
         try {
-          const data = await callFastAPI("/webhook/whatsapp", {
-            sender: "self_user",
-            message: incomingText
-          });
-          replyText = data?.reply || "";
+          recipientJid = await getMessageRecipientJid(msg);
         } catch (err) {
-          console.error("Error al conectar con agente Python para chat personal:", err.message);
-        }
-      } else {
-        let leadReplied = false;
-        try {
-          const data = await callFastAPI("/api/leads/incoming", { sender: remoteJid, message: incomingText });
-          if (data && data.is_lead && data.reply) {
-            replyText = data.reply;
-            leadReplied = true;
-          }
-        } catch (e) {
-          console.error("Error al procesar mensaje de prospecto:", e.message);
+          console.error(`No se pudo resolver el destinatario para ${remoteJid}:`, err.message);
+          continue;
         }
 
-        if (!leadReplied) {
+        if (remoteJid.includes("broadcast") || remoteJid.includes("@newsletter") || remoteJid.endsWith("@g.us")) {
+          continue;
+        }
+
+        if (msg.key.id && botSentMessageIds.has(msg.key.id)) {
+          botSentMessageIds.delete(msg.key.id);
+          continue;
+        }
+
+        const isSelf = isSelfUser(remoteJid) || isSelfUser(recipientJid);
+        if (msg.key.fromMe && !isSelf) continue;
+
+        const mObj =
+          msg.message?.ephemeralMessage?.message ||
+          msg.message?.viewOnceMessage?.message ||
+          msg.message?.viewOnceMessageV2?.message ||
+          msg.message?.documentWithCaptionMessage?.message ||
+          msg.message;
+
+        const incomingText = (
+          mObj?.conversation ||
+          mObj?.extendedTextMessage?.text ||
+          mObj?.imageMessage?.caption ||
+          mObj?.videoMessage?.caption ||
+          ""
+        ).trim();
+        if (!incomingText) continue;
+
+        const messageKey = `${remoteJid}:${msg.key.id || incomingText}`;
+        if (processedIncomingMessageIds.has(messageKey)) continue;
+        processedIncomingMessageIds.add(messageKey);
+        if (processedIncomingMessageIds.size > 500) {
+          const [first] = processedIncomingMessageIds;
+          processedIncomingMessageIds.delete(first);
+        }
+
+        console.log(`[Mensaje Entrante de ${remoteJid}] (respuesta a ${recipientJid}, isSelf: ${isSelf}) -> "${incomingText}"`);
+
+        let replyText = getDiagnosticReply(incomingText);
+
+        if (replyText) {
+          console.log(`[Respuesta de diagnóstico sin herramientas para ${recipientJid}]`);
+        } else if (isSelf) {
           try {
-            const data = await callFastAPI("/webhook/whatsapp", { sender: remoteJid, message: incomingText });
+            const data = await callFastAPI("/webhook/whatsapp", {
+              sender: "self_user",
+              message: incomingText
+            });
             replyText = data?.reply || "";
           } catch (err) {
-            console.error("Error al obtener respuesta de Sebax para", remoteJid, err.message);
+            console.error("Error al conectar con agente Python para chat personal:", err.message);
           }
-        }
-      }
+        } else {
+          let leadReplied = false;
+          try {
+            const data = await callFastAPI("/api/leads/incoming", { sender: recipientJid, message: incomingText });
+            if (data && data.is_lead && data.reply) {
+              replyText = data.reply;
+              leadReplied = true;
+            }
+          } catch (err) {
+            console.error("Error al procesar mensaje de prospecto:", err.message);
+          }
 
-      if (replyText) {
-        console.log(`[Enviando respuesta a ${remoteJid}] -> "${replyText.slice(0, 60)}..."`);
-        const sent = await sock.sendMessage(remoteJid, { text: replyText });
-        if (sent?.key?.id) {
-          botSentMessageIds.add(sent.key.id);
-          if (botSentMessageIds.size > 500) {
-            const [first] = botSentMessageIds;
-            botSentMessageIds.delete(first);
+          if (!leadReplied) {
+            try {
+              const data = await callFastAPI("/webhook/whatsapp", { sender: recipientJid, message: incomingText });
+              replyText = data?.reply || "";
+            } catch (err) {
+              console.error("Error al obtener respuesta de Sebax para", recipientJid, err.message);
+            }
           }
         }
-        console.log(`[Respuesta entregada con exito a ${remoteJid}]`);
+
+        if (replyText) {
+          console.log(`[Enviando respuesta a ${recipientJid}] -> "${replyText.slice(0, 60)}..."`);
+          const sent = await sock.sendMessage(recipientJid, { text: replyText });
+          if (sent?.key?.id) {
+            botSentMessageIds.add(sent.key.id);
+            if (botSentMessageIds.size > 500) {
+              const [first] = botSentMessageIds;
+              botSentMessageIds.delete(first);
+            }
+          }
+          console.log(`[WhatsApp acepto la respuesta para ${recipientJid}]`);
+        }
+      } catch (err) {
+        console.error("Error al procesar mensaje individual de messages.upsert:", err);
       }
-    } catch (err) {
-      console.error("Error critico en messages.upsert:", err);
+    }
+  });
+
+  sock.ev.on("messages.update", (updates) => {
+    for (const { key, update } of updates) {
+      if (key?.id && update?.status !== undefined) {
+        const status = Number(update.status);
+        messageStatusById.set(key.id, status);
+        while (messageStatusById.size > 500) {
+          messageStatusById.delete(messageStatusById.keys().next().value);
+        }
+        console.log(`[Acuse WhatsApp] id: ${key.id}, chat: ${key.remoteJid || "desconocido"}, status: ${getDeliveryStatusName(status)}`);
+        if ((status === 0 || status >= 3) && deliveryStatusWaiters.has(key.id)) {
+          deliveryStatusWaiters.get(key.id)(status);
+        }
+      }
     }
   });
 }

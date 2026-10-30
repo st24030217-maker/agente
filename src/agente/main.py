@@ -23,7 +23,7 @@ from agente.tools.prospecting import (
     _save_leads,
     normalize_mx_phone
 )
-from agente.tools.whatsapp import send_whatsapp_message
+from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 from agente.tools.agenda import (
     add_appointment,
     list_appointments,
@@ -122,7 +122,11 @@ async def verify_meta_webhook(request: Request):
     token = request.query_params.get("hub.verify_token")
     challenge = request.query_params.get("hub.challenge")
 
-    verify_token = settings.meta_wa_verify_token or "sebax_ssssolutions_2026"
+    verify_token = settings.meta_wa_verify_token
+    if not verify_token:
+        logger.error("META_WA_VERIFY_TOKEN no está configurado.")
+        return Response(content="Webhook verification is not configured", status_code=503)
+
     if mode == "subscribe" and token == verify_token:
         logger.info("Meta WhatsApp Cloud Webhook verificado con éxito.")
         return Response(content=challenge, media_type="text/plain")
@@ -282,7 +286,7 @@ async def post_bridge_reset():
 @app.get("/api/bridge/backup")
 def backup_bridge_session():
     """Genera un backup en memoria de los archivos de autenticación de Baileys."""
-    auth_dir = BASE_DIR / "bridge" / "auth_info_baileys"
+    auth_dir = Path(settings.whatsapp_auth_dir)
     if not auth_dir.exists():
         return {"error": "No auth dir found", "files": {}}
     files = {}
@@ -301,19 +305,21 @@ async def restore_bridge_session(request: Request):
     files = data.get("files", {})
     if not files:
         return {"error": "No files provided"}
-    auth_dir = BASE_DIR / "bridge" / "auth_info_baileys"
+    auth_dir = Path(settings.whatsapp_auth_dir)
     auth_dir.mkdir(parents=True, exist_ok=True)
     for name, content in files.items():
         (auth_dir / name).write_text(content, encoding="utf-8")
     return {"success": True, "restored": len(files)}
 
 @app.get("/api/status")
-def api_status():
+async def api_status():
+    bridge_status = await get_bridge_status()
     return {
         "status": "online",
         "agent": "Sebax",
         "model": settings.gemini_model,
-        "whatsapp_connected": True
+        "whatsapp_connected": bridge_status.get("status") == "open",
+        "whatsapp_status": bridge_status.get("status", "unknown")
     }
 
 @app.get("/api/leads")
@@ -343,7 +349,17 @@ async def send_lead_pitch_api(payload: LeadSendRequest):
     """Envía una propuesta personalizada a un prospecto específico."""
     result = await asyncio.to_thread(send_whatsapp_message, to_number=payload.phone, message=payload.message)
     if payload.lead_id:
-        update_lead_status(payload.lead_id, "contactado", f"Mensaje enviado individualmente: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        if is_delivery_confirmed(result):
+            lead_status = "contactado"
+        elif is_delivery_pending(result):
+            lead_status = "pendiente_confirmacion"
+        else:
+            lead_status = "error_envio"
+        update_lead_status(
+            payload.lead_id,
+            lead_status,
+            f"{result} ({datetime.now().strftime('%Y-%m-%d %H:%M')})"
+        )
     return {"result": result}
 
 @app.post("/api/leads/incoming")

@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def send_whatsapp_message(to_number: str, message: str) -> str:
     """Envía un mensaje de texto por WhatsApp a un número o a ti mismo.
-    Soporta prioritariamente el puente Baileys conectado (número real) con fallback a Meta Cloud API.
+    Usa prioritariamente Baileys y reporta entrega solo con acuse de WhatsApp.
     
     Args:
         to_number: Número de teléfono con código de país (ej. '5218719164677'). Si se deja vacío o 'self', se envía a ti mismo.
@@ -27,11 +27,22 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
                     "to": target,
                     "text": message
                 }
-                resp = client.post(bridge_url, json=payload, timeout=12.0)
+                resp = client.post(bridge_url, json=payload, timeout=20.0)
                 if resp.status_code == 200:
                     data = resp.json()
-                    return f"Mensaje enviado con éxito por WhatsApp a {data.get('jid', target)}: '{message}'"
-                bridge_error = f"Error Baileys ({resp.status_code}): {resp.text}"
+                    if data.get("delivered") is True:
+                        return f"Entrega confirmada por WhatsApp a {data.get('jid', target)} (estado: {data.get('delivery_status', 'confirmado')})."
+                    if data.get("accepted") is True:
+                        if data.get("delivery_status") == "error":
+                            return f"WhatsApp reportó un error de entrega para {data.get('jid', target)} (id: {data.get('message_id') or 'desconocido'})."
+                        return (
+                            f"Aceptado por el puente para {data.get('jid', target)}, "
+                            f"pero entrega no confirmada (estado: {data.get('delivery_status', 'desconocido')}, "
+                            f"id: {data.get('message_id') or 'desconocido'})."
+                        )
+                    bridge_error = "El puente respondió sin confirmar la aceptación ni la entrega."
+                else:
+                    bridge_error = f"Error Baileys ({resp.status_code}): {resp.text}"
     except Exception as e:
         bridge_error = f"Baileys no disponible: {str(e)}"
 
@@ -63,7 +74,7 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
                 with httpx.Client(timeout=15.0) as client:
                     resp = client.post(url, headers=headers, json=payload)
                     if resp.status_code in [200, 201]:
-                        return f"Mensaje enviado con éxito vía Meta WhatsApp Cloud API a +{clean_target}."
+                        return f"Aceptado por Meta para +{clean_target}; entrega no confirmada."
                     meta_error = f"Error Meta API ({resp.status_code}): {resp.text}"
             except Exception as e:
                 meta_error = f"Error al comunicar con Meta WhatsApp Cloud API: {str(e)}"
@@ -71,3 +82,11 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
     if bridge_error and meta_error:
         return f"Fallo al enviar mensaje: {bridge_error} | {meta_error}"
     return bridge_error or meta_error or "No se pudo enviar el mensaje (canales no disponibles)."
+
+
+def is_delivery_confirmed(result: str) -> bool:
+    return result.startswith("Entrega confirmada por WhatsApp")
+
+
+def is_delivery_pending(result: str) -> bool:
+    return result.startswith(("Aceptado por el puente", "Aceptado por Meta"))

@@ -6,7 +6,7 @@ from datetime import datetime, date, timezone, timedelta
 from pathlib import Path
 
 from agente.config import DATA_DIR
-from agente.tools.whatsapp import send_whatsapp_message
+from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 from agente.tools.agenda import _load_appointments
 from agente.tools.prospecting import (
     discover_leads,
@@ -112,11 +112,14 @@ def run_autopilot_cycle() -> dict:
         }
 
         send_result = send_whatsapp_message(to_number=item["phone"], message=pitch)
-        if "éxito" in send_result.lower() or "success" in send_result.lower():
+        if is_delivery_confirmed(send_result):
             lead_record["status"] = "contactado"
             lead_record["contacted_at"] = now_str
             contacted_count += 1
             results.append(f"{item['name']} ({item['phone']}) [{item_niche}]")
+        elif is_delivery_pending(send_result):
+            lead_record["status"] = "pendiente_confirmacion"
+            lead_record["notes"] += f" | Entrega pendiente de confirmación: {send_result}"
         else:
             lead_record["status"] = "error_envio"
             lead_record["notes"] += f" | Error envio: {send_result}"
@@ -224,12 +227,15 @@ def retry_unsent_leads() -> dict:
         if not phone or not pitch:
             continue
         res = send_whatsapp_message(to_number=phone, message=pitch)
-        if "éxito" in res.lower() or "success" in res.lower():
+        if is_delivery_confirmed(res):
             item["status"] = "contactado"
             item["contacted_at"] = now_str
             item["notes"] = (item.get("notes", "") + f" | Reintento exitoso: {now_str}").strip()
             retried_count += 1
             time.sleep(10)
+        elif is_delivery_pending(res):
+            item["status"] = "pendiente_confirmacion"
+            item["notes"] = (item.get("notes", "") + f" | Entrega pendiente de confirmación: {res}").strip()
         else:
             item["notes"] = (item.get("notes", "") + f" | Error reintento: {res}").strip()
             if "conectado" in res.lower() or "connect" in res.lower():

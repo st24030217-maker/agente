@@ -2034,7 +2034,7 @@
         const loader = document.getElementById("wa-sheet-qr-loader");
         if (data.status === "open") {
           img.style.display = "none";
-          loader.innerHTML = '<div style="color:#22c55e; font-weight:800; font-size:0.9rem;">✓ WhatsApp Conectado Exitosamente</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">Sebax ya está activo 24/7</div>';
+          loader.innerHTML = '<div style="color:#22c55e; font-weight:800; font-size:0.9rem;">✓ Sesión de WhatsApp conectada</div><div style="font-size:0.75rem; color:#64748b; margin-top:4px;">La conexión está activa en este momento.</div>';
           loader.style.display = "block";
           if (qrPollTimer) clearInterval(qrPollTimer);
           checkWhatsAppStatus();
@@ -2335,8 +2335,12 @@
       }
 
       container.innerHTML = leads.map(l => {
-        const badgeClass = l.status === "contactado" ? "badge-contactado" : (l.status === "respondio" ? "badge-respondio" : "badge-nuevo");
-        const statusLabel = l.status === "contactado" ? "Contactado" : (l.status === "respondio" ? "Respondio" : "Nuevo");
+        const badgeClass = l.status === "contactado"
+          ? "badge-contactado"
+          : (l.status === "respondio" ? "badge-respondio" : (l.status === "pendiente_confirmacion" ? "badge-pending" : "badge-nuevo"));
+        const statusLabel = l.status === "contactado"
+          ? "Contactado"
+          : (l.status === "respondio" ? "Respondio" : (l.status === "pendiente_confirmacion" ? "Entrega pendiente" : "Nuevo"));
         const channel = detectChannel(l);
         const waLink = `https://wa.me/${l.phone}`;
 
@@ -2717,6 +2721,4 @@
   </script>
 </body>
 </html>
-
-
 

@@ -7,8 +7,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data"))).expanduser()
+if not DATA_DIR.is_absolute():
+    DATA_DIR = BASE_DIR / DATA_DIR
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+WHATSAPP_AUTH_DIR = Path(os.getenv(
+    "WHATSAPP_AUTH_DIR",
+    str(BASE_DIR / "bridge" / "auth_info_baileys")
+)).expanduser()
+if not WHATSAPP_AUTH_DIR.is_absolute():
+    WHATSAPP_AUTH_DIR = BASE_DIR / WHATSAPP_AUTH_DIR
 
 class Settings(BaseModel):
     gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
@@ -25,9 +33,10 @@ class Settings(BaseModel):
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
-    # Meta WhatsApp Cloud API Oficial (Token Permanente de Usuario del Sistema)
-    meta_wa_token: str = os.getenv("META_WA_TOKEN", "EAAUyJT420vsBSyU0ZAn4jnpz2NncsPYCT1b2EsjCFaqZBIUykb11qWGY9G5YZCYTkRb9pfEwsapllwgyIY9scM2NBfOsWMEUL9YpPzZBcqbwh5TIJiYn5woGVx88WvrJYrx2hGt8NInFdkyZA5a6DOhkeePuQrSB6itn8ptc6qDvIYJwE7ZCjEtW1bMbylLgZDZD")
-    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1362013893668994")
-    meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
+    whatsapp_auth_dir: str = str(WHATSAPP_AUTH_DIR)
+    # Meta WhatsApp Cloud API credentials must be provided through the environment.
+    meta_wa_token: str = os.getenv("META_WA_TOKEN", "")
+    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "")
+    meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "")
 
 settings = Settings()

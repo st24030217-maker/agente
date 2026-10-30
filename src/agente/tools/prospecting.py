@@ -9,7 +9,7 @@ import httpx
 from ddgs import DDGS
 
 from agente.config import DATA_DIR
-from agente.tools.whatsapp import send_whatsapp_message
+from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 
 logger = logging.getLogger(__name__)
 
@@ -403,11 +403,15 @@ def run_autonomous_campaign(niche: str = "", city: str = "Torreón, Gómez Palac
 
         if auto_send:
             send_result = send_whatsapp_message(to_number=item["phone"], message=pitch)
-            if "éxito" in send_result.lower() or "success" in send_result.lower():
+            if is_delivery_confirmed(send_result):
                 lead_record["status"] = "contactado"
                 lead_record["contacted_at"] = now_str
                 contacted_count += 1
                 results_summary.append(f"• ID {lead_id}: {item['name']} ({item['phone']}) [{item_niche}] -> Contactado por WhatsApp")
+            elif is_delivery_pending(send_result):
+                lead_record["status"] = "pendiente_confirmacion"
+                lead_record["notes"] += f" | Entrega pendiente de confirmación: {send_result}"
+                results_summary.append(f"• ID {lead_id}: {item['name']} ({item['phone']}) [{item_niche}] -> Pendiente de confirmación")
             else:
                 lead_record["status"] = "error_envio"
                 lead_record["notes"] += f" | Error envio: {send_result}"

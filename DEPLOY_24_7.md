@@ -42,7 +42,21 @@ Si deseas apagar tu computadora por completo o viajar sin ella y que Sebax siga 
 5. En **Settings** > **Volumes**, añade un volumen persistente montado en `/app/bridge/auth_info_baileys` y `/app/data` para que tu sesión de WhatsApp y tus prospectos nunca se borren.
 6. Railway generará un dominio público HTTPS `https://...up.railway.app` activo 24/7.
 
-### B. Despliegue en un VPS Linux (Ubuntu 24.04 / Hetzner / DigitalOcean / Hostinger)
+### B. Despliegue en Render
+
+Render usa almacenamiento efímero por defecto. Sin un disco persistente, un reinicio o despliegue puede borrar las credenciales de WhatsApp y solicitar un QR nuevo.
+
+1. Despliega la versión actual del repositorio como servicio Docker y configura `GEMINI_API_KEY` y `GEMINI_MODEL=gemini-3.5-flash-lite`.
+2. En **Settings > Disks**, crea un disco persistente montado en `/var/data`. Los discos persistentes requieren un tipo de instancia de Render que los admita.
+3. En **Environment**, configura:
+   - `WHATSAPP_AUTH_DIR=/var/data/whatsapp-auth`
+   - `DATA_DIR=/var/data/data`
+4. Guarda los cambios y espera a que termine el despliegue.
+5. Abre **Conectar WhatsApp** y escanea de nuevo el QR una sola vez. Confirma que `/api/bridge/status` reporte `"status":"open"` y un usuario vinculado.
+
+La sesión vinculada antes de montar el disco puede haberse perdido. Si Render muestra `qr_ready`, hay que volver a escanear después de configurar el almacenamiento persistente.
+
+### C. Despliegue en un VPS Linux (Ubuntu 24.04 / Hetzner / DigitalOcean / Hostinger)
 1. Conéctate a tu servidor por SSH.
 2. Clona el repositorio:
    ```bash
