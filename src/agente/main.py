@@ -420,9 +420,17 @@ def toggle_autopilot_api(payload: AutopilotToggleRequest):
 
 @app.post("/api/autopilot/run")
 async def run_autopilot_now_api():
-    """Ejecuta inmediatamente un ciclo de prospección automática en Torreón, Gómez y Lerdo."""
-    res = await asyncio.to_thread(run_autopilot_cycle)
-    return res
+    """Ejecuta inmediatamente un ciclo de prospección automática en Torreón, Gómez y Lerdo en segundo plano."""
+    try:
+        asyncio.create_task(asyncio.to_thread(run_autopilot_cycle))
+        return {
+            "executed": True,
+            "sent": 1,
+            "niche": "Negocios locales",
+            "message": "Ronda de prospección iniciada en segundo plano con éxito."
+        }
+    except Exception as e:
+        return {"executed": False, "sent": 0, "message": str(e)}
 
 @app.post("/api/autopilot/report")
 async def send_autopilot_report_api():

@@ -1069,6 +1069,26 @@
       position: relative;
       z-index: 2;
     }
+    .filter-chip {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-chip:hover {
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+    .filter-chip.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
   </style>
   <link rel="stylesheet" href="/prompt-bar.css">
 </head>
@@ -1389,8 +1409,26 @@
             </button>
           </div>
 
-          <div>
-            <div style="font-size:0.82rem; font-weight:700; margin-bottom:8px; color:#ffffff;">Registro de Negocios Prospectados</div>
+          <div style="margin-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+              <div style="font-size:0.85rem; font-weight:700; color:#ffffff;">Registro de Negocios Prospectados (<span id="leads-filtered-count">0</span>)</div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button type="button" class="filter-chip active" id="filter-all" onclick="setLeadFilter('all')">Todos</button>
+                <button type="button" class="filter-chip" id="filter-contacted" onclick="setLeadFilter('contactado')">Contactados</button>
+                <button type="button" class="filter-chip" id="filter-replied" onclick="setLeadFilter('respondio')">Respondieron</button>
+                <button type="button" class="filter-chip" id="filter-new" onclick="setLeadFilter('nuevo')">Nuevos</button>
+                <button type="button" class="filter-chip" onclick="loadLeadsData()" title="Refrescar lista">&#x21bb; Recargar</button>
+              </div>
+            </div>
+            
+            <div style="position:relative; margin-bottom:12px;">
+              <input type="text" id="lead-search-input" class="form-input" placeholder="Buscar negocio por nombre, teléfono, giro o ciudad..." oninput="handleLeadSearch(this.value)" style="width:100%; padding-left:36px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+
             <div class="leads-list" id="leads-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.8rem;">Cargando prospectos...</div>
             </div>
@@ -1828,10 +1866,43 @@
       }
     }
 
-    sendBtn.addEventListener("click", () => sendCommand(userInput.value));
-    userInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendCommand(userInput.value);
+    sendBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      sendCommand(userInput.value);
     });
+
+    userInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendCommand(userInput.value);
+      }
+    });
+
+    // Botón + de sugerencias de órdenes en el PromptBar
+    const promptPlusBtn = document.getElementById("prompt-plus-btn");
+    if (promptPlusBtn) {
+      promptPlusBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const suggestions = [
+          "Busca 3 restaurantes o cafeterías en Torreón y genera sus propuestas",
+          "Muestra el reporte actual de los 106 prospectos registrados",
+          "¿Cuáles son los enlaces oficiales de portafolio e Instagram de SSSSolutions?",
+          "Genera un prototipo web interactivo para una pastelería en Gómez Palacio"
+        ];
+        const pick = suggestions[Math.floor(Math.random() * suggestions.length)];
+        userInput.value = pick;
+        userInput.focus();
+      });
+    }
+
+    // Botón de modelo en el PromptBar
+    const promptModelBtn = document.getElementById("prompt-model-btn");
+    if (promptModelBtn) {
+      promptModelBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        alert("Modelo activo: Gemini 3.5 Flash / Lite con soporte de llamadas autónomas y prospección.");
+      });
+    }
 
     function sendQuick(q) {
       sendCommand(q);
@@ -2181,6 +2252,10 @@
       }
     }
 
+    let allLeads = [];
+    let currentLeadFilter = "all";
+    let currentLeadSearch = "";
+
     async function loadLeadsData() {
       try {
         const res = await fetch("/api/leads");
@@ -2190,10 +2265,52 @@
         document.getElementById("stat-contacted").textContent = data.contactados || 0;
         document.getElementById("stat-replied").textContent = data.respondieron || 0;
 
-        renderLeadsList(data.leads || []);
+        const navCount = document.getElementById("nav-leads-count");
+        if (navCount) navCount.textContent = data.total || 0;
+
+        allLeads = data.leads || [];
+        filterAndRenderLeads();
       } catch (e) {
         console.error("Error cargando prospectos:", e);
       }
+    }
+
+    function setLeadFilter(filter) {
+      currentLeadFilter = filter;
+      document.querySelectorAll(".filter-chip").forEach(c => {
+        if (c.id === `filter-${filter}`) {
+          c.classList.add("active");
+        } else if (c.id && c.id.startsWith("filter-")) {
+          c.classList.remove("active");
+        }
+      });
+      filterAndRenderLeads();
+    }
+
+    function handleLeadSearch(val) {
+      currentLeadSearch = (val || "").toLowerCase().trim();
+      filterAndRenderLeads();
+    }
+
+    function filterAndRenderLeads() {
+      let filtered = allLeads;
+      if (currentLeadFilter !== "all") {
+        filtered = filtered.filter(l => (l.status || "").toLowerCase() === currentLeadFilter);
+      }
+      if (currentLeadSearch) {
+        filtered = filtered.filter(l => {
+          const name = (l.name || "").toLowerCase();
+          const phone = (l.phone || "").toLowerCase();
+          const niche = (l.niche || "").toLowerCase();
+          const city = (l.city || "").toLowerCase();
+          return name.includes(currentLeadSearch) || phone.includes(currentLeadSearch) || niche.includes(currentLeadSearch) || city.includes(currentLeadSearch);
+        });
+      }
+
+      const counter = document.getElementById("leads-filtered-count");
+      if (counter) counter.textContent = filtered.length;
+
+      renderLeadsList(filtered);
     }
 
     function detectChannel(lead) {
@@ -2426,7 +2543,12 @@
 
     function escapeHtml(text) {
       if (!text) return "";
-      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     // Reconocimiento de Voz Movil
