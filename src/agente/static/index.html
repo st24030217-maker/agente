@@ -1317,6 +1317,7 @@
     }
   </style>
   <link rel="stylesheet" href="/prompt-bar.css">
+  <link rel="stylesheet" href="/AnimatedList.css">
 </head>
 <body>
   <!-- 3D Topography Background (React Bits @react-bits/Topography-JS-CSS) -->
@@ -1849,6 +1850,7 @@
   <script type="module" src="/crystalized-ball.js"></script>
   <script type="module" src="/topography.js"></script>
   <script src="/prompt-bar.js"></script>
+  <script src="/animated-list.js"></script>
   <script>
 
     const speechBubble = document.getElementById("speech-bubble");
@@ -2628,6 +2630,9 @@
           </div>
         `;
       }).join("");
+      if (window.applyAnimatedList) {
+        window.applyAnimatedList(container);
+      }
     }
 
     // Event delegation para botones de prospectos
@@ -2713,6 +2718,9 @@
           </div>
         `;
       }).join("");
+      if (window.applyAnimatedList) {
+        window.applyAnimatedList(container);
+      }
     }
 
     async function saveNewAppointment() {
@@ -2921,6 +2929,9 @@
             </div>
           </div>
         `).join('');
+        if (window.applyAnimatedList) {
+          window.applyAnimatedList(container);
+        }
       } catch (e) {
         container.innerHTML = `<div style="color:#ef4444; font-size:0.8rem; text-align:center;">Error al cargar prototipos: ${e.message}</div>`;
       }
