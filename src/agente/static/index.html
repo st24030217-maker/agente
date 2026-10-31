@@ -53,15 +53,15 @@
       overflow-x: hidden;
     }
 
-    /* Main Container (1200px max width framing) */
+    /* Main Container (1160px max width framing) */
     .workspace-frame {
       width: 100%;
-      max-width: 1140px;
+      max-width: 1160px;
       margin: 0 auto;
       padding: 24px 20px 48px 20px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
     }
 
     @media (max-width: 768px) {
@@ -71,23 +71,25 @@
       }
     }
 
-    /* 1. TOP BAR */
+    /* 1. TOP UTILITY STRIP (Strict 36px Baseline Height & Alignment) */
     .top-utility-strip {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
+      width: 100%;
     }
 
     .status-badge-live {
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      height: 36px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 6px 14px;
+      padding: 0 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
     .live-dot {
@@ -131,16 +133,17 @@
       background: var(--panel) !important;
       border: 1px solid var(--border) !important;
       border-radius: 9999px !important;
-      padding: 6px 13px !important;
-      font-size: 0.72rem !important;
+      height: 36px !important;
+      padding: 0 14px !important;
+      font-size: 0.73rem !important;
       font-weight: 600 !important;
       color: #d4d4d8 !important;
       display: inline-flex !important;
       align-items: center !important;
-      gap: 6px !important;
+      gap: 7px !important;
       cursor: pointer !important;
       text-decoration: none !important;
-      box-shadow: none !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
       transition: var(--transition) !important;
     }
 
@@ -167,21 +170,25 @@
       border: 1px solid var(--border);
       color: var(--text);
       border-radius: 9999px;
-      padding: 6px 10px;
-      font-size: 0.72rem;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 0.73rem;
       font-weight: 600;
       outline: none;
       cursor: pointer;
       font-family: inherit;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
       transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
     }
     .voice-select-dark:hover {
       border-color: var(--border-hover);
     }
 
     .icon-ctrl-btn {
-      width: 30px;
-      height: 30px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: var(--panel);
       border: 1px solid var(--border);
@@ -190,97 +197,83 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
       transition: var(--transition);
     }
     .icon-ctrl-btn:hover {
       background: var(--panel-hover);
       border-color: var(--border-hover);
-      transform: scale(1.06);
+      transform: scale(1.05);
     }
     .icon-ctrl-btn.active {
       background: #f5f5f5;
       color: #050505;
       border-color: #ffffff;
     }
-    .icon-ctrl-btn svg { width: 13px; height: 13px; }
+    .icon-ctrl-btn svg { width: 14px; height: 14px; }
 
-    /* 2. NAVIGATION ROW */
+    /* 2. NAVIGATION ROW (Perfect Horizontal Centering & Balance) */
     .nav-workspace-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .nav-active-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--panel-elevated);
-      border: 1px solid #2e2e34;
-      border-radius: 9999px;
-      padding: 7px 16px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .nav-active-pill .pill-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-violet);
-      box-shadow: 0 0 8px var(--accent-violet);
+      justify-content: center;
+      width: 100%;
+      margin: 2px 0;
     }
 
     .nav-segmented-bar {
       display: inline-flex;
       align-items: center;
-      background: var(--panel);
+      justify-content: center;
+      background: #0d0d10;
       border: 1px solid var(--border);
       border-radius: 9999px;
-      padding: 3px;
-      gap: 3px;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     }
 
     .nav-segmented-btn {
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
       border-radius: 9999px;
-      padding: 6px 14px;
-      font-size: 0.74rem;
+      padding: 8px 18px;
+      font-size: 0.77rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
       transition: var(--transition);
       white-space: nowrap;
+      text-align: center;
     }
     .nav-segmented-btn:hover {
       color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
     }
     .nav-segmented-btn.active {
-      background: var(--panel-elevated);
+      background: #1c1c24;
       color: #ffffff;
-      border: 1px solid #303036;
+      border-color: #33333f;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     }
 
-    /* 3. HERO INTERACTION AREA (3D Avatar + Agent Chat) */
+    /* 3. HERO INTERACTION AREA (Symmetrical 3D Orb + Agent Chat) */
     .agent-workspace-grid {
       display: grid;
-      grid-template-columns: 340px 1fr;
-      gap: 16px;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
       align-items: stretch;
-      min-height: 400px;
+      min-height: 460px;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .agent-workspace-grid {
         grid-template-columns: 1fr;
+        gap: 16px;
       }
     }
 
-    /* Columna Avatar 3D (Círculo Flotante Transparente sin bloque) */
+    /* Columna Avatar 3D (Círculo Flotante Transparente sin marco) */
     .avatar-card-panel {
       background: transparent !important;
       border: none !important;
@@ -292,7 +285,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 400px;
+      height: 460px;
+      min-height: 460px;
       box-shadow: none !important;
       animation: floatBall 6s ease-in-out infinite;
     }
@@ -397,12 +391,14 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
-      padding: 22px 24px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
-      height: 400px;
+      gap: 14px;
+      height: 460px;
+      min-height: 460px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     .chat-card-header {
@@ -491,14 +487,25 @@
 
     /* Speech Bubble */
     .speech-bubble {
-      font-size: 1rem;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      font-size: 0.98rem;
       font-weight: 500;
       line-height: 1.6;
       color: #f5f5f5;
-      max-height: 210px;
-      overflow-y: auto;
       word-wrap: break-word;
-      padding-right: 4px;
+      padding-right: 6px;
+      scrollbar-width: thin;
+      scrollbar-color: #2b2b34 transparent;
+    }
+
+    .speech-bubble::-webkit-scrollbar {
+      width: 5px;
+    }
+    .speech-bubble::-webkit-scrollbar-thumb {
+      background: #2b2b34;
+      border-radius: 9999px;
     }
 
     .speech-bubble b, .speech-bubble strong {
@@ -606,51 +613,71 @@
       50% { transform: scale(1.08); }
     }
 
-    /* 4. PRIMARY DASHBOARD PANELS (3 Panels) */
-    .primary-dashboard-row {
+    /* 4. EXECUTIVE METRICS GRID (4 Columns Fully Symmetrical) */
+    .executive-metrics-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
     }
 
-    @media (max-width: 860px) {
-      .primary-dashboard-row {
+    @media (max-width: 1040px) {
+      .executive-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .executive-metrics-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .dash-panel {
+    .exec-metric-card {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px 20px;
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 10px;
-      min-height: 110px;
+      gap: 8px;
+      min-height: 124px;
+      transition: var(--transition);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     }
 
-    .dash-panel-header {
+    .exec-metric-card.clickable {
+      cursor: pointer;
+    }
+
+    .exec-metric-card.clickable:hover {
+      background: var(--panel-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .exec-metric-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .panel-tag {
-      font-size: 0.65rem;
+    .exec-metric-tag {
+      font-size: 0.66rem;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-dim);
     }
 
-    .panel-accent-badge {
+    .exec-accent-pill {
       font-size: 0.62rem;
       font-weight: 700;
       padding: 2px 7px;
-      border-radius: 6px;
+      border-radius: 9999px;
       background: rgba(168, 85, 247, 0.12);
       border: 1px solid rgba(168, 85, 247, 0.3);
       color: #d8b4fe;
@@ -658,85 +685,49 @@
       letter-spacing: 0.04em;
     }
 
-    .panel-main-val {
-      font-size: 1.35rem;
+    .exec-accent-pill.green {
+      background: rgba(50, 212, 102, 0.12);
+      border-color: rgba(50, 212, 102, 0.35);
+      color: #86efac;
+    }
+
+    .exec-accent-pill.blue {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: rgba(56, 189, 248, 0.35);
+      color: #7dd3fc;
+    }
+
+    .exec-accent-pill.violet {
+      background: rgba(168, 85, 247, 0.12);
+      border-color: rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+    }
+
+    .exec-metric-val {
+      font-size: 2.2rem;
       font-weight: 800;
       color: #ffffff;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
     }
 
-    .panel-main-val.mono-time {
+    .exec-metric-val.mono-val {
       font-family: var(--font-mono);
-      font-size: 1.55rem;
-      letter-spacing: 0.02em;
     }
 
-    .panel-sub-line {
+    .exec-metric-val.mono-time {
+      font-family: var(--font-mono);
+      font-size: 1.85rem;
+      letter-spacing: -0.01em;
+    }
+
+    .exec-metric-footer {
       font-size: 0.72rem;
       color: var(--text-muted);
-      line-height: 1.35;
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-
-    /* 5. EXECUTIVE METRICS ROW */
-    .bottom-metrics-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-    }
-
-    @media (max-width: 820px) {
-      .bottom-metrics-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .metric-card-large {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: var(--transition);
-      cursor: pointer;
-    }
-
-    .metric-card-large:hover {
-      background: var(--panel-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-1.5px);
-    }
-
-    .metric-card-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-
-    .oversized-metric {
-      font-family: var(--font-mono);
-      font-size: 2.8rem;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      margin: 2px 0 1px 0;
-    }
-
-    .metric-supporting-line {
-      font-size: 0.74rem;
-      color: var(--text-muted);
-      line-height: 1.35;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      line-height: 1.3;
     }
 
     .accent-green-tag {
@@ -772,8 +763,8 @@
 
     .leads-sheet {
       width: 100%;
-      max-width: 820px;
-      max-height: 90vh;
+      max-width: 860px;
+      max-height: 88vh;
       background: #0f0f12;
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
@@ -846,11 +837,116 @@
     }
 
     .sheet-body {
-      padding: 20px 22px;
+      padding: 22px 24px 28px;
       overflow-y: auto;
+      flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: #2e2e38 transparent;
+    }
+
+    .sheet-body::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sheet-body::-webkit-scrollbar-thumb {
+      background: #2e2e38;
+      border-radius: 9999px;
+    }
+
+    /* Single Scrollbar for Leads List - no double scrollbar */
+    .leads-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .leads-toolbar-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .leads-toolbar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .leads-toolbar-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .leads-toolbar-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .leads-counter-pill {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+      font-family: var(--font-mono);
+    }
+
+    .leads-filter-chips-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .leads-search-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .leads-search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .leads-search-input {
+      width: 100%;
+      background: var(--panel-elevated);
+      border: 1px solid #2a2a32;
+      border-radius: 9999px;
+      padding: 9px 16px 9px 40px;
+      font-size: 0.82rem;
+      color: #ffffff;
+      outline: none;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .leads-search-input:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+    }
+
+    .leads-search-input::placeholder {
+      color: var(--text-dim);
     }
 
     .tab-content { display: none; }
@@ -1213,74 +1309,54 @@
       color: #38bdf8;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 960px) {
       .agent-workspace-grid {
+        grid-template-columns: 1fr;
         min-height: 0;
       }
-
       .avatar-card-panel {
-        height: 280px;
+        height: 320px;
+        min-height: 320px;
+      }
+      .chat-card-panel {
+        height: 440px;
+        min-height: 440px;
       }
     }
 
     @media (max-width: 600px) {
-      .workspace-frame,
-      .top-utility-strip,
-      .nav-workspace-row,
-      .agent-workspace-grid {
-        width: 100%;
-        min-width: 0;
+      .workspace-frame {
+        padding: 14px 12px 36px 12px;
+        gap: 14px;
       }
 
       .top-utility-strip {
-        align-items: flex-start;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         gap: 10px;
       }
 
-      .status-badge-live {
-        padding: 6px 11px;
-      }
-
-      .status-badge-text {
-        font-size: 0.68rem;
-      }
-
       .utility-controls {
-        width: 100%;
-        min-width: 0;
-        gap: 6px;
+        display: flex;
+        justify-content: center;
         flex-wrap: wrap;
-      }
-
-      .utility-controls .thinking-orb-badge {
-        padding: 4px 7px;
-      }
-
-      .voice-select-dark {
-        flex: 1 1 110px;
-        min-width: 0;
+        gap: 6px;
       }
 
       .nav-workspace-row {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .nav-active-pill {
-        align-self: flex-start;
+        width: 100%;
       }
 
       .nav-segmented-bar {
         display: flex;
         width: 100%;
-        min-width: 0;
-        max-width: 100%;
         overflow-x: auto;
         overscroll-behavior-x: contain;
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
-        border-radius: 14px;
+        border-radius: 9999px;
+        justify-content: flex-start;
       }
 
       .nav-segmented-bar::-webkit-scrollbar {
@@ -1292,27 +1368,23 @@
       }
 
       .avatar-card-panel {
-        height: 220px;
-        padding: 0 !important;
-      }
-
-      .avatar-panel-title {
-        font-size: 0.62rem;
-      }
-
-      .avatar-pedestal-pill {
-        padding: 5px 11px;
-      }
-
-      .pedestal-title {
-        font-size: 0.58rem;
+        height: 240px;
+        min-height: 240px;
       }
 
       .chat-card-panel {
-        height: 400px;
-        min-width: 0;
+        height: 420px;
+        min-height: 420px;
         padding: 18px 16px;
+      }
+
+      .leads-sheet {
+        max-height: 94vh;
         border-radius: 18px;
+      }
+
+      .sheet-body {
+        padding: 16px;
       }
     }
   </style>
@@ -1367,11 +1439,6 @@
 
     <!-- 2. NAVIGATION ROW -->
     <nav class="nav-workspace-row">
-      <div class="nav-active-pill">
-        <span class="pill-dot"></span>
-        <span>SEBAX</span>
-      </div>
-
       <div class="nav-segmented-bar">
         <button class="nav-segmented-btn active" id="nav-btn-chat" onclick="openChatTab()">Chat &amp; Asistente</button>
         <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal(event)">Prospectos (<span id="nav-leads-count">77</span>)</button>
@@ -1480,45 +1547,52 @@
       </div>
     </section>
 
-    <!-- 4. PRIMARY DASHBOARD ROW (3 Compact Panels) -->
-    <section class="primary-dashboard-row">
-      <!-- Panel 1: Hora y Fecha Comarca Lagunera -->
-      <div class="dash-panel">
-        <div class="dash-panel-header">
-          <span class="panel-tag">HORA LOCAL · LA LAGUNA</span>
-          <span class="panel-accent-badge">UTC-6</span>
+    <!-- 4. EXECUTIVE METRICS GRID (4 Symmetrical Panels) -->
+    <section class="executive-metrics-grid">
+      <!-- Card 1: Reloj Laguna -->
+      <div class="exec-metric-card" id="card-laguna-time">
+        <div class="exec-metric-header">
+          <span class="exec-metric-tag">HORA LOCAL · LA LAGUNA</span>
+          <span class="exec-accent-pill">UTC-6</span>
         </div>
-        <div class="panel-main-val mono-time" id="laguna-live-time">17:00:00</div>
-        <div class="panel-sub-line">
-          <span id="laguna-live-date">Jueves, 29 de Octubre 2026</span> · Torreón · Gómez · Lerdo
-        </div>
-      </div>
-
-
-    </section>
-
-    <!-- 5. EXECUTIVE METRICS ROW -->
-    <section class="bottom-metrics-row">
-      <div class="metric-card-large" onclick="openLeadsModal()" title="Ver tabla de prospectos">
-        <span class="metric-card-label">TOTAL PROSPECTOS</span>
-        <div class="oversized-metric" id="stat-total-dash">77</div>
-        <div class="metric-supporting-line">
-          <span class="accent-green-tag">▲ +4 hoy</span> en Torreón, Gómez y Lerdo
+        <div class="exec-metric-val mono-time" id="laguna-live-time">17:00:00</div>
+        <div class="exec-metric-footer">
+          <span id="laguna-live-date">Sábado, 31 de Octubre 2026</span> · Torreón · Gómez · Lerdo
         </div>
       </div>
 
-      <div class="metric-card-large" onclick="openLeadsModal()" title="Ver contactados">
-        <span class="metric-card-label">PROPUESTAS ENVIADAS</span>
-        <div class="oversized-metric" id="stat-contacted-dash">7</div>
-        <div class="metric-supporting-line">
-          <span>Con portafolio oficial e Instagram SSSSolutions</span>
+      <!-- Card 2: Total Prospectos -->
+      <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver tabla de prospectos">
+        <div class="exec-metric-header">
+          <span class="exec-metric-tag">TOTAL PROSPECTOS</span>
+          <span class="exec-accent-pill green">EN VIVO</span>
+        </div>
+        <div class="exec-metric-val mono-val" id="stat-total-dash">109</div>
+        <div class="exec-metric-footer">
+          <span class="accent-green-tag">▲ Activos</span> en Torreón, Gómez y Lerdo
         </div>
       </div>
 
-      <div class="metric-card-large" onclick="openAgendaModal()" title="Ver agenda de citas">
-        <span class="metric-card-label">REUNIONES COMERCIALES</span>
-        <div class="oversized-metric" id="stat-agenda-dash">1</div>
-        <div class="metric-supporting-line">
+      <!-- Card 3: Propuestas Enviadas -->
+      <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver contactados">
+        <div class="exec-metric-header">
+          <span class="exec-metric-tag">PROPUESTAS ENVIADAS</span>
+          <span class="exec-accent-pill blue">WHATSAPP</span>
+        </div>
+        <div class="exec-metric-val mono-val" id="stat-contacted-dash">7</div>
+        <div class="exec-metric-footer">
+          <span>Portafolio oficial e Instagram SSSSolutions</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Reuniones Comerciales -->
+      <div class="exec-metric-card clickable" onclick="openAgendaModal()" title="Ver agenda de citas">
+        <div class="exec-metric-header">
+          <span class="exec-metric-tag">REUNIONES COMERCIALES</span>
+          <span class="exec-accent-pill violet">AGENDA</span>
+        </div>
+        <div class="exec-metric-val mono-val" id="stat-agenda-dash">1</div>
+        <div class="exec-metric-footer">
           <span class="accent-green-tag">Confirmada</span> en agenda para llamada
         </div>
       </div>
@@ -1627,10 +1701,13 @@
             </button>
           </div>
 
-          <div style="margin-top:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-              <div style="font-size:0.85rem; font-weight:700; color:#ffffff;">Registro de Negocios Prospectados (<span id="leads-filtered-count">0</span>)</div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <div class="leads-toolbar-card">
+            <div class="leads-toolbar-header">
+              <div class="leads-toolbar-title-wrap">
+                <span class="leads-toolbar-title">Registro de Negocios Prospectados</span>
+                <span class="leads-counter-pill" id="leads-filtered-count">0</span>
+              </div>
+              <div class="leads-filter-chips-wrap">
                 <button type="button" class="filter-chip active" id="filter-all" onclick="setLeadFilter('all')">Todos</button>
                 <button type="button" class="filter-chip" id="filter-contacted" onclick="setLeadFilter('contactado')">Contactados</button>
                 <button type="button" class="filter-chip" id="filter-replied" onclick="setLeadFilter('respondio')">Respondieron</button>
@@ -1639,15 +1716,16 @@
               </div>
             </div>
             
-            <div style="position:relative; margin-bottom:12px;">
-              <input type="text" id="lead-search-input" class="form-input" placeholder="Buscar negocio por nombre, teléfono, giro o ciudad..." oninput="handleLeadSearch(this.value)" style="width:100%; padding-left:36px;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none;">
+            <div class="leads-search-container">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="leads-search-icon">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
+              <input type="text" id="lead-search-input" class="leads-search-input" placeholder="Buscar negocio por nombre, teléfono, giro o ciudad..." oninput="handleLeadSearch(this.value)">
             </div>
+          </div>
 
-            <div class="leads-list" id="leads-container">
+          <div class="leads-list" id="leads-container">
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.8rem;">Cargando prospectos...</div>
             </div>
           </div>

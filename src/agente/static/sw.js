@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-wa-fixed-v23";
+const CACHE_NAME = "sebax-wa-fixed-v24";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
