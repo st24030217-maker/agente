@@ -53,6 +53,15 @@ logger = logging.getLogger("agente")
 
 app = FastAPI(title="Sebax - AI Personal Agent", version="1.0.0")
 
+@app.middleware("http")
+async def add_no_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path in ["/", "/index.html", "/sw.js"]:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 class WhatsAppWebhookRequest(BaseModel):
@@ -230,41 +239,68 @@ def create_demo_api(payload: DemoCreateRequest):
 @app.get("/qr")
 async def get_qr_page():
     """Proxy para mostrar el código QR de vinculación de WhatsApp directamente en el navegador."""
-    if settings.whatsapp_provider == "cloud_api":
-        return Response(
-            content="<h3>WhatsApp Cloud API está seleccionado. Esta integración no usa código QR.</h3>",
-            media_type="text/html"
-        )
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr", timeout=10.0)
             return Response(content=resp.content, media_type="text/html")
         except Exception as e:
-            return Response(content=f"<div style='font-family:sans-serif;text-align:center;padding:40px;'><h3>Iniciando puente de WhatsApp...</h3><p>{e}</p></div>", media_type="text/html")
+            return Response(content=f"<div style='font-family:sans-serif;text-align:center;padding:40px;'><h3>Iniciando conector de WhatsApp...</h3><p>{e}</p></div>", media_type="text/html")
 
 @app.get("/api/bridge/status")
 async def get_bridge_status():
-    """Estado de conexión del conector de WhatsApp."""
-    if settings.whatsapp_provider == "cloud_api":
-        credentials_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
-        return {
-            "status": "cloud_api_configured" if credentials_configured else "cloud_api_unconfigured",
-            "user": None,
-            "webhook_configured": bool(settings.meta_wa_verify_token)
-        }
+    """Estado de conexión unificado del conector de WhatsApp."""
+    bridge_data = {}
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/status", timeout=5.0)
-            return resp.json()
+            if resp.status_code == 200:
+                bridge_data = resp.json()
         except Exception:
-            return {"status": "starting"}
+            bridge_data = {"status": "starting"}
+
+    cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
+
+    # 1. Si Baileys está conectado, reportar 'open'
+    if bridge_data.get("status") == "open":
+        return {
+            "status": "open",
+            "provider": "baileys",
+            "user": bridge_data.get("user"),
+            "cloud_api_configured": cloud_configured,
+            "webhook_configured": bool(settings.meta_wa_verify_token)
+        }
+
+    # 2. Si Baileys está esperando QR o código de vinculación telefónica:
+    if bridge_data.get("status") in ["qr_ready", "starting"]:
+        return {
+            "status": bridge_data.get("status"),
+            "provider": "baileys",
+            "has_qr": bridge_data.get("has_qr", False),
+            "user": None,
+            "cloud_api_configured": cloud_configured,
+            "webhook_configured": bool(settings.meta_wa_verify_token)
+        }
+
+    # 3. Si Baileys está cerrado pero Cloud API está configurado:
+    if cloud_configured and settings.whatsapp_provider == "cloud_api":
+        return {
+            "status": "cloud_api_configured",
+            "provider": "cloud_api",
+            "user": None,
+            "webhook_configured": bool(settings.meta_wa_verify_token)
+        }
+
+    return {
+        "status": bridge_data.get("status", "disconnected"),
+        "provider": settings.whatsapp_provider,
+        "user": None,
+        "cloud_api_configured": cloud_configured,
+        "webhook_configured": bool(settings.meta_wa_verify_token)
+    }
 
 @app.get("/qr-data")
 async def get_qr_data_proxy():
     """Proxy para datos del QR en tiempo real."""
-    if settings.whatsapp_provider == "cloud_api":
-        status = await get_bridge_status()
-        return {**status, "qr": None}
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/qr-data", timeout=5.0)
@@ -329,13 +365,13 @@ async def restore_bridge_session(request: Request):
 @app.get("/api/status")
 async def api_status():
     bridge_status = await get_bridge_status()
-    cloud_api_mode = settings.whatsapp_provider == "cloud_api"
+    is_connected = bridge_status.get("status") == "open" or bridge_status.get("status") == "cloud_api_configured"
     return {
         "status": "online",
         "agent": "Sebax",
         "model": settings.gemini_model,
-        "whatsapp_provider": settings.whatsapp_provider,
-        "whatsapp_connected": None if cloud_api_mode else bridge_status.get("status") == "open",
+        "whatsapp_provider": bridge_status.get("provider", settings.whatsapp_provider),
+        "whatsapp_connected": is_connected,
         "whatsapp_status": bridge_status.get("status", "unknown")
     }
 

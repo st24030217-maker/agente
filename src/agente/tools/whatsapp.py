@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 def send_whatsapp_message(to_number: str, message: str) -> str:
     """Envía un mensaje de texto por WhatsApp a un número o a ti mismo.
-    Usa prioritariamente Baileys y reporta entrega solo con acuse de WhatsApp.
+    Usa prioritariamente Baileys y como respaldo Meta WhatsApp Cloud API Oficial.
     
     Args:
         to_number: Número de teléfono con código de país (ej. '5218719164677'). Si se deja vacío o 'self', se envía a ti mismo.
@@ -14,47 +14,45 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
     """
     meta_error = None
     bridge_error = None
-    provider = settings.whatsapp_provider
-    if provider not in {"baileys", "cloud_api"}:
-        return f"Proveedor WhatsApp no válido: {provider}."
 
     # 1. Modo Puente Baileys (Prioritario si está conectado activamente en status: open)
-    if provider == "baileys":
-        try:
-            bridge_status_url = f"http://127.0.0.1:{settings.bridge_port}/status"
-            with httpx.Client(timeout=3.0) as client:
-                st = client.get(bridge_status_url)
-                if st.status_code == 200 and st.json().get("status") == "open":
-                    bridge_url = f"http://127.0.0.1:{settings.bridge_port}/send"
-                    target = "" if to_number.lower() in ["self", "yo", "mismo", ""] else to_number
-                    payload = {
-                        "to": target,
-                        "text": message
-                    }
-                    resp = client.post(bridge_url, json=payload, timeout=20.0)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        if data.get("delivered") is True:
-                            return f"Entrega confirmada por WhatsApp a {data.get('jid', target)} (estado: {data.get('delivery_status', 'confirmado')})."
-                        if data.get("accepted") is True:
-                            if data.get("delivery_status") == "error":
-                                return f"WhatsApp reportó un error de entrega para {data.get('jid', target)} (id: {data.get('message_id') or 'desconocido'})."
-                            return (
-                                f"Aceptado por el puente para {data.get('jid', target)}, "
-                                f"pero entrega no confirmada (estado: {data.get('delivery_status', 'desconocido')}, "
-                                f"id: {data.get('message_id') or 'desconocido'})."
-                            )
-                        bridge_error = "El puente respondió sin confirmar la aceptación ni la entrega."
-                    else:
-                        bridge_error = f"Error Baileys ({resp.status_code}): {resp.text}"
-        except Exception as e:
-            bridge_error = f"Baileys no disponible: {str(e)}"
+    try:
+        bridge_status_url = f"http://127.0.0.1:{settings.bridge_port}/status"
+        with httpx.Client(timeout=3.0) as client:
+            st = client.get(bridge_status_url)
+            if st.status_code == 200 and st.json().get("status") == "open":
+                bridge_url = f"http://127.0.0.1:{settings.bridge_port}/send"
+                target = "" if to_number.lower() in ["self", "yo", "mismo", ""] else to_number
+                payload = {
+                    "to": target,
+                    "text": message
+                }
+                resp = client.post(bridge_url, json=payload, timeout=20.0)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("delivered") is True:
+                        return f"Entrega confirmada por WhatsApp a {data.get('jid', target)} (estado: {data.get('delivery_status', 'confirmado')})."
+                    if data.get("accepted") is True:
+                        if data.get("delivery_status") == "error":
+                            return f"WhatsApp reportó un error de entrega para {data.get('jid', target)} (id: {data.get('message_id') or 'desconocido'})."
+                        return (
+                            f"Aceptado por el puente para {data.get('jid', target)}, "
+                            f"pero entrega no confirmada (estado: {data.get('delivery_status', 'desconocido')}, "
+                            f"id: {data.get('message_id') or 'desconocido'})."
+                        )
+                    bridge_error = "El conector de WhatsApp no confirmó la entrega."
+                else:
+                    bridge_error = f"Error Baileys ({resp.status_code}): {resp.text}"
+            else:
+                bridge_error = "El conector Baileys no tiene una sesión activa (status != open)."
+    except Exception as e:
+        bridge_error = f"Conector Baileys no disponible: {str(e)}"
 
     # 2. Modo Meta WhatsApp Business Cloud API Oficial (Fallback o modo Cloud)
     if settings.meta_wa_token and settings.meta_wa_phone_number_id:
         target = to_number.strip()
         if target.lower() in ["self", "yo", "mismo", ""]:
-            target = settings.allowed_numbers[0] if settings.allowed_numbers else ""
+            target = settings.allowed_numbers[0] if settings.allowed_numbers else "8719164677"
         
         clean_target = "".join(filter(str.isdigit, target))
         if clean_target.startswith("521") and len(clean_target) == 13:
@@ -87,9 +85,6 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
                     meta_error = f"Error Meta API ({resp.status_code}): {resp.text}"
             except Exception as e:
                 meta_error = f"Error al comunicar con Meta WhatsApp Cloud API: {str(e)}"
-
-    if provider == "cloud_api" and not (settings.meta_wa_token and settings.meta_wa_phone_number_id):
-        return "Cloud API está seleccionado, pero faltan META_WA_TOKEN o META_WA_PHONE_NUMBER_ID en la configuración."
 
     if bridge_error and meta_error:
         return f"Fallo al enviar mensaje: {bridge_error} | {meta_error}"

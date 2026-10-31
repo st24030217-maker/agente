@@ -35,9 +35,12 @@ class Settings(BaseModel):
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
     whatsapp_provider: str = os.getenv("WHATSAPP_PROVIDER", "baileys").strip().lower()
     whatsapp_auth_dir: str = str(WHATSAPP_AUTH_DIR)
-    # Meta WhatsApp Cloud API credentials must be provided through the environment.
-    meta_wa_token: str = os.getenv("META_WA_TOKEN", "")
-    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "")
-    meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "")
+    # Meta WhatsApp Cloud API credentials con token permanente de respaldo
+    meta_wa_token: str = os.getenv(
+        "META_WA_TOKEN",
+        "EAAUyJT420vsBSyU0ZAn4jnpz2NncsPYCT1b2EsjCFaqZBIUykb11qWGY9G5YZCYTkRb9pfEwsapllwgyIY9scM2NBfOsWMEUL9YpPzZBcqbwh5TIJiYn5woGVx88WvrJYrx2hGt8NInFdkyZA5a6DOhkeePuQrSB6itn8ptc6qDvIYJwE7ZCjEtW1bMbylLgZDZD"
+    )
+    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1362013893668994")
+    meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
 
 settings = Settings()
