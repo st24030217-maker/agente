@@ -1,11 +1,10 @@
 {
   "name": "Sebax - Agente IA SSSSolutions",
-  "short_name": "Sebax Widget",
+  "short_name": "Sebax",
   "description": "Agente autónomo de desarrollo comercial, avatar 3D y control por voz para SSSSolutions.",
-  "start_url": "/?mode=widget",
-  "id": "/?mode=widget",
+  "start_url": "/",
+  "id": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#050505",
   "theme_color": "#050505",
   "orientation": "portrait",
@@ -25,15 +24,15 @@
   ],
   "shortcuts": [
     {
-      "name": "Widget Asistente de Voz",
-      "short_name": "Voz Widget",
-      "description": "Hablar directamente con Sebax en modo widget",
-      "url": "/?mode=widget&action=voice",
+      "name": "Hablar con Sebax",
+      "short_name": "Dictar",
+      "description": "Hablar directamente con Sebax por voz",
+      "url": "/?action=voice",
       "icons": [{ "src": "https://img.icons8.com/fluency/96/microphone.png", "sizes": "96x96" }]
     },
     {
       "name": "Panel de Prospección",
-      "short_name": "Prospectos",
+      "short_name": "Leads",
       "description": "Ver métricas y prospectos de SSSSolutions",
       "url": "/?action=leads",
       "icons": [{ "src": "https://img.icons8.com/fluency/96/bullseye.png", "sizes": "96x96" }]
