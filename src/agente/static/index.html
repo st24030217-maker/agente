@@ -1387,6 +1387,222 @@
         padding: 16px;
       }
     }
+
+    /* =========================================================================
+       MOBILE AI WIDGET MODE (Gemini / Claude / ChatGPT Widget Experience)
+       ========================================================================= */
+
+    .view-mode-toggle-btn {
+      background: var(--panel) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 9999px !important;
+      height: 36px !important;
+      padding: 0 14px !important;
+      font-size: 0.73rem !important;
+      font-weight: 700 !important;
+      color: #e4e4e7 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 7px !important;
+      cursor: pointer !important;
+      transition: var(--transition) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+      white-space: nowrap;
+    }
+
+    .view-mode-toggle-btn:hover {
+      background: var(--panel-hover) !important;
+      border-color: var(--border-hover) !important;
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+
+    .view-mode-toggle-btn.active-widget {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(59, 130, 246, 0.22)) !important;
+      border-color: rgba(168, 85, 247, 0.5) !important;
+      color: #f3e8ff !important;
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.3) !important;
+    }
+
+    /* PWA Install Banner */
+    .pwa-install-banner {
+      width: 100%;
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.16), rgba(50, 212, 102, 0.16));
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ffffff;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      animation: fadeInBanner 0.4s ease;
+    }
+
+    @keyframes fadeInBanner {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-pwa-install-action {
+      background: #ffffff;
+      color: #050505;
+      border: none;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-pwa-install-action:hover {
+      background: #f4f4f5;
+      transform: scale(1.04);
+    }
+
+    /* Quick Action Chips */
+    .widget-quick-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding: 4px 2px;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .widget-quick-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .quick-chip {
+      background: rgba(22, 22, 28, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid #2e2e38;
+      border-radius: 9999px;
+      padding: 7px 14px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: #e4e4e7;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    .quick-chip:hover {
+      background: #272733;
+      border-color: #484858;
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .quick-chip:active {
+      transform: scale(0.97);
+    }
+
+    /* When body.widget-mode is active */
+    body.widget-mode {
+      overflow-y: hidden;
+      touch-action: pan-x pan-y;
+    }
+
+    body.widget-mode .workspace-frame {
+      max-width: 640px;
+      height: 100vh;
+      height: 100dvh;
+      padding: 14px 16px env(safe-area-inset-bottom, 14px) 16px;
+      gap: 12px;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    body.widget-mode .nav-workspace-row,
+    body.widget-mode .executive-metrics-grid {
+      display: none !important;
+    }
+
+    body.widget-mode .top-utility-strip {
+      flex-wrap: nowrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    body.widget-mode .agent-workspace-grid {
+      grid-template-columns: 1fr;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    body.widget-mode .avatar-card-panel {
+      height: 200px;
+      min-height: 170px;
+      max-height: 220px;
+      flex-shrink: 0;
+      animation: floatBall 4s ease-in-out infinite;
+    }
+
+    body.widget-mode .chat-card-panel {
+      flex: 1;
+      min-height: 0;
+      height: auto;
+      padding: 18px 20px;
+      border-radius: 22px;
+      background: rgba(15, 15, 18, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65);
+      gap: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    body.widget-mode .speech-bubble {
+      font-size: 1.02rem;
+      line-height: 1.55;
+      padding-right: 4px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    body.widget-mode #mic-btn {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.45);
+      border: none;
+      color: #ffffff;
+    }
+
+    body.widget-mode #mic-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.65);
+    }
+
+    body.widget-mode #mic-btn.listening {
+      background: #ef4444 !important;
+      box-shadow: 0 0 22px rgba(239, 68, 68, 0.75) !important;
+    }
   </style>
   <link rel="stylesheet" href="/prompt-bar.css">
   <link rel="stylesheet" href="/AnimatedList.css">
@@ -1410,6 +1626,17 @@
       </div>
 
       <div class="utility-controls">
+        <!-- Botón para alternar entre Modo Widget y Dashboard Completo -->
+        <button class="view-mode-toggle-btn" id="btn-toggle-view-mode" onclick="toggleViewMode()" title="Alternar entre Modo Widget y Dashboard Completo">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span id="view-mode-label">Modo Widget</span>
+        </button>
+
         <button id="wa-status-btn" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
           <span class="wa-status-dot" id="wa-status-dot"></span>
           <span id="wa-status-label">WhatsApp</span>
@@ -1436,6 +1663,15 @@
         </button>
       </div>
     </header>
+
+    <!-- Banner de Instalación como Widget PWA en Móvil -->
+    <div id="pwa-install-banner" class="pwa-install-banner" style="display:none;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.15rem;">📲</span>
+        <span><b>Instalar Widget Sebax:</b> Agrégalo a tu pantalla de inicio para abrir como widget instantáneo</span>
+      </div>
+      <button id="btn-pwa-install" class="btn-pwa-install-action" onclick="triggerPwaInstall()">Instalar Widget</button>
+    </div>
 
     <!-- 2. NAVIGATION ROW -->
     <nav class="nav-workspace-row">
@@ -1487,6 +1723,25 @@
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
             </svg>
             <span class="btn-text">Escuchar voz</span>
+          </button>
+        </div>
+
+        <!-- Quick Action Chips (Acciones Rápidas 1-Tap tipo Widget Gemini) -->
+        <div class="widget-quick-chips" id="widget-quick-chips">
+          <button type="button" class="quick-chip" onclick="executeQuickPrompt('Busca 3 prospectos de negocios nuevos en Gómez Palacio y Lerdo')">
+            <span>⚡ Buscar 3 clientes</span>
+          </button>
+          <button type="button" class="quick-chip" onclick="openLeadsModal()">
+            <span>📋 Ver prospectos (<span id="quick-leads-count">109</span>)</span>
+          </button>
+          <button type="button" class="quick-chip" onclick="executeQuickPrompt('Envía el reporte comercial de prospección a mi WhatsApp ahora')">
+            <span>📲 Reporte WhatsApp</span>
+          </button>
+          <button type="button" class="quick-chip" onclick="openAgendaModal()">
+            <span>📅 Citas y agenda</span>
+          </button>
+          <button type="button" class="quick-chip" onclick="openDemosTab()">
+            <span>🌐 Prototipos web</span>
           </button>
         </div>
 
@@ -2598,6 +2853,8 @@
 
         const navCount = document.getElementById("nav-leads-count");
         if (navCount) navCount.textContent = data.total || 0;
+        const quickCount = document.getElementById("quick-leads-count");
+        if (quickCount) quickCount.textContent = data.total || 0;
 
         allLeads = data.leads || [];
         filterAndRenderLeads();
@@ -3052,7 +3309,111 @@
       }
     }
 
+
+    // ----------------------------------------------------
+    // MOBILE AI WIDGET MODE & PWA INSTALL LOGIC
+    // ----------------------------------------------------
+    let deferredInstallPrompt = null;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const banner = document.getElementById("pwa-install-banner");
+      if (banner && !window.matchMedia('(display-mode: standalone)').matches) {
+        banner.style.display = "flex";
+      }
+    });
+
+    async function triggerPwaInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === "accepted") {
+          const banner = document.getElementById("pwa-install-banner");
+          if (banner) banner.style.display = "none";
+        }
+        deferredInstallPrompt = null;
+      } else {
+        const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        if (isIos) {
+          alert("Para tener Sebax como Widget en tu iPhone:\n1. Toca el botón Compartir (cuadrado con flecha ⎋)\n2. Desliza hacia abajo y selecciona 'Agregar al inicio (+)'");
+        } else {
+          alert("Para instalar Sebax en tu teléfono:\n1. Toca los tres puntos (⋮) en Chrome\n2. Selecciona 'Instalar aplicación' o 'Agregar a la pantalla principal'");
+        }
+      }
+    }
+
+    window.addEventListener("appinstalled", () => {
+      const banner = document.getElementById("pwa-install-banner");
+      if (banner) banner.style.display = "none";
+      deferredInstallPrompt = null;
+    });
+
+    function initViewMode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const modeParam = urlParams.get("mode");
+      let activeMode = null;
+
+      if (modeParam === "widget" || modeParam === "dashboard") {
+        activeMode = modeParam;
+      } else {
+        const savedMode = localStorage.getItem("sebax_view_mode");
+        if (savedMode) {
+          activeMode = savedMode;
+        } else {
+          // Si es teléfono móvil o pantalla angosta, abrir como widget por defecto
+          const isMobileDevice = window.innerWidth <= 768 || /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+          activeMode = isMobileDevice ? "widget" : "dashboard";
+        }
+      }
+
+      applyViewMode(activeMode);
+    }
+
+    function toggleViewMode() {
+      const isCurrentlyWidget = document.body.classList.contains("widget-mode");
+      const nextMode = isCurrentlyWidget ? "dashboard" : "widget";
+      applyViewMode(nextMode);
+    }
+
+    function applyViewMode(mode) {
+      const isWidget = mode === "widget";
+      document.body.classList.toggle("widget-mode", isWidget);
+      localStorage.setItem("sebax_view_mode", mode);
+
+      const btn = document.getElementById("btn-toggle-view-mode");
+      const label = document.getElementById("view-mode-label");
+      const subBadge = document.querySelector(".status-badge-sub");
+
+      if (btn && label) {
+        if (isWidget) {
+          btn.classList.add("active-widget");
+          label.textContent = "⊞ Ver Dashboard";
+          if (subBadge) subBadge.textContent = "WIDGET MÓVIL";
+        } else {
+          btn.classList.remove("active-widget");
+          label.textContent = "⚡ Modo Widget";
+          if (subBadge) subBadge.textContent = "SSSSOLUTIONS";
+        }
+      }
+
+      // Disparar evento resize para reajuste del WebGL orbe
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 100);
+    }
+
+    function executeQuickPrompt(text) {
+      if (!text) return;
+      const input = document.getElementById("user-input");
+      if (input) {
+        input.value = text;
+      }
+      sendCommand(text);
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
+      initViewMode();
       initThinkingOrbs();
       checkWhatsAppStatus();
       loadLeadsData();
