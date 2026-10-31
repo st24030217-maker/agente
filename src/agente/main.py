@@ -206,7 +206,8 @@ async def whatsapp_webhook(request: Request):
 @app.post("/chat")
 @app.post("/api/chat")
 async def chat_direct(payload: DirectChatRequest):
-    reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=False)
+    is_admin = payload.chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+    reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
     return {"reply": reply}
 
 @app.get("/demo/{slug}", response_class=Response)
