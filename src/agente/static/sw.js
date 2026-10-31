@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-wa-fixed-v26";
+const CACHE_NAME = "sebax-cache-purged-v27";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
@@ -10,7 +10,12 @@ self.addEventListener("activate", (e) => {
       return Promise.all(
         keys.map((k) => caches.delete(k))
       );
-    }).then(() => self.clients.claim())
+    }).then(() => self.clients.claim()).then(async () => {
+      const clients = await self.clients.matchAll({ type: "window" });
+      clients.forEach((c) => {
+        c.postMessage({ type: "CACHE_PURGED" });
+      });
+    })
   );
 });
 
@@ -31,9 +36,9 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Assets estaticos: red primero, cache como respaldo si existe
+  // Siempre solicitar contenido fresco al servidor sin caché
   e.respondWith(
-    fetch(e.request).catch(async () => {
+    fetch(e.request, { cache: "no-store" }).catch(async () => {
       const match = await caches.match(e.request);
       if (match) {
         return match;

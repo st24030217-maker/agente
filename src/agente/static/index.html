@@ -3083,6 +3083,23 @@
       navigator.serviceWorker.register("/sw.js").then((reg) => {
         reg.update();
       }).catch(() => {});
+
+      navigator.serviceWorker.addEventListener("message", (e) => {
+        if (e.data && e.data.type === "CACHE_PURGED") {
+          console.log("Caché purgado por Service Worker.");
+        }
+      });
+    }
+
+    // Limpieza profunda automática de cachés obsoletos en el cliente
+    if ("caches" in window) {
+      caches.keys().then((names) => {
+        names.forEach((name) => {
+          if (name !== "sebax-cache-purged-v27") {
+            caches.delete(name);
+          }
+        });
+      });
     }
   </script>
 </body>

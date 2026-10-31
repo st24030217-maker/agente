@@ -56,8 +56,12 @@ app = FastAPI(title="Sebax - AI Personal Agent", version="1.0.0")
 @app.middleware("http")
 async def add_no_cache_headers(request: Request, call_next):
     response = await call_next(request)
-    if request.url.path in ["/", "/index.html", "/sw.js"]:
-        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    # Evitar cualquier almacenamiento en caché para HTML, JS, CSS, JSON, fuentes y sw.js
+    path = request.url.path
+    if path in ["/", "/index.html", "/sw.js", "/manifest.json"] or any(
+        path.endswith(ext) for ext in [".js", ".css", ".json", ".html", ".mjs"]
+    ):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
     return response
