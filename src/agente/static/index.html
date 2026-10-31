@@ -280,19 +280,38 @@
       }
     }
 
-    /* Columna Avatar 3D (Enmarcado perfecto sin traspasar) */
+    /* Columna Avatar 3D (Círculo Flotante Transparente sin bloque) */
     .avatar-card-panel {
-      background: radial-gradient(circle at center, #131317 0%, #0a0a0c 100%);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 18px 20px;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0;
+      padding: 0 !important;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
+      align-items: center;
       height: 400px;
-      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+      box-shadow: none !important;
+      animation: floatBall 6s ease-in-out infinite;
+    }
+
+    @keyframes floatBall {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .avatar-overlay-header {
+      display: none !important;
+    }
+
+    .avatar-pedestal-pill {
+      display: none !important;
     }
 
     .crystalized-ball,
@@ -1179,7 +1198,7 @@
 
       .avatar-card-panel {
         height: 220px;
-        padding: 14px;
+        padding: 0 !important;
       }
 
       .avatar-panel-title {
@@ -1270,17 +1289,8 @@
     <section class="agent-workspace-grid">
       <!-- Columna Avatar Oficial Sebax AI - Crystalized Ball Core Unit (React Bits) -->
       <div class="avatar-card-panel" id="avatar-stage">
-        <div class="avatar-overlay-header">
-          <span class="avatar-panel-title">CORE AI · CRYSTAL SEBAX</span>
-          <span id="agent-state" class="avatar-panel-status">Listo</span>
-        </div>
-
+        <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
         <div id="canvas-container" class="crystalized-ball"></div>
-
-        <div class="avatar-pedestal-pill">
-          <span class="pedestal-dot" id="pedestal-dot"></span>
-          <span class="pedestal-title">REACT BITS · CRYSTALIZED BALL</span>
-        </div>
       </div>
 
       <!-- Columna Diálogo y Entrada -->
