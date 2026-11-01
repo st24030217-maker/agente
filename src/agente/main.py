@@ -254,18 +254,31 @@ async def get_qr_page():
 @app.get("/api/bridge/status")
 async def get_bridge_status():
     """Estado de conexión unificado del conector de WhatsApp."""
+    cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
+
+    # 1. Si el proveedor activo es Meta Cloud API y las credenciales están configuradas
+    if settings.whatsapp_provider == "cloud_api" and cloud_configured:
+        return {
+            "status": "cloud_api_configured",
+            "provider": "cloud_api",
+            "user": {
+                "id": settings.meta_wa_phone_number_id,
+                "name": "Meta WhatsApp Cloud API (+1 555-653-0368)"
+            },
+            "cloud_api_configured": True,
+            "webhook_configured": bool(settings.meta_wa_verify_token)
+        }
+
     bridge_data = {}
     async with httpx.AsyncClient() as client:
         try:
-            resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/status", timeout=5.0)
+            resp = await client.get(f"http://127.0.0.1:{settings.bridge_port}/status", timeout=3.0)
             if resp.status_code == 200:
                 bridge_data = resp.json()
         except Exception:
             bridge_data = {"status": "starting"}
 
-    cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
-
-    # 1. Si Baileys está conectado, reportar 'open'
+    # 2. Si Baileys está conectado, reportar 'open'
     if bridge_data.get("status") == "open":
         return {
             "status": "open",
@@ -275,7 +288,7 @@ async def get_bridge_status():
             "webhook_configured": bool(settings.meta_wa_verify_token)
         }
 
-    # 2. Si Baileys está esperando QR o código de vinculación telefónica:
+    # 3. Si Baileys está esperando QR o código de vinculación telefónica
     if bridge_data.get("status") in ["qr_ready", "starting"]:
         return {
             "status": bridge_data.get("status"),
@@ -286,17 +299,8 @@ async def get_bridge_status():
             "webhook_configured": bool(settings.meta_wa_verify_token)
         }
 
-    # 3. Si Baileys está cerrado pero Cloud API está configurado:
-    if cloud_configured and settings.whatsapp_provider == "cloud_api":
-        return {
-            "status": "cloud_api_configured",
-            "provider": "cloud_api",
-            "user": None,
-            "webhook_configured": bool(settings.meta_wa_verify_token)
-        }
-
     return {
-        "status": bridge_data.get("status", "disconnected"),
+        "status": "cloud_api_configured" if cloud_configured else "disconnected",
         "provider": settings.whatsapp_provider,
         "user": None,
         "cloud_api_configured": cloud_configured,

@@ -2455,28 +2455,31 @@
 
         const isOnline = data.status === "open";
         const isCloudApi = data.status === "cloud_api_configured";
+        const isConnected = isOnline || isCloudApi;
+
         if (dot) {
-          if (isOnline || isCloudApi) {
+          if (isConnected) {
             dot.classList.add("connected");
           } else {
             dot.classList.remove("connected");
           }
         }
         if (btn && label) {
-          btn.className = (isOnline || isCloudApi) ? "glass-pill wa-status-pill connected" : "glass-pill wa-status-pill disconnected";
-          label.textContent = isOnline ? "WhatsApp Conectado" : (isCloudApi ? "WhatsApp Cloud API" : "Conectar WhatsApp");
+          btn.className = isConnected ? "utility-pill connected" : "utility-pill disconnected";
+          label.textContent = isOnline ? "WhatsApp Conectado" : (isCloudApi ? "Meta Cloud API Conectada" : "Conectar WhatsApp");
         }
 
         if (connectedView && pairingView) {
-          connectedView.style.display = isOnline ? "block" : "none";
-          pairingView.style.display = isOnline ? "none" : "block";
-          if (cloudView) cloudView.style.display = (data.status === "cloud_api_configured") ? "block" : "none";
-          if (cloudDesc && isCloudApi) {
-            cloudDesc.textContent = "Credenciales Cloud API activas. Listo para operar.";
-          }
-          if (isOnline && userDesc && data.user && data.user.id) {
-            const cleanUser = data.user.id.split("@")[0].split(":")[0];
-            userDesc.textContent = "Conectado al número " + cleanUser + ". Sebax está activo 24/7 en Torreón, Gómez y Lerdo.";
+          connectedView.style.display = isConnected ? "block" : "none";
+          pairingView.style.display = isConnected ? "none" : "block";
+          if (cloudView) cloudView.style.display = "none";
+          if (userDesc) {
+            if (isCloudApi) {
+              userDesc.innerHTML = "<b>Meta WhatsApp Business Cloud API Oficial</b> conectada y operativa (+1 555-653-0368). Sebax está en línea 24/7 atendiendo clientes y prospectando negocios en La Laguna.";
+            } else if (isOnline && data.user && data.user.id) {
+              const cleanUser = data.user.id.split("@")[0].split(":")[0];
+              userDesc.textContent = "Conectado al número " + cleanUser + ". Sebax está activo 24/7 en Torreón, Gómez y Lerdo.";
+            }
           }
         }
       } catch (e) {}

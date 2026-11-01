@@ -1,4 +1,4 @@
-const CACHE_NAME = "sebax-cache-purged-v27";
+const CACHE_NAME = "sebax-cloud-wa-v28";
 
 self.addEventListener("install", (e) => {
   self.skipWaiting();
