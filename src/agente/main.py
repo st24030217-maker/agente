@@ -21,7 +21,9 @@ from agente.tools.prospecting import (
     generate_lead_reply,
     _load_leads,
     _save_leads,
-    normalize_mx_phone
+    normalize_mx_phone,
+    export_leads_csv,
+    get_leads_analytics
 )
 from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 from agente.tools.agenda import (
@@ -89,6 +91,11 @@ class LeadSendRequest(BaseModel):
     phone: str
     message: str
     lead_id: int | None = None
+
+class LeadStatusUpdateRequest(BaseModel):
+    lead_id: int
+    status: str
+    notes: str = ""
 
 class LeadIncomingCheck(BaseModel):
     sender: str
@@ -389,6 +396,32 @@ async def api_status():
 def get_leads_api():
     """Devuelve la lista completa de prospectos y métricas de prospección."""
     return get_leads_stats()
+
+
+@app.get("/api/leads/export/csv")
+def export_leads_csv_api():
+    """Descarga de la base de datos de prospectos en formato CSV UTF-8 para Excel."""
+    csv_data = export_leads_csv()
+    filename = f"prospectos_ssssolutions_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    return Response(
+        content=csv_data,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}",
+            "Cache-Control": "no-cache, no-store, must-revalidate"
+        }
+    )
+
+@app.get("/api/leads/report")
+def get_leads_report_api():
+    """Devuelve un reporte ejecutivo con análisis inteligente de prospectos, tasas de respuesta y leads calientes."""
+    return get_leads_analytics()
+
+@app.post("/api/leads/status")
+def update_lead_status_api(payload: LeadStatusUpdateRequest):
+    """Actualiza manualmente el estado de un lead (ej. 'respondio', 'no_contesto', 'contactado', 'cita_agendada')."""
+    res = update_lead_status(payload.lead_id, payload.status, payload.notes)
+    return {"success": True, "message": res, "stats": get_leads_stats()}
 
 @app.post("/api/leads/campaign")
 async def run_campaign_api(payload: CampaignRequest):

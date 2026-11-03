@@ -1711,8 +1711,17 @@
                 <button type="button" class="filter-chip active" id="filter-all" onclick="setLeadFilter('all')">Todos</button>
                 <button type="button" class="filter-chip" id="filter-contacted" onclick="setLeadFilter('contactado')">Contactados</button>
                 <button type="button" class="filter-chip" id="filter-replied" onclick="setLeadFilter('respondio')">Respondieron</button>
+                <button type="button" class="filter-chip" id="filter-noreply" onclick="setLeadFilter('no_contesto')">No Contestaron</button>
                 <button type="button" class="filter-chip" id="filter-new" onclick="setLeadFilter('nuevo')">Nuevos</button>
                 <button type="button" class="filter-chip" onclick="loadLeadsData()" title="Refrescar lista">&#x21bb; Recargar</button>
+                <a href="/api/leads/export/csv" download class="filter-chip" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#34d399; text-decoration:none; display:inline-flex; align-items:center; gap:5px;" title="Descargar base de datos completa en Excel (CSV UTF-8)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>Excel</span>
+                </a>
+                <button type="button" class="filter-chip" style="background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4); color:#a5b4fc; display:inline-flex; align-items:center; gap:5px;" onclick="openLeadsAnalyticsModal()" title="Ver reporte ejecutivo inteligente">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  <span>Reporte</span>
+                </button>
               </div>
             </div>
             
@@ -2669,14 +2678,26 @@
       }
 
       container.innerHTML = leads.map(l => {
-        const badgeClass = l.status === "contactado"
-          ? "badge-contactado"
-          : (l.status === "respondio" ? "badge-respondio" : (l.status === "pendiente_confirmacion" ? "badge-pending" : "badge-nuevo"));
-        const statusLabel = l.status === "contactado"
-          ? "Contactado"
-          : (l.status === "respondio" ? "Respondio" : (l.status === "pendiente_confirmacion" ? "Entrega pendiente" : "Nuevo"));
+        let badgeClass = "badge-nuevo";
+        let statusLabel = "Nuevo";
+        if (l.status === "contactado") {
+          badgeClass = "badge-contactado";
+          statusLabel = "Contactado";
+        } else if (l.status === "respondio" || l.status === "interesado") {
+          badgeClass = "badge-respondio";
+          statusLabel = "Respondio";
+        } else if (l.status === "no_contesto") {
+          badgeClass = "badge-pending";
+          statusLabel = "No contesto";
+        } else if (l.status === "pendiente_confirmacion") {
+          badgeClass = "badge-pending";
+          statusLabel = "Entrega pendiente";
+        }
+
         const channel = detectChannel(l);
-        const waLink = "https://wa.me/" + l.phone;
+        const cleanDigits = (l.phone || "").replace(/\D/g, "");
+        const pitchText = l.pitch || ("Hola equipo de " + (l.name || "su negocio") + ", les escribe Sebastian Salinas de la agencia SSSSolutions. Vimos su negocio y nos gustaria presentarles una propuesta de sitio web para impulsar sus ventas. Portafolio: https://st24030217-maker.github.io/cv-salinas/ Instagram: https://www.instagram.com/ssss.olutions");
+        const waLink = "https://wa.me/" + cleanDigits + "?text=" + encodeURIComponent(pitchText);
 
         return `
           <div class="lead-card">
@@ -2695,17 +2716,23 @@
               </div>
             </div>
             <div class="lead-actions">
-              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa" title="Abrir chat directo en WhatsApp">
+              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa" title="Abrir chat en WhatsApp con mensaje precargado">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <span>Abrir WhatsApp</span>
               </a>
+              <button class="lead-btn btn-status-lead" data-id="${l.id}" data-status="respondio" title="Marcar que el cliente contesto" style="border-color:rgba(16,185,129,0.35); color:#34d399;">
+                <span>✓ Contesto</span>
+              </button>
+              <button class="lead-btn btn-status-lead" data-id="${l.id}" data-status="no_contesto" title="Marcar que no contesto" style="border-color:rgba(239,68,68,0.35); color:#f87171;">
+                <span>✕ No contesto</span>
+              </button>
               <button class="lead-btn btn-schedule-lead" data-name="${escapeHtml(l.name)}" data-phone="${escapeHtml(l.phone)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                 <span>Agendar Cita</span>
               </button>
               <button class="lead-btn btn-send-lead" data-id="${l.id}" data-phone="${escapeHtml(l.phone)}" data-name="${escapeHtml(l.name)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                <span>Reenviar Propuesta</span>
+                <span>Reenviar</span>
               </button>
             </div>
           </div>
@@ -2713,6 +2740,116 @@
       }).join("");
       if (window.applyAnimatedList) {
         window.applyAnimatedList(container);
+      }
+    }
+
+    
+    async function updateLeadStatusDirect(leadId, status) {
+      try {
+        const res = await fetch('/api/leads/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lead_id: parseInt(leadId), status: status })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const statusText = status === 'respondio' ? 'Marcado como: Respondio / Interesado' : 'Marcado como: No contesto';
+          showToast(statusText);
+          loadLeadsData();
+        }
+      } catch (e) {
+        showToast('Error al actualizar estado: ' + e.message);
+      }
+    }
+
+    async function openLeadsAnalyticsModal() {
+      let modal = document.getElementById('leads-report-modal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'leads-report-modal';
+        modal.className = 'agent-modal-backdrop';
+        modal.innerHTML = `
+          <div class="agent-modal-card" style="max-width: 620px;">
+            <div class="agent-modal-header">
+              <div class="agent-modal-title">Reporte Ejecutivo de Prospeccion</div>
+              <button class="agent-modal-close" onclick="document.getElementById('leads-report-modal').style.display='none'">&times;</button>
+            </div>
+            <div class="agent-modal-body" id="leads-report-content" style="max-height: 70vh; overflow-y: auto;">
+              <div style="text-align:center; padding:20px; color:var(--text-dim);">Cargando reporte analitico...</div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.style.display = 'flex';
+
+      try {
+        const res = await fetch('/api/leads/report');
+        const d = await res.json();
+        const content = document.getElementById('leads-report-content');
+        
+        let calientesHtml = '';
+        if (d.leads_calientes && d.leads_calientes.length > 0) {
+          calientesHtml = d.leads_calientes.map(c => `
+            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:10px; margin-bottom:8px;">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:#34d399;">${escapeHtml(c.name)}</strong>
+                <a href="https://wa.me/${(c.phone||'').replace(/\D/g,'')}" target="_blank" style="background:#10b981; color:#000; font-weight:600; font-size:0.75rem; padding:3px 8px; border-radius:4px; text-decoration:none;">Chatear</a>
+              </div>
+              <div style="font-size:0.8rem; color:var(--text-dim); margin-top:3px;">
+                <span>Tel: ${escapeHtml(c.phone)}</span> | <span>${escapeHtml(c.city||'La Laguna')}</span> | <span>Giro: ${escapeHtml(c.niche||'General')}</span>
+              </div>
+              ${c.last_reply ? `<div style="font-size:0.78rem; color:#e2e8f0; margin-top:5px; background:rgba(0,0,0,0.3); padding:6px; border-radius:4px;">"${escapeHtml(c.last_reply)}"</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          calientesHtml = '<div style="color:var(--text-dim); font-size:0.82rem; padding:8px 0;">No hay prospectos con respuesta registrada aun.</div>';
+        }
+
+        let girosHtml = Object.entries(d.distribucion_giros || {}).map(([g, count]) => `
+          <span style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:3px 10px; font-size:0.75rem;">${g}: <strong>${count}</strong></span>
+        `).join(' ');
+
+        content.innerHTML = `
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:16px;">
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Total</div>
+              <div style="font-size:1.3rem; font-weight:700; color:#fff;">${d.total_prospectos}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:0.72rem; color:var(--text-dim); text-transform:uppercase;">Contactados</div>
+              <div style="font-size:1.3rem; font-weight:700; color:#38bdf8;">${d.contactados}</div>
+            </div>
+            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:0.72rem; color:#34d399; text-transform:uppercase;">Respondieron</div>
+              <div style="font-size:1.3rem; font-weight:700; color:#34d399;">${d.respondieron}</div>
+            </div>
+            <div style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.25); border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:0.72rem; color:#a5b4fc; text-transform:uppercase;">Tasa Resp.</div>
+              <div style="font-size:1.3rem; font-weight:700; color:#a5b4fc;">${d.tasa_respuesta_porcentaje}%</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:0.85rem; font-weight:600; margin-bottom:8px; color:#34d399; display:flex; align-items:center; gap:6px;">
+              <span>Leads Calientes (Clientes que respondieron)</span>
+            </div>
+            ${calientesHtml}
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:0.82rem; font-weight:600; margin-bottom:8px; color:var(--text-dim);">Distribucion de Giros Prospectados</div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+              ${girosHtml}
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px; border-top:1px solid var(--border-color); padding-top:12px;">
+            <a href="/api/leads/export/csv" download class="filter-chip" style="background:#10b981; color:#000; font-weight:600; text-decoration:none; padding:8px 16px; border-radius:6px; font-size:0.82rem;">Descargar Base Completa en Excel (.CSV)</a>
+          </div>
+        `;
+      } catch (err) {
+        document.getElementById('leads-report-content').innerHTML = '<div style="color:#ef4444; padding:20px;">Error al cargar reporte: ' + err.message + '</div>';
       }
     }
 

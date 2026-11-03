@@ -508,3 +508,130 @@ def get_leads_stats() -> dict:
         "nuevos": nuevos,
         "leads": sorted(leads, key=lambda x: x.get("id", 0), reverse=True)
     }
+
+
+def export_leads_csv() -> str:
+    """Genera un archivo CSV con formato UTF-8 BOM compatible directamente con Microsoft Excel, separando columnas inteligentes y estados."""
+    import csv
+    import io
+    import urllib.parse
+
+    leads = _load_leads()
+    output = io.StringIO()
+    # Escribir BOM UTF-8 para que Excel en Windows reconozca acentos y caracteres latinos
+    output.write("\ufeff")
+    writer = csv.writer(output, quoting=csv.QUOTE_ALL)
+
+    # Encabezados en español para Excel
+    writer.writerow([
+        "ID",
+        "Negocio",
+        "Teléfono",
+        "Ciudad",
+        "Giro / Nicho",
+        "Estado Comercial",
+        "¿Contestó?",
+        "Fecha de Contacto",
+        "Fecha de Registro",
+        "Enlace WhatsApp Directo",
+        "Propuesta / Pitch Personalizado",
+        "Última Respuesta del Cliente",
+        "Notas y Seguimiento"
+    ])
+
+    for l in sorted(leads, key=lambda x: x.get("id", 0), reverse=True):
+        status = l.get("status", "nuevo").lower()
+        if status in ["respondio", "interesado"]:
+            contesto = "SÍ (Cliente Interesado)"
+        elif status == "no_contesto":
+            contesto = "NO (Sin respuesta)"
+        elif status == "contactado":
+            contesto = "ENVIADO (Esperando respuesta)"
+        else:
+            contesto = "PENDIENTE (No enviado aún)"
+
+        status_label = {
+            "nuevo": "Nuevo",
+            "contactado": "Mensaje Enviado",
+            "respondio": "Respondió / Interesado",
+            "interesado": "Cliente Caliente",
+            "no_contesto": "No Contestó",
+            "cita_agendada": "Cita Agendada",
+            "descartado": "Descartado"
+        }.get(status, status.title())
+
+        phone = l.get("phone", "")
+        pitch = l.get("pitch", "")
+        if not pitch:
+            pitch = generate_pitch(business_name=l.get("name", "Negocio"), niche=l.get("niche", "general"))
+
+        clean_phone = re.sub(r"\D", "", phone)
+        wa_link = f"https://wa.me/{clean_phone}?text={urllib.parse.quote(pitch)}" if clean_phone else ""
+
+        writer.writerow([
+            l.get("id", ""),
+            l.get("name", ""),
+            phone,
+            l.get("city", "La Laguna"),
+            l.get("niche", "General"),
+            status_label,
+            contesto,
+            l.get("contacted_at", ""),
+            l.get("created_at", ""),
+            wa_link,
+            pitch,
+            l.get("last_reply", ""),
+            l.get("notes", "")
+        ])
+
+    return output.getvalue()
+
+def get_leads_analytics() -> dict:
+    """Genera un reporte analítico inteligente del estado de todos los prospectos para el dashboard y exportación."""
+    leads = _load_leads()
+    total = len(leads)
+    contactados = sum(1 for l in leads if l.get("status") == "contactado")
+    respondieron = sum(1 for l in leads if l.get("status") in ["respondio", "interesado"])
+    no_contestaron = sum(1 for l in leads if l.get("status") == "no_contesto")
+    nuevos = sum(1 for l in leads if l.get("status") == "nuevo")
+
+    # Ciudades
+    ciudades = {}
+    for l in leads:
+        c = l.get("city") or "Torreón"
+        ciudades[c] = ciudades.get(c, 0) + 1
+
+    # Giros
+    giros = {}
+    for l in leads:
+        g = (l.get("niche") or "General").title()
+        giros[g] = giros.get(g, 0) + 1
+
+    # Prospectos calientes que respondieron
+    calientes = [
+        {
+            "id": l.get("id"),
+            "name": l.get("name"),
+            "phone": l.get("phone"),
+            "niche": l.get("niche"),
+            "city": l.get("city"),
+            "last_reply": l.get("last_reply", ""),
+            "last_reply_at": l.get("last_reply_at", ""),
+            "contacted_at": l.get("contacted_at", "")
+        }
+        for l in leads if l.get("status") in ["respondio", "interesado"]
+    ]
+
+    tasa_respuesta = round((respondieron / contactados * 100), 1) if contactados > 0 else 0.0
+
+    return {
+        "total_prospectos": total,
+        "contactados": contactados,
+        "respondieron": respondieron,
+        "no_contestaron": no_contestaron,
+        "nuevos_en_espera": nuevos,
+        "tasa_respuesta_porcentaje": tasa_respuesta,
+        "distribucion_ciudades": ciudades,
+        "distribucion_giros": dict(sorted(giros.items(), key=lambda item: item[1], reverse=True)[:8]),
+        "leads_calientes": calientes
+    }
