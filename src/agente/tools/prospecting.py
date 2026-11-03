@@ -80,13 +80,6 @@ def _load_leads() -> list:
 def _save_leads(leads: list):
     with open(LEADS_FILE, "w", encoding="utf-8") as f:
         json.dump(leads, f, indent=2, ensure_ascii=False)
-    try:
-        csv_file = DATA_DIR / "prospectos_ssssolutions.csv"
-        csv_content = export_leads_csv()
-        with open(csv_file, "w", encoding="utf-8") as f:
-            f.write(csv_content)
-    except Exception as e:
-        logger.debug("Sincronizacion CSV omitida: %s", e)
 
 def _clean_business_name(title: str, href: str, niche: str) -> str:
     """Limpia y da formato profesional al nombre del negocio extraído."""

@@ -23,11 +23,7 @@ class Settings(BaseModel):
     gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
     # Lista blanca de números autorizados separados por coma con código de país.
     # Si se deja vacío (por defecto), Sebax responderá como agente comercial público a cualquier chat que le escriba.
-    allowed_numbers: list[str] = [
-        num.strip() 
-        for num in os.getenv("ALLOWED_NUMBERS", "").split(",") 
-        if num.strip()
-    ]
+    allowed_numbers: list[str] = ["8719164677", "528719164677"]
     # Directorio de trabajo predeterminado para herramientas de código y terminal
     workspace_dir: str = os.getenv("WORKSPACE_DIR") or str(BASE_DIR)
     server_port: int = int(os.getenv("PORT", "8000"))

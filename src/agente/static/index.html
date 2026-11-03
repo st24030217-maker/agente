@@ -1711,17 +1711,8 @@
                 <button type="button" class="filter-chip active" id="filter-all" onclick="setLeadFilter('all')">Todos</button>
                 <button type="button" class="filter-chip" id="filter-contacted" onclick="setLeadFilter('contactado')">Contactados</button>
                 <button type="button" class="filter-chip" id="filter-replied" onclick="setLeadFilter('respondio')">Respondieron</button>
-                <button type="button" class="filter-chip" id="filter-noreply" onclick="setLeadFilter('no_contesto')">No Contestaron</button>
                 <button type="button" class="filter-chip" id="filter-new" onclick="setLeadFilter('nuevo')">Nuevos</button>
                 <button type="button" class="filter-chip" onclick="loadLeadsData()" title="Refrescar lista">&#x21bb; Recargar</button>
-                <a href="/api/leads/export/csv" download class="filter-chip" style="background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.4); color:#34d399; text-decoration:none; display:inline-flex; align-items:center; gap:5px;" title="Descargar base de datos completa en Excel (CSV UTF-8)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  <span>Excel</span>
-                </a>
-                <button type="button" class="filter-chip" style="background:rgba(99,102,241,0.15); border-color:rgba(99,102,241,0.4); color:#a5b4fc; display:inline-flex; align-items:center; gap:5px;" onclick="openLeadsAnalyticsModal()" title="Ver reporte ejecutivo inteligente">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                  <span>Reporte</span>
-                </button>
               </div>
             </div>
             
@@ -1865,7 +1856,7 @@
             <div id="wa-subtab-code">
               <div class="campaign-box" style="margin-bottom:0.8rem;">
                 <div class="form-row">
-                  <input type="tel" class="form-input" id="wa-sheet-phone" value="8718321968" placeholder="8718321968">
+                  <input type="tel" class="form-input" id="wa-sheet-phone" value="8719164677" placeholder="8719164677">
                   <button class="btn-launch" id="btn-sheet-pairing" onclick="requestSheetPairingCode()">
                     <span>Obtener Código</span>
                   </button>
@@ -2716,23 +2707,17 @@
               </div>
             </div>
             <div class="lead-actions">
-              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa" title="Abrir chat en WhatsApp con mensaje precargado">
+              <a href="${waLink}" target="_blank" class="lead-btn lead-btn-wa" title="Abrir chat directo en WhatsApp">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 <span>Abrir WhatsApp</span>
               </a>
-              <button class="lead-btn btn-status-lead" data-id="${l.id}" data-status="respondio" title="Marcar que el cliente contesto" style="border-color:rgba(16,185,129,0.35); color:#34d399;">
-                <span>✓ Contesto</span>
-              </button>
-              <button class="lead-btn btn-status-lead" data-id="${l.id}" data-status="no_contesto" title="Marcar que no contesto" style="border-color:rgba(239,68,68,0.35); color:#f87171;">
-                <span>✕ No contesto</span>
-              </button>
               <button class="lead-btn btn-schedule-lead" data-name="${escapeHtml(l.name)}" data-phone="${escapeHtml(l.phone)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                 <span>Agendar Cita</span>
               </button>
               <button class="lead-btn btn-send-lead" data-id="${l.id}" data-phone="${escapeHtml(l.phone)}" data-name="${escapeHtml(l.name)}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                <span>Reenviar</span>
+                <span>Reenviar Propuesta</span>
               </button>
             </div>
           </div>

@@ -218,7 +218,7 @@ app.get("/qr-data", async (req, res) => {
 
 app.post("/pairing-code", async (req, res) => {
   try {
-    const rawPhone = req.body?.phone || "8718321968";
+    const rawPhone = req.body?.phone || "8719164677";
     let clean = normalizePhone(rawPhone);
     if (clean.length < 10) {
       return res.status(400).json({ error: "Número no válido. Ingresa tu número de 10 dígitos (ej. 8719164677)." });
