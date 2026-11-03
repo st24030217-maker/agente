@@ -222,6 +222,15 @@ async def chat_direct(payload: DirectChatRequest):
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
     return {"reply": reply}
 
+@app.get("/chat")
+@app.get("/api/chat")
+async def chat_direct_get(message: str = "", chat_id: str = "shortcuts"):
+    if not message:
+        return {"reply": "Por favor proporciona un mensaje o indicación para Sebax."}
+    is_admin = chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+    reply = await coordinator.process_message(chat_id=chat_id, message=message, is_admin=is_admin)
+    return {"reply": reply}
+
 @app.get("/demo/{slug}", response_class=Response)
 async def view_demo(slug: str):
     """Visualizador público del prototipo web interactivo generado para el prospecto."""
