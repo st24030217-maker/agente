@@ -216,20 +216,39 @@ async def whatsapp_webhook(request: Request):
     return {"reply": reply}
 
 @app.post("/chat")
+@app.post("/chat/")
 @app.post("/api/chat")
+@app.post("/api/chat/")
 async def chat_direct(payload: DirectChatRequest):
     is_admin = payload.chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
     return {"reply": reply}
 
 @app.get("/chat")
+@app.get("/chat/")
 @app.get("/api/chat")
+@app.get("/api/chat/")
 async def chat_direct_get(message: str = "", chat_id: str = "shortcuts"):
     if not message:
         return {"reply": "Por favor proporciona un mensaje o indicación para Sebax."}
     is_admin = chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
     reply = await coordinator.process_message(chat_id=chat_id, message=message, is_admin=is_admin)
     return {"reply": reply}
+
+@app.post("/")
+async def root_post_chat(request: Request):
+    """Manejador de respaldo si el widget de iOS envía el POST a la raíz del dominio."""
+    try:
+        data = await request.json()
+        msg = data.get("message", "")
+        cid = data.get("chat_id", "shortcuts")
+        if msg:
+            is_admin = cid.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+            reply = await coordinator.process_message(chat_id=cid, message=msg, is_admin=is_admin)
+            return {"reply": reply}
+    except Exception:
+        pass
+    return {"detail": "Endpoint de chat activo en /api/chat"}
 
 @app.get("/demo/{slug}", response_class=Response)
 async def view_demo(slug: str):
