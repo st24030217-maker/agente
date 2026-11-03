@@ -38,9 +38,9 @@ class Settings(BaseModel):
     # Meta WhatsApp Cloud API credentials con token permanente de respaldo
     meta_wa_token: str = os.getenv(
         "META_WA_TOKEN",
-        "EAAUyJT420vsBSyU0ZAn4jnpz2NncsPYCT1b2EsjCFaqZBIUykb11qWGY9G5YZCYTkRb9pfEwsapllwgyIY9scM2NBfOsWMEUL9YpPzZBcqbwh5TIJiYn5woGVx88WvrJYrx2hGt8NInFdkyZA5a6DOhkeePuQrSB6itn8ptc6qDvIYJwE7ZCjEtW1bMbylLgZDZD"
+        "EAAU9E9oxiUIBSzdciwiP67ZBmqndGqhLGl3p3GSxJSxKo4HD2oLP4tggUEjQ8N5K4UOcZBCBJqVUP0ZAZAydcL7cZBNnzZBqJiNRKVBPZCswMLWSpZCSqWuXGdWnPQ8ZBgI1ZAEW8ACzQb20WTrxLf8aCEL19HBw490O51RB22mhqOHZCQjANf4J1K1C8Qt0ZAhrnMf5lh9VDxFKBzgw8WeTpn0ZBhJ9wVCng0juJwHZBxZAiuFqXXQ5SKpg0dBLQPsI7e73PSaoNv6IflKvNVIfZBHRA3aQMbxuBZBYZD"
     )
-    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1362013893668994")
+    meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1425016637355936")
     meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
 
 settings = Settings()

@@ -263,7 +263,7 @@ async def get_bridge_status():
             "provider": "cloud_api",
             "user": {
                 "id": settings.meta_wa_phone_number_id,
-                "name": "Meta WhatsApp Cloud API (+1 555-653-0368)"
+                "name": "Meta WhatsApp Cloud API (+1 555-179-2439)"
             },
             "cloud_api_configured": True,
             "webhook_configured": bool(settings.meta_wa_verify_token)
