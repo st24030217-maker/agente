@@ -13,6 +13,7 @@ from agente.tools.prospecting import (
     generate_pitch,
     _load_leads,
     _save_leads,
+    _is_excluded_business,
     DIVERSE_NICHES,
     PORTFOLIO_LINKS
 )
@@ -72,7 +73,7 @@ def toggle_autopilot(enabled: bool = None) -> dict:
     return cfg
 
 def run_autopilot_cycle() -> dict:
-    """Ejecuta una ronda de prospección continua: busca negocios en Torreón, Gómez o Lerdo y les envía la propuesta por WhatsApp."""
+    """Ejecuta una ronda de prospección comercial: toma prospectos pendientes de la base de datos o busca nuevos en Torreón, Gómez o Lerdo y les envía la propuesta por WhatsApp."""
     cfg = get_autopilot_config()
     if not cfg.get("enabled", True):
         return {"executed": False, "reason": "Piloto automático en pausa"}
@@ -82,64 +83,102 @@ def run_autopilot_cycle() -> dict:
     niche = DIVERSE_NICHES[idx]
     cfg["current_niche_idx"] = idx + 1
 
-    batch_size = cfg.get("batch_size", 2)
+    batch_size = cfg.get("batch_size", 3)
     city = "Torreón, Gómez Palacio y Lerdo"
-
-    leads_found = discover_leads(niche=niche, city=city, max_leads=batch_size)
-    if not leads_found:
-        cfg["last_run"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        save_autopilot_config(cfg)
-        return {"executed": True, "sent": 0, "niche": niche, "message": "No se detectaron prospectos nuevos en este ciclo"}
+    now_str = get_laguna_now().strftime("%Y-%m-%d %H:%M:%S")
 
     existing_leads = _load_leads()
+
+    # 1. Priorizar prospectos no contactados ('nuevo') ya guardados en data/leads.json
+    def _is_valid_lead(l: dict) -> bool:
+        if l.get("status") != "nuevo":
+            return False
+        if not l.get("phone"):
+            return False
+        if _is_excluded_business(l.get("name", ""), l.get("niche", ""), l.get("notes", "")):
+            return False
+        return True
+
+    eligible_leads = [l for l in existing_leads if _is_valid_lead(l)]
+
+    # Intentar emparejar con el giro en turno
+    niche_lower = niche.lower()
+    matching_leads = [
+        l for l in eligible_leads
+        if any(w in (l.get("niche") or "").lower() for w in niche_lower.split() if len(w) > 3)
+    ]
+
+    selected_leads = matching_leads[:batch_size]
+    # Si faltan para completar el lote, tomar de los otros giros permitidos
+    if len(selected_leads) < batch_size:
+        for l in eligible_leads:
+            if l not in selected_leads and len(selected_leads) < batch_size:
+                selected_leads.append(l)
+
+    # 2. Si todavía faltan para completar el lote, descubrir nuevos negocios en la web
+    remaining_needed = batch_size - len(selected_leads)
+    if remaining_needed > 0:
+        newly_discovered = discover_leads(niche=niche, city=city, max_leads=remaining_needed)
+        for item in newly_discovered:
+            if not _is_excluded_business(item.get("name", ""), item.get("niche", ""), item.get("notes", "")):
+                lead_id = len(existing_leads) + 1
+                item_niche = item.get("niche", niche)
+                pitch = generate_pitch(business_name=item["name"], niche=item_niche)
+                new_rec = {
+                    "id": lead_id,
+                    "name": item["name"],
+                    "phone": item["phone"],
+                    "city": item.get("city", "La Laguna"),
+                    "niche": item_niche,
+                    "source": item.get("source", ""),
+                    "notes": item.get("notes", "Descubierto en prospección web"),
+                    "created_at": now_str,
+                    "pitch": pitch,
+                    "status": "nuevo"
+                }
+                existing_leads.append(new_rec)
+                selected_leads.append(new_rec)
+
+    if not selected_leads:
+        cfg["last_run"] = now_str
+        save_autopilot_config(cfg)
+        return {"executed": True, "sent": 0, "niche": niche, "message": "No hay prospectos pendientes para contactar"}
+
     contacted_count = 0
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     results = []
 
-    for item in leads_found:
-        lead_id = len(existing_leads) + 1
+    for item in selected_leads:
         item_niche = item.get("niche", niche)
-        pitch = generate_pitch(business_name=item["name"], niche=item_niche)
-
-        lead_record = {
-            "id": lead_id,
-            "name": item["name"],
-            "phone": item["phone"],
-            "city": item.get("city", "La Laguna"),
-            "niche": item_niche,
-            "source": item.get("source", ""),
-            "notes": item.get("notes", "Contactado por piloto automático 24/7"),
-            "created_at": now_str,
-            "pitch": pitch,
-            "status": "nuevo"
-        }
+        pitch = item.get("pitch")
+        if not pitch:
+            pitch = generate_pitch(business_name=item["name"], niche=item_niche)
+            item["pitch"] = pitch
 
         send_result = send_whatsapp_message(to_number=item["phone"], message=pitch)
         if is_delivery_confirmed(send_result):
-            lead_record["status"] = "contactado"
-            lead_record["contacted_at"] = now_str
+            item["status"] = "contactado"
+            item["contacted_at"] = now_str
             contacted_count += 1
             results.append(f"{item['name']} ({item['phone']}) [{item_niche}]")
         elif is_delivery_pending(send_result):
-            lead_record["status"] = "pendiente_confirmacion"
-            lead_record["notes"] += f" | Entrega pendiente de confirmación: {send_result}"
+            item["status"] = "pendiente_confirmacion"
+            item["notes"] = (item.get("notes", "") + f" | Entrega pendiente de confirmación: {send_result}").strip(" | ")
         else:
-            lead_record["status"] = "error_envio"
-            lead_record["notes"] += f" | Error envio: {send_result}"
+            item["status"] = "error_envio"
+            item["notes"] = (item.get("notes", "") + f" | Error envio: {send_result}").strip(" | ")
 
-        existing_leads.append(lead_record)
+        # Guardar inmediatamente tras cada envío para persistencia garantizada
+        _save_leads(existing_leads)
 
-        # Espaciado de seguridad entre mensajes
-        if len(leads_found) > 1:
-            time.sleep(10)
-
-    _save_leads(existing_leads)
+        # Espaciado de seguridad anti-ban entre mensajes (10-15s)
+        if len(selected_leads) > 1:
+            time.sleep(12)
 
     cfg["last_run"] = now_str
     cfg["sent_today"] = cfg.get("sent_today", 0) + contacted_count
     save_autopilot_config(cfg)
 
-    # Notificar inmediatamente a Sebastián a su WhatsApp personal sobre el lote enviado
+    # Notificar inmediatamente a Sebastián a su WhatsApp personal (8719164677) sobre el lote enviado
     if contacted_count > 0:
         batch_summary_lines = "\n".join([f"• {b}" for b in results])
         batch_notice = (
@@ -152,7 +191,7 @@ def run_autopilot_cycle() -> dict:
             f"Sebax continúa activo 24/7 en Torreón, Gómez y Lerdo."
         )
         try:
-            send_whatsapp_message(to_number="self", message=batch_notice)
+            send_whatsapp_message(to_number="8719164677", message=batch_notice)
         except Exception as e:
             logger.warning("Fallo al enviar notificación de lote a Sebastián: %s", e)
 
@@ -207,7 +246,6 @@ def send_daily_morning_report() -> str:
     try:
         send_whatsapp_message(to_number="8719164677", message=report)
         cfg["last_daily_report"] = today_str
-        cfg["sent_today"] = 0  # Reiniciar contador para el nuevo día
         save_autopilot_config(cfg)
         logger.info("Reporte diario matutino enviado exitosamente a Sebastián.")
         return report
@@ -268,11 +306,12 @@ async def autopilot_background_worker():
                 operate_hour = cfg.get("operate_hour", 8)
                 if now.hour >= operate_hour and cfg.get("last_daily_run") != today_str:
                     logger.info("08:00 AM alcanzada: Ejecutando prospección diaria en Torreón, Gómez y Lerdo...")
-                    await asyncio.to_thread(retry_unsent_leads)
-                    await asyncio.to_thread(run_autopilot_cycle)
                     cfg = get_autopilot_config()
                     cfg["last_daily_run"] = today_str
+                    cfg["sent_today"] = 0  # Reiniciar contador para el nuevo día comercial
                     save_autopilot_config(cfg)
+                    await asyncio.to_thread(retry_unsent_leads)
+                    await asyncio.to_thread(run_autopilot_cycle)
 
                 # 2. Envío de Reporte Consolidado Diario (09:00 AM Hora de La Laguna a 8719164677)
                 report_hour = cfg.get("report_hour", 9)

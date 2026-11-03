@@ -101,8 +101,14 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
 
 
 def is_delivery_confirmed(result: str) -> bool:
-    return result.startswith("Entrega confirmada por WhatsApp")
+    if not result:
+        return False
+    r = result.lower()
+    return "entrega confirmada" in r or "confirmado" in r
 
 
 def is_delivery_pending(result: str) -> bool:
-    return result.startswith(("Aceptado por el puente", "Aceptado por Meta"))
+    if not result:
+        return False
+    r = result.lower()
+    return "aceptado" in r or "pendiente" in r
