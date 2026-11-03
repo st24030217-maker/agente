@@ -30,10 +30,13 @@ AUTOPILOT_FILE = DATA_DIR / "autopilot.json"
 
 DEFAULT_CONFIG = {
     "enabled": True,
-    "interval_minutes": 25,
-    "batch_size": 2,
+    "operate_hour": 8,          # Prospección diaria a las 8:00 AM (Hora Laguna UTC-6)
+    "report_hour": 9,           # Reporte ejecutivo diario a las 9:00 AM (Hora Laguna UTC-6)
+    "interval_minutes": 60,
+    "batch_size": 3,
     "target_cities": ["Torreón", "Gómez Palacio", "Ciudad Lerdo"],
     "last_run": None,
+    "last_daily_run": None,
     "last_daily_report": None,
     "sent_today": 0,
     "current_niche_idx": 0
@@ -202,7 +205,7 @@ def send_daily_morning_report() -> str:
     )
 
     try:
-        send_whatsapp_message(to_number="self", message=report)
+        send_whatsapp_message(to_number="8719164677", message=report)
         cfg["last_daily_report"] = today_str
         cfg["sent_today"] = 0  # Reiniciar contador para el nuevo día
         save_autopilot_config(cfg)
@@ -250,10 +253,9 @@ def retry_unsent_leads() -> dict:
     }
 
 async def autopilot_background_worker():
-    """Bucle asíncrono permanente de piloto automático que corre 24/7 en segundo plano."""
-    logger.info("Iniciando trabajador 24/7 de Piloto Automático Sebax...")
-    # Esperar 40 segundos al arranque para permitir que los puentes se estabilicen
-    await asyncio.sleep(40)
+    """Bucle permanente de piloto automático programado: 8:00 AM prospección y 9:00 AM reporte diario a Sebastián."""
+    logger.info("Iniciando trabajador programado de Sebax (08:00 AM Prospección / 09:00 AM Reporte Matutino a 8719164677)...")
+    await asyncio.sleep(30)
 
     while True:
         try:
@@ -261,36 +263,28 @@ async def autopilot_background_worker():
             now = get_laguna_now()
             today_str = now.strftime("%Y-%m-%d")
 
-            # 1. Verificar si corresponde enviar el reporte matutino (09:00 AM hora de La Laguna)
-            if now.hour >= 9 and cfg.get("last_daily_report") != today_str:
-                await asyncio.to_thread(send_daily_morning_report)
-
-            # 2. Verificar ciclo de prospección automática
             if cfg.get("enabled", True):
-                last_run_str = cfg.get("last_run")
-                should_run = False
-
-                if not last_run_str:
-                    should_run = True
-                else:
-                    try:
-                        last_run_dt = datetime.strptime(last_run_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=LAGUNA_TZ)
-                        diff_minutes = (now - last_run_dt).total_seconds() / 60
-                        if diff_minutes >= cfg.get("interval_minutes", 25):
-                            should_run = True
-                    except Exception:
-                        should_run = True
-
-                if should_run:
-                    logger.info("Ejecutando ciclo automático de prospección 24/7...")
+                # 1. Ronda de Prospección Diaria (08:00 AM Hora de La Laguna)
+                operate_hour = cfg.get("operate_hour", 8)
+                if now.hour >= operate_hour and cfg.get("last_daily_run") != today_str:
+                    logger.info("08:00 AM alcanzada: Ejecutando prospección diaria en Torreón, Gómez y Lerdo...")
                     await asyncio.to_thread(retry_unsent_leads)
                     await asyncio.to_thread(run_autopilot_cycle)
+                    cfg = get_autopilot_config()
+                    cfg["last_daily_run"] = today_str
+                    save_autopilot_config(cfg)
+
+                # 2. Envío de Reporte Consolidado Diario (09:00 AM Hora de La Laguna a 8719164677)
+                report_hour = cfg.get("report_hour", 9)
+                if now.hour >= report_hour and cfg.get("last_daily_report") != today_str:
+                    logger.info("09:00 AM alcanzada: Enviando reporte ejecutivo matutino al WhatsApp 8719164677...")
+                    await asyncio.to_thread(send_daily_morning_report)
+                    cfg = get_autopilot_config()
+                    cfg["last_daily_report"] = today_str
+                    save_autopilot_config(cfg)
 
         except Exception as e:
-            logger.error("Error en bucle de piloto automático: %s", e)
+            logger.error("Error en bucle de piloto automático programado: %s", e)
 
-        # Dormir 60 segundos antes de la siguiente verificación
-        await asyncio.sleep(60)
-
-        # Dormir 60 segundos antes de la siguiente verificación
+        # Verificar cada 60 segundos
         await asyncio.sleep(60)
