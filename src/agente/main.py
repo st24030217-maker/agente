@@ -215,6 +215,77 @@ async def whatsapp_webhook(request: Request):
     reply = await coordinator.process_message(chat_id=sender, message=message, is_admin=is_self)
     return {"reply": reply}
 
+async def handle_voice_quick_intent(message: str) -> str | None:
+    """Interpreta intenciones directas por voz para el widget de iOS / Siri y devuelve respuesta ágil, humana y concisa."""
+    m = message.lower().strip()
+    if not m:
+        return "Te escucho Sebastián, ¿qué indicación tienes?"
+
+    # 1. Enviar o consultar reporte a WhatsApp
+    if any(k in m for k in [
+        "reporte", "mándame el reporte", "mandame el reporte",
+        "envíame mi reporte", "enviame mi reporte", "mándame mi reporte",
+        "mandame mi reporte", "manda reporte", "envia reporte", "envíame el reporte",
+        "enviame el reporte", "reporte a mi whatsapp", "reporte a whatsapp"
+    ]):
+        try:
+            await asyncio.to_thread(send_daily_morning_report)
+            cfg = get_autopilot_config()
+            sent = cfg.get("sent_today", 0)
+            return f"Listo Sebastián, te acabo de enviar tu reporte actualizado a WhatsApp. Llevas {sent} negocios contactados hoy."
+        except Exception as e:
+            return f"Intenté enviar tu reporte pero ocurrió un detalle: {e}"
+
+    # 2. Iniciar búsqueda o prospección en Google Maps
+    if any(k in m for k in [
+        "haz una búsqueda", "haz una busqueda", "busca negocios",
+        "inicia búsqueda", "inicia busqueda", "prospecta", "busca en google maps",
+        "buscar negocios", "haz prospección", "haz prospeccion", "inicia prospección",
+        "prospección ahora", "busca en maps"
+    ]):
+        asyncio.create_task(asyncio.to_thread(run_autopilot_cycle))
+        return "Iniciando búsqueda en Google Maps para La Laguna. Te enviaré el reporte a tu WhatsApp en cuanto termine el lote."
+
+    # 3. Estado en vivo / ¿Cómo vas?
+    if any(k in m for k in [
+        "cómo vas", "como vas", "cómo vamos", "como vamos", "estado", "estatus",
+        "resumen de hoy", "cuántos van", "cuantos van", "cuántos llevas", "cuantos llevas",
+        "cómo está todo", "como esta todo", "qué llevas hoy", "que llevas hoy"
+    ]):
+        cfg = get_autopilot_config()
+        leads = _load_leads()
+        sent = cfg.get("sent_today", 0)
+        nuevos = sum(1 for l in leads if l.get("status") == "nuevo")
+        contactados = sum(1 for l in leads if l.get("status") == "contactado")
+        return f"Todo operativo. Llevamos {sent} contactados hoy, {contactados} en total y {nuevos} en cola. El piloto automático sigue corriendo cada media hora."
+
+    # 4. Pausar o reanudar piloto automático
+    if any(k in m for k in ["pausa el piloto", "pausar piloto", "detén el piloto", "deten el piloto", "pausa la búsqueda", "pausar búsqueda"]):
+        toggle_autopilot(False)
+        return "Piloto automático en pausa. No se enviarán mensajes hasta que me indiques reanudar."
+    if any(k in m for k in ["activa el piloto", "activar piloto", "reanuda el piloto", "reanudar piloto", "continúa la búsqueda", "prende el piloto"]):
+        toggle_autopilot(True)
+        return "Piloto automático reactivado. Seguirá buscando y contactando en La Laguna cada 30 minutos."
+
+    # 5. Saludos directos (evitar el discurso acartonado corporativo)
+    if m in ["hola", "buen día", "buen dia", "buenos días", "buenos dias", "qué onda", "que onda", "ey", "sebax", "buenas tardes"]:
+        cfg = get_autopilot_config()
+        sent = cfg.get("sent_today", 0)
+        return f"Qué onda Sebastián. Todo en orden por acá, llevamos {sent} negocios contactados hoy. ¿Qué indicación tienes?"
+
+    # 6. Enviar mensaje de WhatsApp a un número específico
+    wa_match = re.search(r"(?:env[ií]a(?:le)?|m[aá]nda(?:le)?)\s+(?:un\s+)?mensaje\s+a\s+(\+?\d[\d\s-]{7,15})\s+(?:que\s+diga|diciendo|con|:)\s+(.+)", m)
+    if wa_match:
+        target_phone = wa_match.group(1).replace(" ", "").replace("-", "")
+        text_to_send = wa_match.group(2).strip()
+        try:
+            send_whatsapp_message(to_number=target_phone, message=text_to_send)
+            return f"Mensaje enviado con éxito a {target_phone}."
+        except Exception as e:
+            return f"Hubo un detalle al enviar el mensaje a {target_phone}: {e}"
+
+    return None
+
 @app.post("/chat")
 @app.post("/chat/")
 @app.post("/api/chat")
@@ -222,6 +293,9 @@ async def whatsapp_webhook(request: Request):
 @app.post("/apj/chat")
 @app.post("/apj/chat/")
 async def chat_direct(payload: DirectChatRequest):
+    quick = await handle_voice_quick_intent(payload.message)
+    if quick:
+        return {"reply": quick}
     is_admin = payload.chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
     return {"reply": reply}
@@ -234,7 +308,10 @@ async def chat_direct(payload: DirectChatRequest):
 @app.get("/apj/chat/")
 async def chat_direct_get(message: str = "", chat_id: str = "shortcuts"):
     if not message:
-        return {"reply": "Por favor proporciona un mensaje o indicación para Sebax."}
+        return {"reply": "Te escucho Sebastián, ¿qué indicación tienes?"}
+    quick = await handle_voice_quick_intent(message)
+    if quick:
+        return {"reply": quick}
     is_admin = chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
     reply = await coordinator.process_message(chat_id=chat_id, message=message, is_admin=is_admin)
     return {"reply": reply}
@@ -247,6 +324,9 @@ async def root_post_chat(request: Request):
         msg = data.get("message", "")
         cid = data.get("chat_id", "shortcuts")
         if msg:
+            quick = await handle_voice_quick_intent(msg)
+            if quick:
+                return {"reply": quick}
             is_admin = cid.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
             reply = await coordinator.process_message(chat_id=cid, message=msg, is_admin=is_admin)
             return {"reply": reply}

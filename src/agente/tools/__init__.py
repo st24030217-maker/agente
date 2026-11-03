@@ -13,6 +13,12 @@ from agente.tools.prospecting import (
     update_lead_status
 )
 from agente.tools.demo_generator import generate_business_demo
+from agente.tools.autopilot import (
+    run_autopilot_cycle,
+    send_daily_morning_report,
+    toggle_autopilot,
+    get_autopilot_config
+)
 
 # 1. HERRAMIENTAS COMERCIALES (Seguras para exposición pública y clientes)
 # Se excluyen terminantemente run_command, read_file, write_file y list_directory
@@ -34,6 +40,10 @@ COMMERCIAL_TOOLS = [
     search_web,
     fetch_web_content,
     send_whatsapp_message,
+    run_autopilot_cycle,
+    send_daily_morning_report,
+    toggle_autopilot,
+    get_autopilot_config,
 ]
 
 # 2. HERRAMIENTAS ADMINISTRATIVAS COMPLETAS (Uso exclusivo de desarrollo local)

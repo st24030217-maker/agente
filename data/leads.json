@@ -189,7 +189,8 @@
     "notes": "Negocio de florerias y arreglos florales en Torreón detectado en directorio web.",
     "created_at": "2026-10-29 21:07:59",
     "pitch": "Hola equipo de Aurora Flores Y Regalos,\n\nLes escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente oportunidad para que Aurora Flores Y Regalos cuente con una plataforma web propia de alto impacto que les permita exhibir su catálogo de ramos y arreglos florales de temporada, facilitando que los clientes elijan y coordinen envíos a domicilio al instante.\n\nEn SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de Aurora Flores Y Regalos?",
-    "status": "nuevo"
+    "status": "contactado",
+    "contacted_at": "2026-11-03 16:03:47"
   },
   {
     "id": 67,
@@ -201,7 +202,8 @@
     "notes": "Negocio de florerias y arreglos florales en Torreón detectado en directorio web.",
     "created_at": "2026-10-29 21:07:59",
     "pitch": "Hola equipo de Aurora Flores Y Regalos,\n\nLes escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente oportunidad para que Aurora Flores Y Regalos cuente con una plataforma web propia de alto impacto que les permita exhibir su catálogo de ramos y arreglos florales de temporada, facilitando que los clientes elijan y coordinen envíos a domicilio al instante.\n\nEn SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de Aurora Flores Y Regalos?",
-    "status": "nuevo"
+    "status": "contactado",
+    "contacted_at": "2026-11-03 16:03:47"
   },
   {
     "id": 66,
@@ -210,10 +212,10 @@
     "city": "Torreón",
     "niche": "dulcerias y confiterias",
     "source": "https://www.facebook.com/dulcesdeliciasdetorreon/",
-    "notes": "Negocio de dulcerias y confiterias en Torreón detectado en directorio web.",
+    "notes": "Negocio de dulcerias y confiterias en Torreón detectado en directorio web. | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"AssbRoneXUH2dIZ9adChqjx\"}} | Conector Baileys no conectado (status != open).",
     "created_at": "2026-10-29 20:41:34",
     "pitch": "Hola equipo de Dulces Delicias De,\n\nLes escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente oportunidad para que Dulces Delicias De cuente con una plataforma web propia de alto impacto que les permita mostrar su catálogo de dulces, botanas y paquetes para fiestas y recibir pedidos por mayoreo o menudeo directamente en su WhatsApp.\n\nEn SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de Dulces Delicias De?",
-    "status": "nuevo"
+    "status": "error_envio"
   },
   {
     "id": 65,
@@ -222,10 +224,10 @@
     "city": "Torreón",
     "niche": "dulcerias y confiterias",
     "source": "https://www.facebook.com/dulcesdeliciasdetorreon/",
-    "notes": "Negocio de dulcerias y confiterias en Torreón detectado en directorio web.",
+    "notes": "Negocio de dulcerias y confiterias en Torreón detectado en directorio web. | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"AVn8FKca0fBjx9z5mypUZI1\"}} | Conector Baileys no conectado (status != open).",
     "created_at": "2026-10-29 20:41:34",
     "pitch": "Hola equipo de Dulces Delicias De,\n\nLes escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente oportunidad para que Dulces Delicias De cuente con una plataforma web propia de alto impacto que les permita mostrar su catálogo de dulces, botanas y paquetes para fiestas y recibir pedidos por mayoreo o menudeo directamente en su WhatsApp.\n\nEn SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de Dulces Delicias De?",
-    "status": "nuevo"
+    "status": "error_envio"
   },
   {
     "id": 64,
@@ -942,7 +944,7 @@
     "city": "Ciudad Lerdo",
     "niche": "restaurantes y cafeterias",
     "source": "https://coffeedepot.com.mx/?srsltid=AYCX9vKMnlk_rPZ1JzfwnN9u73YFp3kuSE4ADLVNF7RU5lwSeOUdq0XW",
-    "notes": "Negocio de restaurantes y cafeterias en Ciudad Lerdo detectado en directorio web. | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"AolIVT7MKYmt1HAYTEHcv3-\"}} | Conector Baileys no conectado (status != open). | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"ASoQXMiYARJ1p61VPYuLI9F\"}} | Error Baileys (500): {\"error\":\"El número indicado no aparece registrado en WhatsApp.\"}",
+    "notes": "Negocio de restaurantes y cafeterias en Ciudad Lerdo detectado en directorio web. | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"AolIVT7MKYmt1HAYTEHcv3-\"}} | Conector Baileys no conectado (status != open). | Error envio: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"ASoQXMiYARJ1p61VPYuLI9F\"}} | Error Baileys (500): {\"error\":\"El número indicado no aparece registrado en WhatsApp.\"} | Error reintento: Fallo al enviar mensaje: Error Meta API (401): {\"error\":{\"message\":\"Authentication Error\",\"code\":190,\"type\":\"OAuthException\",\"fbtrace_id\":\"AemZf9ugZgJ4oamUb_IfNdS\"}} | Conector Baileys no conectado (status != open).",
     "created_at": "2026-10-27 19:35:01",
     "pitch": "Hola equipo de Coffee Depot,\n\nLes escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\nEstuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente oportunidad para que Coffee Depot cuente con una plataforma web propia de alto impacto que les permita atraer nuevos clientes, exhibir su menú de forma visual y recibir reservaciones o pedidos directamente en su WhatsApp.\n\nEn SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n• Instagram: https://www.instagram.com/ssss.olutions\n\n¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de Coffee Depot?",
     "status": "error_envio"
