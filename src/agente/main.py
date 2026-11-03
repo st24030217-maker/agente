@@ -219,6 +219,8 @@ async def whatsapp_webhook(request: Request):
 @app.post("/chat/")
 @app.post("/api/chat")
 @app.post("/api/chat/")
+@app.post("/apj/chat")
+@app.post("/apj/chat/")
 async def chat_direct(payload: DirectChatRequest):
     is_admin = payload.chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
@@ -228,6 +230,8 @@ async def chat_direct(payload: DirectChatRequest):
 @app.get("/chat/")
 @app.get("/api/chat")
 @app.get("/api/chat/")
+@app.get("/apj/chat")
+@app.get("/apj/chat/")
 async def chat_direct_get(message: str = "", chat_id: str = "shortcuts"):
     if not message:
         return {"reply": "Por favor proporciona un mensaje o indicación para Sebax."}
