@@ -189,7 +189,7 @@ async def whatsapp_webhook(request: Request):
 
     logger.info("Mensaje Baileys recibido de [%s]: %s", sender, message)
 
-    is_self = sender.lower() in ["self", "self_user", "yo", "mismo"] or "8719164677" in sender
+    is_self = sender.lower() in ["self", "self_user", "yo", "mismo"] or ("8719164677" in sender or "8718321968" in sender)
     if settings.allowed_numbers and not is_self:
         sender_digits = "".join(filter(str.isdigit, sender))
         is_allowed = any(

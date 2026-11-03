@@ -150,7 +150,7 @@ async function resolveRecipientJid(destination) {
 function isSelfUser(jid) {
   if (!jid) return false;
   const digits = jid.split("@")[0].replace(/\D/g, "");
-  if (digits.includes("8719164677")) return true;
+  if (digits.includes("8719164677") || digits.includes("8718321968")) return true;
   if (!sock || !sock.user) return false;
   try {
     if (areJidsSameUser(jid, sock.user.id)) return true;
@@ -218,7 +218,7 @@ app.get("/qr-data", async (req, res) => {
 
 app.post("/pairing-code", async (req, res) => {
   try {
-    const rawPhone = req.body?.phone || "8719164677";
+    const rawPhone = req.body?.phone || "8718321968";
     let clean = normalizePhone(rawPhone);
     if (clean.length < 10) {
       return res.status(400).json({ error: "Número no válido. Ingresa tu número de 10 dígitos (ej. 8719164677)." });

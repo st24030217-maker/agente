@@ -71,7 +71,7 @@ def send_whatsapp_message(to_number: str, message: str) -> str:
 
     target = to_number.strip()
     if target.lower() in ["self", "yo", "mismo", ""]:
-        target = settings.allowed_numbers[0] if settings.allowed_numbers else "8719164677"
+        target = settings.allowed_numbers[0] if settings.allowed_numbers else "8718321968"
 
     # Orden de proveedores según configuración activa
     if settings.whatsapp_provider == "cloud_api":
