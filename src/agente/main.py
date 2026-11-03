@@ -293,22 +293,7 @@ async def get_qr_page():
 
 @app.get("/api/bridge/status")
 async def get_bridge_status():
-    """Estado de conexión unificado del conector de WhatsApp."""
-    cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
-
-    # 1. Si el proveedor activo es Meta Cloud API y las credenciales están configuradas
-    if settings.whatsapp_provider == "cloud_api" and cloud_configured:
-        return {
-            "status": "cloud_api_configured",
-            "provider": "cloud_api",
-            "user": {
-                "id": settings.meta_wa_phone_number_id,
-                "name": "Meta WhatsApp Cloud API (+1 555-179-2439)"
-            },
-            "cloud_api_configured": True,
-            "webhook_configured": bool(settings.meta_wa_verify_token)
-        }
-
+    """Estado de conexión unificado del conector de WhatsApp (prioriza Baileys QR/código)."""
     bridge_data = {}
     async with httpx.AsyncClient() as client:
         try:
@@ -318,34 +303,35 @@ async def get_bridge_status():
         except Exception:
             bridge_data = {"status": "starting"}
 
-    # 2. Si Baileys está conectado, reportar 'open'
+    # 1. Si Baileys está conectado, reportar 'open'
     if bridge_data.get("status") == "open":
         return {
             "status": "open",
             "provider": "baileys",
             "user": bridge_data.get("user"),
-            "cloud_api_configured": cloud_configured,
-            "webhook_configured": bool(settings.meta_wa_verify_token)
+            "cloud_api_configured": False,
+            "webhook_configured": False
         }
 
-    # 3. Si Baileys está esperando QR o código de vinculación telefónica
+    # 2. Si Baileys está esperando QR o código de vinculación telefónica
     if bridge_data.get("status") in ["qr_ready", "starting"]:
         return {
             "status": bridge_data.get("status"),
             "provider": "baileys",
             "has_qr": bridge_data.get("has_qr", False),
             "user": None,
-            "cloud_api_configured": cloud_configured,
-            "webhook_configured": bool(settings.meta_wa_verify_token)
+            "cloud_api_configured": False,
+            "webhook_configured": False
         }
 
     return {
-        "status": "cloud_api_configured" if cloud_configured else "disconnected",
-        "provider": settings.whatsapp_provider,
+        "status": bridge_data.get("status", "disconnected"),
+        "provider": "baileys",
         "user": None,
-        "cloud_api_configured": cloud_configured,
-        "webhook_configured": bool(settings.meta_wa_verify_token)
+        "cloud_api_configured": False,
+        "webhook_configured": False
     }
+
 
 @app.get("/qr-data")
 async def get_qr_data_proxy():
