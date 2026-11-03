@@ -173,7 +173,8 @@ async def whatsapp_webhook(request: Request):
                                     coordinator.reset_chat(sender)
                                     send_whatsapp_message(to_number=sender, message="Conversación y contexto reiniciados exitosamente.")
                                 else:
-                                    reply = await coordinator.process_message(chat_id=sender, message=text_body)
+                                    is_admin = "8718321968" in sender or "8719164677" in sender
+                                    reply = await coordinator.process_message(chat_id=sender, message=text_body, is_admin=is_admin)
                                     if reply:
                                         send_whatsapp_message(to_number=sender, message=reply)
         except Exception as e:
