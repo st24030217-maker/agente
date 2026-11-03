@@ -1,15 +1,17 @@
 {
   "enabled": true,
   "operate_hour": 8,
+  "end_hour": 21,
   "report_hour": 9,
-  "interval_minutes": 60,
-  "batch_size": 3,
+  "interval_minutes": 30,
+  "batch_size": 2,
   "target_cities": [
     "Torreón",
     "Gómez Palacio",
     "Ciudad Lerdo"
   ],
-  "last_run": "2026-11-03 12:34:48",
+  "last_run": null,
+  "last_daily_date": "2026-11-03",
   "last_daily_run": "2026-11-03",
   "last_daily_report": "2026-11-03",
   "sent_today": 2,

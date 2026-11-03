@@ -31,12 +31,14 @@ AUTOPILOT_FILE = DATA_DIR / "autopilot.json"
 
 DEFAULT_CONFIG = {
     "enabled": True,
-    "operate_hour": 8,          # Prospección diaria a las 8:00 AM (Hora Laguna UTC-6)
-    "report_hour": 9,           # Reporte ejecutivo diario a las 9:00 AM (Hora Laguna UTC-6)
-    "interval_minutes": 60,
-    "batch_size": 3,
+    "operate_hour": 8,          # Inicio de jornada (8:00 AM Hora Laguna)
+    "end_hour": 21,             # Fin de jornada comercial (9:00 PM Hora Laguna)
+    "report_hour": 9,           # Reporte matutino consolidado a las 9:00 AM
+    "interval_minutes": 30,     # Búsqueda y envío cada 30 minutos
+    "batch_size": 2,            # 2 negocios por ciclo (hasta 26 negocios al día)
     "target_cities": ["Torreón", "Gómez Palacio", "Ciudad Lerdo"],
     "last_run": None,
+    "last_daily_date": None,
     "last_daily_run": None,
     "last_daily_report": None,
     "sent_today": 0,
@@ -178,22 +180,34 @@ def run_autopilot_cycle() -> dict:
     cfg["sent_today"] = cfg.get("sent_today", 0) + contacted_count
     save_autopilot_config(cfg)
 
-    # Notificar inmediatamente a Sebastián a su WhatsApp personal (8719164677) sobre el lote enviado
+    # Notificar inmediatamente a Sebastián a su WhatsApp personal (8719164677) sobre el ciclo de 30 min
     if contacted_count > 0:
         batch_summary_lines = "\n".join([f"• {b}" for b in results])
         batch_notice = (
-            f"SEBAX PILOTO AUTOMÁTICO - ENVÍO REALIZADO\n\n"
+            f"SEBAX - REPORTE DE CICLO (CADA 30 MIN)\n\n"
             f"Giro: {niche.title()}\n"
             f"Negocios contactados ({contacted_count}):\n"
             f"{batch_summary_lines}\n\n"
             f"Enlaces enviados: Portafolio e Instagram.\n"
             f"Total acumulado hoy: {cfg.get('sent_today', 0)}\n\n"
-            f"Sebax continúa activo 24/7 en Torreón, Gómez y Lerdo."
+            f"Próxima búsqueda en 30 minutos."
         )
         try:
             send_whatsapp_message(to_number="8719164677", message=batch_notice)
         except Exception as e:
             logger.warning("Fallo al enviar notificación de lote a Sebastián: %s", e)
+    else:
+        cycle_notice = (
+            f"SEBAX - REPORTE DE CICLO (CADA 30 MIN)\n\n"
+            f"Giro explorado: {niche.title()}\n"
+            f"Resultado: No se detectaron números nuevos sin contactar en este turno.\n"
+            f"Total acumulado hoy: {cfg.get('sent_today', 0)}\n\n"
+            f"Próxima búsqueda en 30 minutos."
+        )
+        try:
+            send_whatsapp_message(to_number="8719164677", message=cycle_notice)
+        except Exception as e:
+            logger.warning("Fallo al enviar notificación de ciclo a Sebastián: %s", e)
 
     logger.info("Piloto automático completó ciclo: %d contactados en giro [%s]", contacted_count, niche)
     return {
@@ -291,9 +305,9 @@ def retry_unsent_leads() -> dict:
     }
 
 async def autopilot_background_worker():
-    """Bucle permanente de piloto automático programado: 8:00 AM prospección y 9:00 AM reporte diario a Sebastián."""
-    logger.info("Iniciando trabajador programado de Sebax (08:00 AM Prospección / 09:00 AM Reporte Matutino a 8719164677)...")
-    await asyncio.sleep(30)
+    """Bucle permanente de piloto automático programado: prospección cada 30 minutos y reporte diario a Sebastián."""
+    logger.info("Iniciando trabajador programado de Sebax (Prospección cada 30 min / Reporte Diario a 8719164677)...")
+    await asyncio.sleep(15)
 
     while True:
         try:
@@ -302,18 +316,40 @@ async def autopilot_background_worker():
             today_str = now.strftime("%Y-%m-%d")
 
             if cfg.get("enabled", True):
-                # 1. Ronda de Prospección Diaria (08:00 AM Hora de La Laguna)
-                operate_hour = cfg.get("operate_hour", 8)
-                if now.hour >= operate_hour and cfg.get("last_daily_run") != today_str:
-                    logger.info("08:00 AM alcanzada: Ejecutando prospección diaria en Torreón, Gómez y Lerdo...")
-                    cfg = get_autopilot_config()
-                    cfg["last_daily_run"] = today_str
-                    cfg["sent_today"] = 0  # Reiniciar contador para el nuevo día comercial
+                interval_minutes = cfg.get("interval_minutes", 30)
+
+                # Reset de contador diario al cambiar de fecha
+                if cfg.get("last_daily_date") != today_str:
+                    cfg["last_daily_date"] = today_str
+                    cfg["sent_today"] = 0
                     save_autopilot_config(cfg)
+
+                # 1. Verificar si corresponde ejecutar el ciclo de cada 30 min
+                last_run_str = cfg.get("last_run")
+                should_run = False
+
+                if not last_run_str:
+                    should_run = True
+                else:
+                    try:
+                        last_dt = datetime.strptime(last_run_str, "%Y-%m-%d %H:%M:%S")
+                        elapsed_min = (now.replace(tzinfo=None) - last_dt).total_seconds() / 60
+                        if elapsed_min >= interval_minutes:
+                            should_run = True
+                    except Exception:
+                        should_run = True
+
+                # Operar durante horario comercial de La Laguna (08:00 AM a 09:00 PM)
+                start_h = cfg.get("operate_hour", 8)
+                end_h = cfg.get("end_hour", 21)
+                is_active_hours = start_h <= now.hour < end_h
+
+                if should_run and is_active_hours:
+                    logger.info("Ciclo de prospección (cada 30 min): ejecutando búsqueda y contacto en La Laguna...")
                     await asyncio.to_thread(retry_unsent_leads)
                     await asyncio.to_thread(run_autopilot_cycle)
 
-                # 2. Envío de Reporte Consolidado Diario (09:00 AM Hora de La Laguna a 8719164677)
+                # 2. Envío de Reporte Consolidado Matutino Diario (09:00 AM Hora de La Laguna a 8719164677)
                 report_hour = cfg.get("report_hour", 9)
                 if now.hour >= report_hour and cfg.get("last_daily_report") != today_str:
                     logger.info("09:00 AM alcanzada: Enviando reporte ejecutivo matutino al WhatsApp 8719164677...")
