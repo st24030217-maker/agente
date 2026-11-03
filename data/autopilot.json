@@ -9,9 +9,9 @@
     "Gómez Palacio",
     "Ciudad Lerdo"
   ],
-  "last_run": null,
-  "last_daily_run": null,
-  "last_daily_report": null,
-  "sent_today": 0,
-  "current_niche_idx": 0
+  "last_run": "2026-11-03 12:34:48",
+  "last_daily_run": "2026-11-03",
+  "last_daily_report": "2026-11-03",
+  "sent_today": 2,
+  "current_niche_idx": 2
 }

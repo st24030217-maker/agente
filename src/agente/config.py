@@ -38,5 +38,7 @@ class Settings(BaseModel):
     )
     meta_wa_phone_number_id: str = os.getenv("META_WA_PHONE_NUMBER_ID", "1425016637355936")
     meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "sebax_ssssolutions_2026")
+    # Google Maps / Places API vía Serper (2,500 búsquedas gratuitas)
+    serper_api_key: str = os.getenv("SERPER_API_KEY", "abc4a87c7e8b8e158317e76ddb8918595784e820")
 
 settings = Settings()

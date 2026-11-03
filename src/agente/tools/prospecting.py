@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import httpx
 from ddgs import DDGS
 
-from agente.config import DATA_DIR
+from agente.config import DATA_DIR, settings
 from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 
 logger = logging.getLogger(__name__)
@@ -108,17 +108,106 @@ def normalize_mx_phone(raw: str) -> str:
         return "521" + digits[3:13]
     return digits
 
+def search_google_maps_serper(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerdo", max_leads: int = 5, seen_phones: set = None) -> list:
+    """Busca negocios reales directamente en Google Maps a través de Serper API.
+    Devuelve prospectos con teléfono oficial verificado por los dueños en Google Maps.
+    """
+    api_key = getattr(settings, "serper_api_key", None) or os.getenv("SERPER_API_KEY", "")
+    if not api_key:
+        return []
+
+    if seen_phones is None:
+        existing_leads = _load_leads()
+        seen_phones = {l.get("phone") for l in existing_leads if l.get("phone")}
+
+    discovered = []
+    headers = {
+        "X-API-KEY": api_key,
+        "Content-Type": "application/json"
+    }
+
+    target_cities = _resolve_target_cities(city)
+    target_niches = [niche] if niche and niche.lower() not in ["cualquier", "todos", "general", ""] else DIVERSE_NICHES
+
+    for c in target_cities:
+        if len(discovered) >= max_leads:
+            break
+        for n in target_niches:
+            if len(discovered) >= max_leads:
+                break
+            query = f"{n} en {c}"
+            payload = {
+                "q": query,
+                "gl": "mx",
+                "hl": "es"
+            }
+            try:
+                with httpx.Client(timeout=10.0, verify=False) as client:
+                    resp = client.post("https://google.serper.dev/maps", headers=headers, json=payload)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    places = data.get("places", [])
+                    for p in places:
+                        raw_phone = p.get("phoneNumber") or p.get("phone")
+                        if not raw_phone:
+                            continue
+                        norm_phone = normalize_mx_phone(raw_phone)
+                        if not norm_phone or norm_phone in seen_phones:
+                            continue
+
+                        name = p.get("title", "").strip()
+                        address = p.get("address", "")
+                        category = p.get("type") or (p.get("types", [n])[0] if p.get("types") else n)
+
+                        # Validación de exclusión estricta: talleres mecánicos o clínicas dentales
+                        if _is_excluded_business(name, category, address):
+                            continue
+
+                        seen_phones.add(norm_phone)
+                        discovered.append({
+                            "name": name,
+                            "phone": norm_phone,
+                            "city": c,
+                            "niche": n,
+                            "source": f"Google Maps ({p.get('cid', 'Maps')})",
+                            "address": address,
+                            "rating": p.get("rating"),
+                            "website": p.get("website", ""),
+                            "notes": f"Ficha oficial de Google Maps en {c}. Dirección: {address}",
+                            "status": "nuevo",
+                            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        })
+                        if len(discovered) >= max_leads:
+                            break
+            except Exception as e:
+                logger.error("Error al consultar Google Maps (Serper): %s", e)
+                continue
+
+    return discovered
+
+
 def discover_leads(niche: str = "", city: str = "Torreón, Gómez Palacio y Lerdo", max_leads: int = 5) -> list:
-    """Explora la web, directorios y mapas locales para identificar prospectos de CUALQUIER tipo de negocio con teléfono en Torreón, Gómez Palacio y Lerdo.
+    """Explora Google Maps en tiempo real y la web para identificar prospectos de CUALQUIER tipo de negocio con teléfono verificado en Torreón, Gómez Palacio y Lerdo.
     
     Args:
-        niche: Giro o categoría (ej. 'talleres mecánicos', 'restaurantes', 'arquitectura', 'abogados', 'gimnasios', 'mueblerías', etc.). Si está vacío o es 'cualquiera', busca en giros variados.
+        niche: Giro o categoría (ej. 'restaurantes', 'pastelerías', 'cafeterías', 'florerías', etc.). Si está vacío o es 'cualquiera', busca en giros variados.
         city: Ciudad o región a prospectar (por defecto busca en la Comarca Lagunera: Torreón, Gómez Palacio y Lerdo).
         max_leads: Número de prospectos a identificar.
     """
     existing_leads = _load_leads()
     seen_phones = {l.get("phone") for l in existing_leads if l.get("phone")}
     discovered = []
+
+    # 1. Prioridad #1: Buscar directamente en Google Maps con datos verificados oficiales
+    try:
+        maps_leads = search_google_maps_serper(niche=niche, city=city, max_leads=max_leads, seen_phones=seen_phones)
+        if maps_leads:
+            discovered.extend(maps_leads)
+            logger.info("Google Maps identificó %d prospectos verificados con teléfono en La Laguna", len(maps_leads))
+            if len(discovered) >= max_leads:
+                return discovered
+    except Exception as e:
+        logger.warning("Fallo al consultar Google Maps, procediendo con búsqueda web de respaldo: %s", e)
 
     target_niches = []
     clean_niche_input = (niche or "").lower().strip()
