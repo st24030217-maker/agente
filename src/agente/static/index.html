@@ -1461,10 +1461,10 @@
     .app-main .agent-workspace-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; min-height: 0; }
     .app-main .chat-card-panel { height: 560px; min-height: 560px; }
     .agent-header-brand { display: flex; align-items: center; gap: 10px; }
-    .chat-avatar-slot { width: 48px; height: 48px; flex: none; }
+    .chat-avatar-slot { width: 52px; height: 52px; flex: none; }
 
     /* Avatar de Sebax: parpadea en reposo, mira a los lados al pensar y mueve la boca al hablar */
-    /* Estilo pixel: cuadrícula 16×16, bordes nítidos y movimientos de pixel completo (steps) */
+    /* Estilo pixel: cuadrícula 24×24 (cabeza 16×16), bordes nítidos y movimientos de pixel completo (steps) */
     .sebax-avatar, .sebax-avatar svg { display: block; width: 100%; height: 100%; }
     .sebax-avatar svg { shape-rendering: crispEdges; }
     .side-brand-mark { image-rendering: pixelated; }
@@ -1482,8 +1482,43 @@
     @keyframes sx-look { 0% { transform: translateX(-1px); } 50% { transform: translateX(1px); } 100% { transform: translateX(-1px); } }
     @keyframes sx-talk-closed { 0% { opacity: 1; } 50% { opacity: 0; } }
     @keyframes sx-talk-open { 0% { opacity: 0; } 50% { opacity: 1; } }
+    /* Cuerpo: brazos y piernas. Todo se mueve en pixeles completos (steps) y los
+       gestos del brazo derecho son cuadros distintos que se prenden y apagan */
+    .sebax-avatar .sx-arm, .sebax-avatar .sx-leg, .sebax-avatar .sx-upper { transform-box: view-box; }
+    .sebax-avatar .sx-arm-r-wave-a, .sebax-avatar .sx-arm-r-wave-b, .sebax-avatar .sx-arm-r-think { opacity: 0; }
+    /* Reposo: respira (cabeza y brazos suben 1 pixel) y saluda cada ~7 s */
+    .sebax-avatar .sx-upper { animation: sx-bob 1.6s steps(1, end) infinite; }
+    .sebax-avatar .sx-arm-r-down { animation: sx-wave-rest 7s steps(1, end) infinite; }
+    .sebax-avatar .sx-arm-r-wave-a { animation: sx-wave-a 7s steps(1, end) infinite; }
+    .sebax-avatar .sx-arm-r-wave-b { animation: sx-wave-b 7s steps(1, end) infinite; }
+    /* Al pasar el mouse: saluda sin parar */
+    .sebax-avatar:hover .sx-arm-r-down { animation: none; opacity: 0; }
+    .sebax-avatar:hover .sx-arm-r-wave-a { animation: sx-flip-a 0.5s steps(1, end) infinite; }
+    .sebax-avatar:hover .sx-arm-r-wave-b { animation: sx-flip-b 0.5s steps(1, end) infinite; }
+    /* Pensando: mano en la barbilla y golpea el piso con el pie */
+    .sebax-avatar.thinking .sx-arm-r-down,
+    .sebax-avatar.thinking .sx-arm-r-wave-a,
+    .sebax-avatar.thinking .sx-arm-r-wave-b { animation: none; opacity: 0; }
+    .sebax-avatar.thinking .sx-arm-r-think { opacity: 1; }
+    .sebax-avatar.thinking .sx-leg-r { animation: sx-tap 0.6s steps(1, end) infinite; }
+    /* Hablando: gesticula alternando los brazos y respira más rápido */
+    .sebax-avatar.speaking .sx-upper { animation-duration: 0.72s; }
+    .sebax-avatar.speaking .sx-arm-r-wave-a,
+    .sebax-avatar.speaking .sx-arm-r-wave-b,
+    .sebax-avatar.speaking .sx-arm-r-think { animation: none; opacity: 0; }
+    .sebax-avatar.speaking .sx-arm-r-down { animation: sx-gesture 0.48s steps(1, end) infinite; opacity: 1; }
+    .sebax-avatar.speaking .sx-arm-l { animation: sx-gesture 0.48s steps(1, end) infinite reverse; }
+    @keyframes sx-bob { 0% { transform: translateY(0); } 50% { transform: translateY(1px); } }
+    @keyframes sx-tap { 0% { transform: translateY(0); } 50% { transform: translateY(-1px); } }
+    @keyframes sx-gesture { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+    @keyframes sx-flip-a { 0% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes sx-flip-b { 0% { opacity: 0; } 50% { opacity: 1; } }
+    @keyframes sx-wave-rest { 0%, 100% { opacity: 1; } 78% { opacity: 0; } 96% { opacity: 1; } }
+    @keyframes sx-wave-a { 0%, 100% { opacity: 0; } 78% { opacity: 1; } 81% { opacity: 0; } 84% { opacity: 1; } 87% { opacity: 0; } 90% { opacity: 1; } 93% { opacity: 0; } }
+    @keyframes sx-wave-b { 0%, 100% { opacity: 0; } 81% { opacity: 1; } 84% { opacity: 0; } 87% { opacity: 1; } 90% { opacity: 0; } 93% { opacity: 1; } 96% { opacity: 0; } }
     @media (prefers-reduced-motion: reduce) {
-      .sebax-avatar .sx-eye, .sebax-avatar .sx-eyes, .sebax-avatar .sx-mouth, .sebax-avatar .sx-mouth-open { animation: none !important; }
+      .sebax-avatar .sx-eye, .sebax-avatar .sx-eyes, .sebax-avatar .sx-mouth, .sebax-avatar .sx-mouth-open,
+      .sebax-avatar .sx-upper, .sebax-avatar .sx-arm, .sebax-avatar .sx-leg { animation: none !important; }
     }
 
     /* Vistas: formularios, tarjetas y números con el mismo lenguaje visual */
@@ -1607,12 +1642,10 @@
     .chat-empty { align-items: center; text-align: center; }
     .chat-empty .chat-suggestions { justify-content: center; }
     .chat-hero-avatar {
-      width: 96px !important; height: 96px !important; margin-bottom: 14px;
+      width: 120px !important; height: 120px !important; margin-bottom: 8px;
       filter: drop-shadow(0 14px 28px rgba(168, 85, 247, 0.35));
-      animation: hero-float 2.4s steps(1, end) infinite, hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    /* Flota en saltos de un "pixel" (6px = 1/16 del avatar), como un sprite */
-    @keyframes hero-float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     @keyframes hero-in { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
     .chat-empty-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
     .chat-empty-sub { font-size: 0.84rem; color: var(--text-muted); }
@@ -1868,20 +1901,38 @@
               <div class="chat-avatar-slot">
         <div class="sebax-avatar" id="avatar-stage" title="Sebax">
           <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
-          <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
-            <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
-            <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
-            <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
-            <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
-            <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
-            <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
-            <g class="sx-eyes">
-              <g class="sx-eye"><rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="4" y="5" width="1" height="1" fill="#5b5b66"/></g>
-              <g class="sx-eye"><rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="10" y="5" width="1" height="1" fill="#5b5b66"/></g>
+          <!-- Sprite 24x24: cabeza 16x16 (cuadro original) + brazos, piernas y sombra -->
+          <svg viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true">
+            <rect class="sx-shadow" x="6" y="22" width="12" height="1" fill="#a855f7" opacity="0.28"/>
+            <g class="sx-legs">
+              <g class="sx-leg sx-leg-l"><rect x="8" y="17" width="2" height="3" fill="#8b8b96"/><rect x="7" y="20" width="3" height="1" fill="#d4d4da"/></g>
+              <g class="sx-leg sx-leg-r"><rect x="14" y="17" width="2" height="3" fill="#8b8b96"/><rect x="14" y="20" width="3" height="1" fill="#d4d4da"/></g>
             </g>
-            <g class="sx-mouth"><rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/></g>
-            <g class="sx-mouth-open"><rect x="6" y="11" width="4" height="2" fill="#0b0b0e"/><rect x="7" y="12" width="2" height="1" fill="#e05a7a"/></g>
-            <rect class="sx-dot" x="12" y="2" width="2" height="2" fill="#a855f7"/>
+            <g class="sx-upper">
+              <!-- Brazo izquierdo -->
+              <g class="sx-arm sx-arm-l"><rect x="4" y="10" width="1" height="2" fill="#8b8b96"/><rect x="2" y="10" width="2" height="3" fill="#8b8b96"/><rect x="1" y="13" width="3" height="2" fill="#d4d4da"/></g>
+              <!-- Brazo derecho: abajo, saludando (2 cuadros) y mano en la barbilla -->
+              <g class="sx-arm sx-arm-r sx-arm-r-down"><rect x="19" y="10" width="1" height="2" fill="#8b8b96"/><rect x="20" y="10" width="2" height="3" fill="#8b8b96"/><rect x="20" y="13" width="3" height="2" fill="#d4d4da"/></g>
+              <g class="sx-arm sx-arm-r-wave-a"><rect x="19" y="9" width="1" height="2" fill="#8b8b96"/><rect x="20" y="7" width="2" height="4" fill="#8b8b96"/><rect x="20" y="4" width="3" height="3" fill="#d4d4da"/></g>
+              <g class="sx-arm sx-arm-r-wave-b"><rect x="19" y="9" width="1" height="2" fill="#8b8b96"/><rect x="20" y="8" width="2" height="3" fill="#8b8b96"/><rect x="21" y="6" width="2" height="2" fill="#8b8b96"/><rect x="21" y="3" width="3" height="3" fill="#d4d4da"/></g>
+              <g class="sx-head" transform="translate(4 2)">
+                <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
+                <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
+                <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
+                <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
+                <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
+                <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
+                <g class="sx-eyes">
+                  <g class="sx-eye"><rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="4" y="5" width="1" height="1" fill="#5b5b66"/></g>
+                  <g class="sx-eye"><rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="10" y="5" width="1" height="1" fill="#5b5b66"/></g>
+                </g>
+                <g class="sx-mouth"><rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/></g>
+                <g class="sx-mouth-open"><rect x="6" y="11" width="4" height="2" fill="#0b0b0e"/><rect x="7" y="12" width="2" height="1" fill="#e05a7a"/></g>
+                <rect class="sx-dot" x="12" y="2" width="2" height="2" fill="#a855f7"/>
+              </g>
+              <!-- Encima de la cabeza: mano en la barbilla al pensar -->
+              <g class="sx-arm sx-arm-r-think"><rect x="19" y="11" width="1" height="2" fill="#8b8b96"/><rect x="20" y="11" width="2" height="5" fill="#8b8b96"/><rect x="17" y="15" width="3" height="1" fill="#8b8b96"/><rect x="16" y="13" width="3" height="2" fill="#d4d4da"/></g>
+            </g>
           </svg>
         </div>
               </div>
@@ -2353,10 +2404,10 @@
     // Estados del avatar de Sebax (pensando / hablando)
     window.avatar = {
       setSpeaking: function(val) {
-        document.getElementById("avatar-stage")?.classList.toggle("speaking", !!val);
+        document.querySelectorAll(".sebax-avatar").forEach(el => el.classList.toggle("speaking", !!val));
       },
       setThinking: function(val) {
-        document.getElementById("avatar-stage")?.classList.toggle("thinking", !!val);
+        document.querySelectorAll(".sebax-avatar").forEach(el => el.classList.toggle("thinking", !!val));
       },
       setPreset: function(p) {}
     };
@@ -2600,29 +2651,14 @@
       chatHistory = chatHistory.slice(-CHAT_MAX);
       try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory)); } catch (e) {}
     }
+    const SEBAX_SPRITE = document.querySelector("#avatar-stage svg")?.outerHTML || "";
     function renderChat() {
       if (!chatHistory.length) {
         const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/Monterrey", hour: "numeric", hour12: false })) % 24;
         const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
         speechBubble.innerHTML = `
           <div class="chat-empty">
-            <div class="chat-hero-avatar sebax-avatar" aria-hidden="true">
-              <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
-                <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
-                <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
-                <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
-                <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
-                <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
-                <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
-                <g class="sx-eyes">
-                  <g class="sx-eye"><rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="4" y="5" width="1" height="1" fill="#5b5b66"/></g>
-                  <g class="sx-eye"><rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="10" y="5" width="1" height="1" fill="#5b5b66"/></g>
-                </g>
-                <g class="sx-mouth"><rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/></g>
-                <g class="sx-mouth-open"><rect x="6" y="11" width="4" height="2" fill="#0b0b0e"/><rect x="7" y="12" width="2" height="1" fill="#e05a7a"/></g>
-                <rect class="sx-dot" x="12" y="2" width="2" height="2" fill="#a855f7"/>
-              </svg>
-            </div>
+            <div class="chat-hero-avatar sebax-avatar" aria-hidden="true">${SEBAX_SPRITE}</div>
             <p class="chat-empty-title">${greeting}, Sebastián</p>
             <p class="chat-empty-sub">¿Qué hacemos hoy? Escribe una orden, dicta por voz o elige una sugerencia.</p>
             <div class="chat-suggestions">
