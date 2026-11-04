@@ -847,7 +847,7 @@ export function initTopography(container, canvas, userOptions = {}) {
     const matrix = new Float32Array(16);
     const pulseData = new Float32Array(MAX_PULSES * 4);
     const glitchData = new Float32Array(12);
-    const glitch = { until: 0, next: 1.5, roll: 0, seed: 0 };
+    const glitchState = { until: 0, next: 1.5, roll: 0, seed: 0 };
     let entropy = 7919;
     const random = () => {
       entropy = (entropy * 16807) % 2147483647;
@@ -1100,7 +1100,7 @@ export function initTopography(container, canvas, userOptions = {}) {
         gl.uniform1f(u.uLightMode, s.lightMode ? 1 : 0);
         gl.uniform1f(u.uOpacity, s.opacity);
         gl.uniform4fv(u.uGlitch, glitchData);
-        gl.uniform1f(u.uGlitchSeed, glitch.seed);
+        gl.uniform1f(u.uGlitchSeed, glitchState.seed);
         gl.uniform1f(u.uPixel, pixel);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LESS);
@@ -1295,13 +1295,13 @@ export function initTopography(container, canvas, userOptions = {}) {
       state.clock += dt;
       const glitching = reduce ? 0 : s.glitch;
       if (glitching > 0) {
-        if (state.clock >= glitch.next && state.clock >= glitch.until) {
-          glitch.until = state.clock + 0.1 + random() * 0.22 * (0.5 + glitching);
-          glitch.next = glitch.until + (9 - 7.4 * glitching) * (0.45 + random() * 1.1);
-          glitch.roll = 0;
+        if (state.clock >= glitchState.next && state.clock >= glitchState.until) {
+          glitchState.until = state.clock + 0.1 + random() * 0.22 * (0.5 + glitching);
+          glitchState.next = glitchState.until + (9 - 7.4 * glitching) * (0.45 + random() * 1.1);
+          glitchState.roll = 0;
         }
-        if (state.clock < glitch.until) {
-          if (state.clock >= glitch.roll) {
+        if (state.clock < glitchState.until) {
+          if (state.clock >= glitchState.roll) {
             glitchData.fill(0);
             const count = 1 + Math.floor(random() * 3);
             for (let i = 0; i < count; i++) {
@@ -1310,8 +1310,8 @@ export function initTopography(container, canvas, userOptions = {}) {
               const shift = (random() - 0.5) * 2 * (10 + 46 * glitching);
               glitchData.set([y, y + band, shift, 1 + random() * 3 * glitching], i * 4);
             }
-            glitch.seed = random();
-            glitch.roll = state.clock + 0.04 + random() * 0.05;
+            glitchState.seed = random();
+            glitchState.roll = state.clock + 0.04 + random() * 0.05;
           }
         } else glitchData.fill(0);
       } else glitchData.fill(0);
@@ -1423,8 +1423,8 @@ export function initTopography(container, canvas, userOptions = {}) {
       pointer.inside = true;
       wake();
       if (s.glitch > 0 && !reduce) {
-        glitch.until = state.clock + 0.16;
-        glitch.roll = 0;
+        glitchState.until = state.clock + 0.16;
+        glitchState.roll = 0;
       }
       if (!s.mouseInteraction || (s.clickEffect !== 'pulse' && s.clickEffect !== 'peak')) return;
       const hit = pick(camera(), s, (x / view.width) * 2 - 1, 1 - (y / view.height) * 2);
