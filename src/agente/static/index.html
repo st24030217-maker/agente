@@ -1415,7 +1415,7 @@
     }
 
     .side-brand { display: flex; align-items: center; gap: 11px; padding: 2px 8px; }
-    .side-brand-mark { width: 34px; height: 34px; flex: none; display: block; }
+    .side-brand-mark { width: 32px; height: 32px; flex: none; display: block; }
     .side-brand-text strong { display: block; font-size: 0.92rem; letter-spacing: -0.01em; }
     .side-brand-text span { font-size: 0.64rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
 
@@ -1459,23 +1459,29 @@
     .app-main .agent-workspace-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; min-height: 0; }
     .app-main .chat-card-panel { height: 560px; min-height: 560px; }
     .agent-header-brand { display: flex; align-items: center; gap: 10px; }
-    .chat-avatar-slot { width: 42px; height: 42px; flex: none; }
+    .chat-avatar-slot { width: 48px; height: 48px; flex: none; }
 
     /* Avatar de Sebax: parpadea en reposo, mira a los lados al pensar y mueve la boca al hablar */
+    /* Estilo pixel: cuadrícula 16×16, bordes nítidos y movimientos de pixel completo (steps) */
     .sebax-avatar, .sebax-avatar svg { display: block; width: 100%; height: 100%; }
-    .sebax-avatar .sx-eye { transform-box: fill-box; transform-origin: center; animation: sx-blink 5.2s infinite; }
-    .sebax-avatar .sx-eyes { transition: transform 0.3s ease; }
-    .sebax-avatar .sx-mouth { transform-box: fill-box; transform-origin: center top; }
-    .sebax-avatar .sx-dot { transition: fill 0.25s ease; }
-    .sebax-avatar.thinking .sx-eyes { animation: sx-look 1.6s ease-in-out infinite; }
+    .sebax-avatar svg { shape-rendering: crispEdges; }
+    .side-brand-mark { image-rendering: pixelated; }
+    .sebax-avatar .sx-eye { transform-box: fill-box; transform-origin: center bottom; animation: sx-blink 5.2s steps(1, end) infinite; }
+    .sebax-avatar .sx-mouth-open { opacity: 0; }
+    .sebax-avatar .sx-dot { transition: fill 0.2s steps(1, end); }
+    .sebax-avatar.thinking .sx-eyes { animation: sx-look 1.4s steps(1, end) infinite; }
     .sebax-avatar.thinking .sx-dot { fill: #38bdf8; }
-    .sebax-avatar.speaking .sx-mouth { animation: sx-talk 0.32s ease-in-out infinite alternate; }
+    .sebax-avatar.speaking .sx-mouth { animation: sx-talk-closed 0.36s steps(1, end) infinite; }
+    .sebax-avatar.speaking .sx-mouth-open { animation: sx-talk-open 0.36s steps(1, end) infinite; }
     .sebax-avatar.speaking .sx-dot { fill: var(--accent-green); }
-    @keyframes sx-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.12); } }
-    @keyframes sx-look { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
-    @keyframes sx-talk { from { transform: scaleY(1); } to { transform: scaleY(1.9); } }
+    /* Parpadeo: el ojo baja de 4 pixeles a 1 durante un instante */
+    @keyframes sx-blink { 0%, 95% { transform: scaleY(1); } 96%, 98% { transform: scaleY(0.25); } 99%, 100% { transform: scaleY(1); } }
+    /* Mirar a los lados: un pixel a la izquierda, luego a la derecha */
+    @keyframes sx-look { 0% { transform: translateX(-1px); } 50% { transform: translateX(1px); } 100% { transform: translateX(-1px); } }
+    @keyframes sx-talk-closed { 0% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes sx-talk-open { 0% { opacity: 0; } 50% { opacity: 1; } }
     @media (prefers-reduced-motion: reduce) {
-      .sebax-avatar .sx-eye, .sebax-avatar .sx-eyes, .sebax-avatar .sx-mouth { animation: none !important; }
+      .sebax-avatar .sx-eye, .sebax-avatar .sx-eyes, .sebax-avatar .sx-mouth, .sebax-avatar .sx-mouth-open { animation: none !important; }
     }
 
     /* Vistas: formularios, tarjetas y números con el mismo lenguaje visual */
@@ -1599,12 +1605,12 @@
     .chat-empty { align-items: center; text-align: center; }
     .chat-empty .chat-suggestions { justify-content: center; }
     .chat-hero-avatar {
-      width: 96px !important; height: 96px !important; margin-bottom: 14px; border-radius: 28px;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 50px rgba(168, 85, 247, 0.28);
-      animation: hero-float 5s ease-in-out infinite, hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 96px !important; height: 96px !important; margin-bottom: 14px;
+      filter: drop-shadow(0 14px 28px rgba(168, 85, 247, 0.35));
+      animation: hero-float 2.4s steps(1, end) infinite, hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .chat-hero-avatar svg { border-radius: 28px; }
-    @keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    /* Flota en saltos de un "pixel" (6px = 1/16 del avatar), como un sprite */
+    @keyframes hero-float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
     @keyframes hero-in { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
     .chat-empty-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
     .chat-empty-sub { font-size: 0.84rem; color: var(--text-muted); }
@@ -1729,7 +1735,7 @@
     <!-- Navegación: barra lateral en escritorio, barra inferior en celular -->
     <aside class="side-nav" aria-label="Navegación principal">
       <div class="side-brand">
-        <img class="side-brand-mark" src="/sebax-avatar.svg" alt="Sebax" width="34" height="34">
+        <img class="side-brand-mark" src="/sebax-avatar.svg" alt="Sebax" width="32" height="32">
         <div class="side-brand-text"><strong>Sebax AI</strong><span>SSSSolutions</span></div>
       </div>
       <nav class="nav-segmented-bar side-nav-list">
@@ -1860,14 +1866,20 @@
               <div class="chat-avatar-slot">
         <div class="sebax-avatar" id="avatar-stage" title="Sebax">
           <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
-          <svg viewBox="0 0 64 64" aria-hidden="true">
-            <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
+          <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
+            <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
+            <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
+            <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
+            <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
+            <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
             <g class="sx-eyes">
-              <rect class="sx-eye" x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
-              <rect class="sx-eye" x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+              <g class="sx-eye"><rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="4" y="5" width="1" height="1" fill="#5b5b66"/></g>
+              <g class="sx-eye"><rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="10" y="5" width="1" height="1" fill="#5b5b66"/></g>
             </g>
-            <path class="sx-mouth" d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
-            <circle class="sx-dot" cx="51" cy="13" r="4" fill="#a855f7"/>
+            <g class="sx-mouth"><rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/></g>
+            <g class="sx-mouth-open"><rect x="6" y="11" width="4" height="2" fill="#0b0b0e"/><rect x="7" y="12" width="2" height="1" fill="#e05a7a"/></g>
+            <rect class="sx-dot" x="12" y="2" width="2" height="2" fill="#a855f7"/>
           </svg>
         </div>
               </div>
@@ -2589,14 +2601,20 @@
         speechBubble.innerHTML = `
           <div class="chat-empty">
             <div class="chat-hero-avatar sebax-avatar" aria-hidden="true">
-              <svg viewBox="0 0 64 64">
-                <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
+              <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+                <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
+                <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
+                <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
+                <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
+                <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
+                <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
                 <g class="sx-eyes">
-                  <rect class="sx-eye" x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
-                  <rect class="sx-eye" x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+                  <g class="sx-eye"><rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="4" y="5" width="1" height="1" fill="#5b5b66"/></g>
+                  <g class="sx-eye"><rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/><rect x="10" y="5" width="1" height="1" fill="#5b5b66"/></g>
                 </g>
-                <path class="sx-mouth" d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
-                <circle class="sx-dot" cx="51" cy="13" r="4" fill="#a855f7"/>
+                <g class="sx-mouth"><rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/><rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/></g>
+                <g class="sx-mouth-open"><rect x="6" y="11" width="4" height="2" fill="#0b0b0e"/><rect x="7" y="12" width="2" height="1" fill="#e05a7a"/></g>
+                <rect class="sx-dot" x="12" y="2" width="2" height="2" fill="#a855f7"/>
               </svg>
             </div>
             <p class="chat-empty-title">${greeting}, Sebastián</p>

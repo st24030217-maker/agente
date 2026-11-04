@@ -1,7 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sebax">
-  <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
-  <rect x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
-  <rect x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
-  <path d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="51" cy="13" r="4" fill="#a855f7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges" role="img" aria-label="Sebax">
+  <!-- Cuerpo: cuadro con esquinas pixeladas y sombra inferior/derecha -->
+  <rect x="2" y="1" width="12" height="14" fill="#f4f4f5"/>
+  <rect x="1" y="2" width="14" height="12" fill="#f4f4f5"/>
+  <rect x="2" y="14" width="12" height="1" fill="#cfcfd6"/>
+  <rect x="14" y="3" width="1" height="10" fill="#dedee4"/>
+  <rect x="1" y="13" width="1" height="1" fill="#cfcfd6"/>
+  <rect x="14" y="13" width="1" height="1" fill="#cfcfd6"/>
+  <!-- Ojos -->
+  <rect x="4" y="5" width="2" height="4" fill="#0b0b0e"/>
+  <rect x="10" y="5" width="2" height="4" fill="#0b0b0e"/>
+  <!-- Brillo en los ojos -->
+  <rect x="4" y="5" width="1" height="1" fill="#5b5b66"/>
+  <rect x="10" y="5" width="1" height="1" fill="#5b5b66"/>
+  <!-- Sonrisa -->
+  <rect x="4" y="11" width="1" height="1" fill="#0b0b0e"/>
+  <rect x="11" y="11" width="1" height="1" fill="#0b0b0e"/>
+  <rect x="5" y="12" width="6" height="1" fill="#0b0b0e"/>
+  <!-- Punto de estado -->
+  <rect x="12" y="2" width="2" height="2" fill="#a855f7"/>
 </svg>
