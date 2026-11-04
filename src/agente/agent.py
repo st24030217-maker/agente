@@ -106,9 +106,8 @@ class AgentCoordinator:
         selected_tools = ADMIN_TOOLS if is_admin else COMMERCIAL_TOOLS
 
         async with self.get_lock(chat_id):
-            candidate_models = [settings.gemini_model, "gemini-3.5-flash-lite"]
-            # Asegurar modelos únicos
-            models_to_try = list(dict.fromkeys(candidate_models))
+            candidate_models = [settings.gemini_model, "gemini-3.5-flash", "gemini-3.5-flash-lite"]
+            models_to_try = [m for i, m in enumerate(candidate_models) if m and m not in candidate_models[:i]]
 
             for current_model in models_to_try:
                 for attempt in range(2):
@@ -131,16 +130,18 @@ class AgentCoordinator:
                         return "Comando ejecutado con éxito."
                     except Exception as e:
                         err_msg = str(e)
-                        # Si el chat se bloqueó o cambió de modelo, reiniciarlo
-                        if "429" in err_msg or "resource_exhausted" in err_msg.lower():
-                            logger.warning("Cuota alcanzada en modelo %s. Intentando modelo de respaldo...", current_model)
+                        err_lower = err_msg.lower()
+                        is_overload = any(k in err_lower for k in ["429", "resource_exhausted", "503", "unavailable", "overloaded", "high demand", "capacity"])
+
+                        if is_overload:
+                            logger.warning("Modelo %s con alta demanda/cuota: %s. Probando siguiente...", current_model, err_msg)
                             self.reset_chat(chat_id)
-                            break  # Pasar al siguiente modelo de respaldo
-                        elif ("503" in err_msg or "overloaded" in err_msg.lower()) and attempt == 0:
-                            logger.warning("Modelo %s sobrecargado, reintentando en 2s...", current_model)
-                            await asyncio.sleep(2.0)
-                            continue
+                            if attempt == 0:
+                                await asyncio.sleep(1.5)
+                                continue
+                            break
                         else:
+                            logger.error("Error al procesar mensaje con %s: %s", current_model, err_msg)
                             self.reset_chat(chat_id)
                             break
 
