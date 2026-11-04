@@ -217,6 +217,119 @@ def run_autopilot_cycle() -> dict:
         "businesses": results
     }
 
+def run_followup_cycle(max_followups: int = 1) -> dict:
+    """Ejecuta una ronda de seguimiento automático para prospectos contactados que no han respondido.
+    
+    Estrategia de 3 toques:
+    - Toque 1: Pitch inicial personalizado (enviado en el ciclo de prospección).
+    - Toque 2 (48 a 72 horas sin respuesta): Mensaje cordial de valor recordando el portafolio y ofreciendo prototipo visual sin costo.
+    - Toque 3 (120 horas / 5 días sin respuesta): Cierre elegante y no invasivo, deseando éxito y dejando datos de contacto a la mano.
+    """
+    leads = _load_leads()
+    now_dt = get_laguna_now().replace(tzinfo=None)
+    now_str = get_laguna_now().strftime("%Y-%m-%d %H:%M:%S")
+
+    followup_candidates = []
+    for l in leads:
+        status = l.get("status", "")
+        # Solo prospectos contactados que NO han respondido y siguen pendientes
+        if status != "contactado":
+            continue
+
+        phone = l.get("phone", "")
+        if not phone:
+            continue
+
+        contacted_at_str = l.get("contacted_at")
+        if not contacted_at_str:
+            continue
+
+        try:
+            contacted_dt = datetime.strptime(contacted_at_str, "%Y-%m-%d %H:%M:%S")
+        except Exception:
+            continue
+
+        stage = l.get("followup_stage", 0)
+        last_followup_str = l.get("last_followup_at")
+        if last_followup_str:
+            try:
+                last_followup_dt = datetime.strptime(last_followup_str, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                last_followup_dt = contacted_dt
+        else:
+            last_followup_dt = contacted_dt
+
+        hours_since_contact = (now_dt - contacted_dt).total_seconds() / 3600.0
+        hours_since_last_touch = (now_dt - last_followup_dt).total_seconds() / 3600.0
+
+        # Toque 2: después de 48 horas sin respuesta y en etapa 0
+        if stage == 0 and hours_since_contact >= 48:
+            followup_candidates.append({
+                "lead": l,
+                "stage": 1,
+                "hours": round(hours_since_contact, 1)
+            })
+        # Toque 3: después de 120 horas (5 días) y en etapa 1, con al menos 48h desde el toque anterior
+        elif stage == 1 and hours_since_contact >= 120 and hours_since_last_touch >= 48:
+            followup_candidates.append({
+                "lead": l,
+                "stage": 2,
+                "hours": round(hours_since_contact, 1)
+            })
+
+    if not followup_candidates:
+        return {"executed": True, "followups_sent": 0, "message": "No hay prospectos que requieran seguimiento en este momento"}
+
+    sent_count = 0
+    sent_details = []
+
+    for item in followup_candidates[:max_followups]:
+        l = item["lead"]
+        target_stage = item["stage"]
+        name = l.get("name", "Estimado cliente")
+        phone = l.get("phone", "")
+
+        if target_stage == 1:
+            # Toque 2: 48 horas sin respuesta
+            msg = (
+                f"Hola buen dia. Le escribo brevemente de SSSSolutions para dar seguimiento a la propuesta que le comparti para {name}. "
+                f"¿Tuvieron oportunidad de revisar nuestro portafolio oficial (https://st24030217-maker.github.io/cv-salinas/)? "
+                f"Con gusto podemos prepararles un prototipo visual exclusivo sin costo si desean ver como luciria su sitio web."
+            )
+            res = send_whatsapp_message(to_number=phone, message=msg)
+            if is_delivery_confirmed(res) or is_delivery_pending(res):
+                l["followup_stage"] = 1
+                l["last_followup_at"] = now_str
+                l["notes"] = (l.get("notes", "") + f" | Seguimiento 48h enviado: {now_str}").strip(" | ")
+                sent_count += 1
+                sent_details.append(f"{name} ({phone}) [Touch 2 - 48h]")
+        elif target_stage == 2:
+            # Toque 3: 5 días sin respuesta (cierre elegante)
+            msg = (
+                f"Hola buen dia. Entiendo que pueden estar con agenda ocupada en {name}. "
+                f"No deseo insistir ni saturar su WhatsApp, solo queria dejarles a la mano nuestro contacto por si mas adelante deciden renovar su presencia digital o requieren apoyo en diseño y desarrollo web. "
+                f"Pueden ver nuestros proyectos en https://st24030217-maker.github.io/cv-salinas/ o escribirnos por Instagram https://www.instagram.com/ssss.olutions. Mucho exito con sus proyectos."
+            )
+            res = send_whatsapp_message(to_number=phone, message=msg)
+            if is_delivery_confirmed(res) or is_delivery_pending(res):
+                l["followup_stage"] = 2
+                l["status"] = "sin_respuesta"
+                l["last_followup_at"] = now_str
+                l["notes"] = (l.get("notes", "") + f" | Seguimiento 5d (cierre) enviado: {now_str}").strip(" | ")
+                sent_count += 1
+                sent_details.append(f"{name} ({phone}) [Touch 3 - 5d Cierre]")
+
+        _save_leads(leads)
+        if len(followup_candidates) > 1:
+            time.sleep(12)
+
+    logger.info("Ciclo de seguimiento completado: %d mensajes enviados", sent_count)
+    return {
+        "executed": True,
+        "followups_sent": sent_count,
+        "details": sent_details
+    }
+
 def send_daily_morning_report() -> str:
     """Compila y envía el reporte diario consolidado al WhatsApp personal de Sebastián Salinas."""
     today_str = get_laguna_now().strftime("%Y-%m-%d")
@@ -225,7 +338,9 @@ def send_daily_morning_report() -> str:
 
     # Contar prospectos contactados hoy o en últimas 24 horas
     today_contacted = [l for l in leads if (l.get("contacted_at") or "").startswith(today_str)]
-    replied_leads = [l for l in leads if l.get("status") == "respondio"]
+    replied_leads = [l for l in leads if l.get("status") in ["respondio", "interesado"]]
+    hot_leads = [l for l in leads if l.get("status") == "interesado" or l.get("is_hot")]
+    followup_active = [l for l in leads if l.get("followup_stage", 0) > 0 and l.get("status") == "contactado"]
     today_appointments = [a for a in appointments if (a.get("created_at") or "").startswith(today_str)]
 
     # Construir lista de próximas citas
@@ -248,13 +363,15 @@ def send_daily_morning_report() -> str:
         f"Resumen comercial de las últimas 24 horas:\n"
         f"• Negocios contactados: {total_sent_metric}\n"
         f"• Respuestas atendidas automáticamente: {len(replied_leads)}\n"
+        f"• Leads calientes (alta intención): {len(hot_leads)}\n"
+        f"• En secuencia de seguimiento activo: {len(followup_active)}\n"
         f"• Citas y reuniones en agenda: {len(appointments)}\n\n"
         f"Enlaces enviados en cada propuesta:\n"
         f"• Portafolio: https://st24030217-maker.github.io/cv-salinas/\n"
         f"• Instagram: https://www.instagram.com/ssss.olutions\n\n"
         f"Próximas citas en agenda:\n"
         f"{citas_text}\n\n"
-        f"Sebax continúa operando en segundo plano atendiendo respuestas y prospectando constantemente."
+        f"Sebax continúa operando en segundo plano atendiendo respuestas, dando seguimiento y prospectando cada 30 minutos."
     )
 
     try:
@@ -345,8 +462,9 @@ async def autopilot_background_worker():
                 is_active_hours = start_h <= now.hour < end_h
 
                 if should_run and is_active_hours:
-                    logger.info("Ciclo de prospección (cada 30 min): ejecutando búsqueda y contacto en La Laguna...")
+                    logger.info("Ciclo comercial (cada 30 min): reintentos, seguimiento 48h/5d y prospección en La Laguna...")
                     await asyncio.to_thread(retry_unsent_leads)
+                    await asyncio.to_thread(run_followup_cycle, 1)
                     await asyncio.to_thread(run_autopilot_cycle)
 
                 # 2. Envío de Reporte Consolidado Matutino Diario (09:00 AM Hora de La Laguna a 8719164677)

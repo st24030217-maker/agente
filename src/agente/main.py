@@ -19,6 +19,7 @@ from agente.tools.prospecting import (
     run_autonomous_campaign,
     update_lead_status,
     generate_lead_reply,
+    classify_lead_intent,
     _load_leads,
     _save_leads,
     normalize_mx_phone,
@@ -28,6 +29,9 @@ from agente.tools.prospecting import (
 from agente.tools.whatsapp import is_delivery_confirmed, is_delivery_pending, send_whatsapp_message
 from agente.tools.agenda import (
     add_appointment,
+    schedule_smart_appointment,
+    check_agenda_availability,
+    suggest_available_slots,
     list_appointments,
     update_appointment_status,
     get_appointments_stats
@@ -37,6 +41,7 @@ from agente.tools.autopilot import (
     get_autopilot_config,
     toggle_autopilot,
     run_autopilot_cycle,
+    run_followup_cycle,
     send_daily_morning_report,
     retry_unsent_leads
 )
@@ -284,6 +289,42 @@ async def handle_voice_quick_intent(message: str) -> str | None:
         except Exception as e:
             return f"Hubo un detalle al enviar el mensaje a {target_phone}: {e}"
 
+    # 7. Consultar citas y agenda en vivo
+    if any(k in m for k in [
+        "citas de hoy", "qué citas tengo", "que citas tengo", "ver mi agenda",
+        "ver agenda", "cómo está mi agenda", "como esta mi agenda", "tengo reuniones",
+        "mis citas", "agenda de hoy", "próximas citas", "proximas citas"
+    ]):
+        stats = get_appointments_stats()
+        apps = stats.get("appointments", [])
+        active = [a for a in apps if a.get("status") in ["confirmada", "en_negociacion"]]
+        if not active:
+            return "No tienes citas pendientes agendadas en este momento. La agenda está libre para nuevas reuniones."
+        prox = active[0]
+        return f"Tienes {len(active)} cita en agenda. La próxima es con {prox.get('business_name')} para {prox.get('date_time', 'fecha por acordar')}."
+
+    # 8. Consultar leads calientes / prospectos interesados
+    if any(k in m for k in [
+        "leads calientes", "lead caliente", "clientes interesados", "quién respondió",
+        "quien respondio", "prospectos interesados", "quién ha respondido", "quien ha respondido",
+        "hay interesados", "algún interesado", "algun interesado"
+    ]):
+        leads = _load_leads()
+        hot = [l for l in leads if l.get("status") == "interesado" or l.get("is_hot")]
+        if not hot:
+            return "Por el momento no hay leads con intención urgente, pero sigo atendiendo y clasificando respuestas 24/7."
+        nombres = ", ".join([l.get("name", "Prospecto") for l in hot[:3]])
+        return f"Llevamos {len(hot)} leads calientes interesados en servicios web. Destacan: {nombres}. Revisa tu WhatsApp para ver los accesos directos."
+
+    # 9. Ejecutar ciclo de seguimiento (48h/5d) manualmente
+    if any(k in m for k in ["haz seguimiento", "ejecuta seguimiento", "manda seguimientos", "dar seguimiento", "seguimiento ahora"]):
+        res = run_followup_cycle(max_followups=1)
+        sent = res.get("followups_sent", 0)
+        if sent > 0:
+            det = res.get("details", [""])[0]
+            return f"Listo Sebastián, envié seguimiento a: {det}."
+        return "Revisé la base de datos y ningún prospecto cumple aún las 48 horas sin respuesta. Todo al corriente."
+
     return None
 
 @app.post("/chat")
@@ -449,6 +490,117 @@ async def post_bridge_reset():
         except Exception as e:
             return {"error": str(e)}
 
+
+def auto_restore_session():
+    """Restaura automáticamente las credenciales de Baileys si existen en variable de entorno o archivo de persistencia."""
+    try:
+        import base64
+        import json
+        auth_dir = Path(settings.whatsapp_auth_dir)
+        creds_file = auth_dir / "creds.json"
+        if creds_file.exists():
+            logger.info("[Session] Sesión de Baileys ya existente en disco local.")
+            return
+
+        # 1. Variable de entorno WHATSAPP_SESSION_B64
+        b64_env = os.getenv("WHATSAPP_SESSION_B64", "").strip()
+        if b64_env:
+            decoded = base64.b64decode(b64_env).decode("utf-8")
+            data = json.loads(decoded)
+            files = data.get("files", data) if isinstance(data, dict) else {}
+            if files:
+                auth_dir.mkdir(parents=True, exist_ok=True)
+                for name, file_content in files.items():
+                    (auth_dir / name).write_text(file_content, encoding="utf-8")
+                logger.info("[Session] Sesión restaurada desde WHATSAPP_SESSION_B64 (%d archivos).", len(files))
+                return
+
+        # 2. Archivo persistente data/baileys_session.json
+        session_file = DATA_DIR / "baileys_session.json"
+        if session_file.exists():
+            data = json.loads(session_file.read_text(encoding="utf-8"))
+            files = data.get("files", data) if isinstance(data, dict) else {}
+            if files:
+                auth_dir.mkdir(parents=True, exist_ok=True)
+                for name, file_content in files.items():
+                    (auth_dir / name).write_text(file_content, encoding="utf-8")
+                logger.info("[Session] Sesión restaurada desde data/baileys_session.json (%d archivos).", len(files))
+                return
+    except Exception as e:
+        logger.warning("[Session] Fallo al auto-restaurar sesión de Baileys: %s", e)
+
+@app.get("/api/bridge/session/export")
+def export_bridge_session():
+    """Exporta la sesión de Baileys a formato JSON y Base64 compacto para persistencia en Render."""
+    import base64
+    import json
+    auth_dir = Path(settings.whatsapp_auth_dir)
+    if not auth_dir.exists():
+        return {"error": "Directorio de sesión no existe", "count": 0}
+
+    files = {}
+    for f in auth_dir.glob("*"):
+        if f.is_file():
+            try:
+                files[f.name] = f.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+
+    if not files:
+        return {"error": "No hay archivos en la sesión de Baileys", "count": 0}
+
+    payload = {
+        "files": files,
+        "count": len(files),
+        "exported_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    json_str = json.dumps(payload, ensure_ascii=False, indent=2)
+    session_file = DATA_DIR / "baileys_session.json"
+    session_file.write_text(json_str, encoding="utf-8")
+
+    b64_str = base64.b64encode(json.dumps({"files": files}).encode("utf-8")).decode("ascii")
+    b64_file = DATA_DIR / "session_b64.txt"
+    b64_file.write_text(b64_str, encoding="ascii")
+
+    return {
+        "success": True,
+        "count": len(files),
+        "b64_length": len(b64_str),
+        "b64": b64_str,
+        "backup_file": str(session_file)
+    }
+
+@app.post("/api/bridge/session/import")
+async def import_bridge_session(request: Request):
+    """Importa y activa una sesión de Baileys desde Base64 o payload JSON."""
+    import base64
+    import json
+    data = await request.json()
+    b64_input = (data.get("b64") or "").strip()
+    files = data.get("files")
+
+    if not files and b64_input:
+        try:
+            decoded = base64.b64decode(b64_input).decode("utf-8")
+            parsed = json.loads(decoded)
+            files = parsed.get("files", parsed)
+        except Exception as e:
+            return {"error": f"Base64 no válido: {e}"}
+
+    if not files or not isinstance(files, dict):
+        return {"error": "No se encontraron archivos válidos en el payload"}
+
+    auth_dir = Path(settings.whatsapp_auth_dir)
+    auth_dir.mkdir(parents=True, exist_ok=True)
+    for name, content in files.items():
+        (auth_dir / name).write_text(content, encoding="utf-8")
+
+    # Guardar copia de persistencia en DATA_DIR
+    session_file = DATA_DIR / "baileys_session.json"
+    session_file.write_text(json.dumps({"files": files, "restored_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}, indent=2), encoding="utf-8")
+
+    return {"success": True, "restored_files": len(files), "message": "Sesión restaurada con éxito. Reiniciando conector..."}
+
 @app.get("/api/bridge/backup")
 def backup_bridge_session():
     """Genera un backup en memoria de los archivos de autenticación de Baileys."""
@@ -558,8 +710,11 @@ async def send_lead_pitch_api(payload: LeadSendRequest):
 
 @app.post("/api/leads/incoming")
 async def check_incoming_lead_api(payload: LeadIncomingCheck):
-    """Verifica si un mensaje entrante proviene de un prospecto de negocios, responde automáticamente y notifica a Sebastián."""
+    """Verifica si un mensaje entrante proviene de un prospecto de negocios o nuevo cliente, clasifica la intención (Hot Lead), responde y alerta de inmediato a Sebastián por WhatsApp."""
     sender_digits = re.sub(r"\D", "", payload.sender)
+    if not sender_digits or len(sender_digits) < 8:
+        return {"is_lead": False}
+
     leads = _load_leads()
     matched_lead = None
 
@@ -569,54 +724,110 @@ async def check_incoming_lead_api(payload: LeadIncomingCheck):
             matched_lead = l
             break
 
-    if matched_lead:
-        matched_lead["status"] = "respondio"
-        matched_lead["last_reply"] = payload.message
-        matched_lead["last_reply_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Detectar si el prospecto propone o solicita agendar una cita o llamada
-        msg_lower = payload.message.lower()
-        if any(w in msg_lower for w in ["cita", "llamada", "reunion", "agendar", "mañana", "hora", "vernos", "platicar", "reunirnos", "zoom"]):
-            try:
-                add_appointment(
-                    business_name=matched_lead.get("name", "Prospecto"),
-                    client_name=matched_lead.get("name", "Contacto"),
-                    phone=matched_lead.get("phone", ""),
-                    date_time="Por confirmar con el cliente",
-                    notes=f"Solicitud automática recibida por WhatsApp: '{payload.message}'",
-                    status="en_negociacion"
-                )
-            except Exception as e:
-                logger.warning("Fallo al registrar cita automática: %s", e)
+    # Si es un número nuevo que contacta directamente a Sebax, registrarlo como nuevo prospecto
+    if not matched_lead:
+        clean_phone = sender_digits
+        if clean_phone.startswith("521") and len(clean_phone) == 13:
+            clean_phone = "52" + clean_phone[3:]
+        new_id = len(leads) + 1
+        matched_lead = {
+            "id": new_id,
+            "name": f"Contacto WhatsApp {clean_phone[-10:]}",
+            "phone": clean_phone,
+            "city": "La Laguna",
+            "niche": "Prospecto Directo",
+            "source": "WhatsApp Inbound",
+            "notes": "Cliente potencial escribió directamente a WhatsApp",
+            "created_at": now_str,
+            "status": "respondio"
+        }
+        leads.append(matched_lead)
 
-        # Generar respuesta automática con Sebax para el prospecto
-        ai_reply = await generate_lead_reply(
-            lead_name=matched_lead.get("name", "Cliente"),
-            lead_niche=matched_lead.get("niche", "negocio"),
-            incoming_message=payload.message
-        )
+    # 1. Clasificación inteligente de intención comercial y detección de Lead Caliente
+    intent_data = classify_lead_intent(payload.message)
+    is_hot = intent_data.get("is_hot", False)
+    intent_type = intent_data.get("intent", "general")
+    intent_label = intent_data.get("intent_label", "Consulta Comercial")
 
-        matched_lead["last_agent_reply"] = ai_reply
-        _save_leads(leads)
+    matched_lead["status"] = "interesado" if is_hot else intent_data.get("status", "respondio")
+    matched_lead["is_hot"] = is_hot
+    matched_lead["intent"] = intent_type
+    matched_lead["intent_label"] = intent_label
+    matched_lead["last_reply"] = payload.message
+    matched_lead["last_reply_at"] = now_str
+    if is_hot:
+        matched_lead["hot_lead_detected_at"] = now_str
 
-        # Notificar en tiempo real al chat personal de Sebastián con el reporte de la interacción
-        notice = (
-            f"AVISO DE PROSPECTO EN WHATSAPP\n\n"
-            f"El negocio '{matched_lead['name']}' (+{matched_lead['phone']}) ha respondido:\n"
-            f"\"{payload.message}\"\n\n"
-            f"Sebax le respondió automáticamente:\n"
-            f"\"{ai_reply}\"\n\n"
-            f"Giro: {matched_lead.get('niche', 'general')} | Ciudad: {matched_lead.get('city', '')}\n"
-            f"Puedes continuar la conversación con el cliente cuando lo desees."
-        )
+    # 2. Si solicita cita, llamada o reunión, registrarla automáticamente en agenda
+    if intent_type == "cita":
         try:
-            await asyncio.to_thread(send_whatsapp_message, to_number="self", message=notice)
+            add_appointment(
+                business_name=matched_lead.get("name", "Prospecto"),
+                client_name=matched_lead.get("name", "Contacto"),
+                phone=matched_lead.get("phone", ""),
+                date_time="Por confirmar con el cliente",
+                notes=f"Solicitud por WhatsApp: '{payload.message}'",
+                status="en_negociacion"
+            )
         except Exception as e:
-            logger.warning("Fallo al enviar aviso de lead entrante: %s", e)
+            logger.warning("Fallo al registrar cita automática: %s", e)
 
-        return {"is_lead": True, "reply": ai_reply, "lead": matched_lead}
+    # 3. Generar respuesta comercial inteligente con Sebax (sin emojis)
+    ai_reply = await generate_lead_reply(
+        lead_name=matched_lead.get("name", "Cliente"),
+        lead_niche=matched_lead.get("niche", "negocio local"),
+        incoming_message=payload.message
+    )
 
-    return {"is_lead": False}
+    matched_lead["last_agent_reply"] = ai_reply
+    _save_leads(leads)
+
+    # 4. Formatear enlace wa.me limpio para que Sebastián responda al instante
+    raw_lead_phone = re.sub(r"\D", "", matched_lead.get("phone", ""))
+    if raw_lead_phone.startswith("521") and len(raw_lead_phone) == 13:
+        wa_target_phone = "52" + raw_lead_phone[3:]
+    elif len(raw_lead_phone) == 10:
+        wa_target_phone = "52" + raw_lead_phone
+    else:
+        wa_target_phone = raw_lead_phone
+    wa_direct_url = f"https://wa.me/{wa_target_phone}"
+
+    # 5. Envío de Alerta Prioritaria a Sebastián Salinas (8719164677)
+    if is_hot:
+        notice = (
+            f"ALERTA PRIORITARIA: LEAD CALIENTE (INTERESADO)\n\n"
+            f"Negocio: {matched_lead['name']}\n"
+            f"Telefono: +{matched_lead['phone']}\n"
+            f"Giro: {matched_lead.get('niche', 'Comercial')} | Ciudad: {matched_lead.get('city', 'La Laguna')}\n"
+            f"Intencion: {intent_label}\n\n"
+            f"Mensaje del cliente:\n"
+            f"\"{payload.message}\"\n\n"
+            f"Sebax le respondio automaticamente:\n"
+            f"\"{ai_reply}\"\n\n"
+            f"Abrir chat directo para cerrar venta:\n"
+            f"{wa_direct_url}"
+        )
+    else:
+        notice = (
+            f"AVISO DE RESPUESTA EN WHATSAPP\n\n"
+            f"Negocio: {matched_lead['name']} (+{matched_lead['phone']})\n"
+            f"Giro: {matched_lead.get('niche', 'general')} | Ciudad: {matched_lead.get('city', 'La Laguna')}\n\n"
+            f"Mensaje recibido:\n"
+            f"\"{payload.message}\"\n\n"
+            f"Sebax le respondio:\n"
+            f"\"{ai_reply}\"\n\n"
+            f"Chat directo con el cliente:\n"
+            f"{wa_direct_url}"
+        )
+
+    try:
+        await asyncio.to_thread(send_whatsapp_message, to_number="8719164677", message=notice)
+    except Exception as e:
+        logger.warning("Fallo al enviar alerta de lead a Sebastián: %s", e)
+
+    return {"is_lead": True, "reply": ai_reply, "lead": matched_lead, "is_hot": is_hot}
 
 @app.get("/api/autopilot")
 def get_autopilot_api():
@@ -647,6 +858,31 @@ async def send_autopilot_report_api():
     """Compila y envía el reporte diario consolidado al WhatsApp personal de Sebastián Salinas."""
     report = await asyncio.to_thread(send_daily_morning_report)
     return {"success": True, "report": report}
+
+
+@app.post("/api/autopilot/followup")
+async def run_autopilot_followup_api():
+    """Ejecuta inmediatamente una ronda de seguimiento automático (48h y 5 días) en segundo plano."""
+    result = await asyncio.to_thread(run_followup_cycle, 1)
+    return {"success": True, "result": result}
+
+@app.get("/api/appointments/availability")
+def get_appointment_availability_api(date_time: str = ""):
+    """Verifica disponibilidad de agenda y devuelve sugerencias de horarios libres."""
+    return check_agenda_availability(date_time)
+
+@app.post("/api/appointments/smart")
+def create_smart_appointment_api(payload: AppointmentCreateRequest):
+    """Agenda una cita inteligente con verificación de disponibilidad, confirmación sin emojis al cliente y alerta a Sebastián."""
+    result = schedule_smart_appointment(
+        business_name=payload.business_name,
+        client_name=payload.client_name,
+        phone=payload.phone,
+        date_time=payload.date_time,
+        notes=payload.notes,
+        send_client_confirmation=True
+    )
+    return {"success": True, "result": result, "stats": get_appointments_stats()}
 
 @app.post("/api/autopilot/retry")
 async def retry_autopilot_leads_api():
@@ -712,6 +948,7 @@ async def get_tts(text: str, voice: str = "es-MX-JorgeNeural"):
 @app.on_event("startup")
 async def startup_event():
     """Inicia tareas de fondo: keep-alive y el piloto automático 24/7 de prospección continua."""
+    auto_restore_session()
     asyncio.create_task(render_keepalive_loop())
     asyncio.create_task(autopilot_background_worker())
 

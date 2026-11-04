@@ -27,6 +27,93 @@ const authFolderSetting = process.env.WHATSAPP_AUTH_DIR || path.join(__dirname, 
 const AUTH_FOLDER = path.isAbsolute(authFolderSetting)
   ? authFolderSetting
   : path.resolve(PROJECT_ROOT, authFolderSetting);
+const SESSION_BACKUP_PATH = path.resolve(PROJECT_ROOT, "data", "baileys_session.json");
+const SESSION_B64_PATH = path.resolve(PROJECT_ROOT, "data", "session_b64.txt");
+
+function restoreSessionFromBackup() {
+  try {
+    const credsPath = path.join(AUTH_FOLDER, "creds.json");
+    if (fs.existsSync(credsPath)) {
+      return true;
+    }
+
+    fs.mkdirSync(AUTH_FOLDER, { recursive: true });
+
+    // 1. Variable de entorno base64
+    const envB64 = (process.env.WHATSAPP_SESSION_B64 || "").trim();
+    if (envB64) {
+      console.log("[Auth State] Restaurando sesión de WhatsApp desde variable WHATSAPP_SESSION_B64...");
+      const decoded = Buffer.from(envB64, "base64").toString("utf-8");
+      const parsed = JSON.parse(decoded);
+      const files = parsed.files || parsed;
+      let count = 0;
+      for (const [name, content] of Object.entries(files)) {
+        fs.writeFileSync(path.join(AUTH_FOLDER, name), content, "utf-8");
+        count++;
+      }
+      console.log(`[Auth State] ${count} archivos de autenticación restaurados desde variable de entorno.`);
+      return true;
+    }
+
+    // 2. Archivo de persistencia data/baileys_session.json
+    if (fs.existsSync(SESSION_BACKUP_PATH)) {
+      console.log("[Auth State] Restaurando sesión de WhatsApp desde data/baileys_session.json...");
+      const raw = fs.readFileSync(SESSION_BACKUP_PATH, "utf-8");
+      const parsed = JSON.parse(raw);
+      const files = parsed.files || parsed;
+      let count = 0;
+      for (const [name, content] of Object.entries(files)) {
+        fs.writeFileSync(path.join(AUTH_FOLDER, name), content, "utf-8");
+        count++;
+      }
+      console.log(`[Auth State] ${count} archivos de autenticación restaurados desde disco persistente.`);
+      return true;
+    }
+  } catch (err) {
+    console.warn("[Auth State] Advertencia al restaurar sesión de respaldo:", err.message);
+  }
+  return false;
+}
+
+let backupDebounceTimeout = null;
+function backupSessionToDisk() {
+  if (backupDebounceTimeout) clearTimeout(backupDebounceTimeout);
+  backupDebounceTimeout = setTimeout(() => {
+    try {
+      if (!fs.existsSync(AUTH_FOLDER)) return;
+      const credsPath = path.join(AUTH_FOLDER, "creds.json");
+      if (!fs.existsSync(credsPath)) return;
+
+      const files = {};
+      const fileNames = fs.readdirSync(AUTH_FOLDER);
+      for (const fn of fileNames) {
+        const fp = path.join(AUTH_FOLDER, fn);
+        if (fs.statSync(fp).isFile()) {
+          files[fn] = fs.readFileSync(fp, "utf-8");
+        }
+      }
+
+      const count = Object.keys(files).length;
+      if (count === 0) return;
+
+      const payload = {
+        files,
+        count,
+        updated_at: new Date().toISOString()
+      };
+      const jsonStr = JSON.stringify(payload, null, 2);
+      fs.mkdirSync(path.dirname(SESSION_BACKUP_PATH), { recursive: true });
+      fs.writeFileSync(SESSION_BACKUP_PATH, jsonStr, "utf-8");
+
+      const b64Str = Buffer.from(jsonStr).toString("base64");
+      fs.writeFileSync(SESSION_B64_PATH, b64Str, "ascii");
+      console.log(`[Auth State] Sesión de WhatsApp respaldada automáticamente (${count} archivos, base64: ${b64Str.length} chars).`);
+    } catch (e) {
+      console.warn("[Auth State] Error al respaldar sesión:", e.message);
+    }
+  }, 2500);
+}
+
 
 async function callFastAPI(endpoint, body) {
   const candidatePorts = [
@@ -247,6 +334,57 @@ app.post("/pairing-code", async (req, res) => {
   } catch (err) {
     console.error("Error al generar código de vinculación:", err.message);
     res.status(500).json({ error: err.message || "No se pudo generar el código. Verifica el número e intenta nuevamente." });
+  }
+});
+
+app.get("/session/export", (req, res) => {
+  try {
+    if (!fs.existsSync(AUTH_FOLDER)) {
+      return res.status(404).json({ error: "Directorio de sesión no existe", count: 0 });
+    }
+    const files = {};
+    for (const fn of fs.readdirSync(AUTH_FOLDER)) {
+      const fp = path.join(AUTH_FOLDER, fn);
+      if (fs.statSync(fp).isFile()) {
+        files[fn] = fs.readFileSync(fp, "utf-8");
+      }
+    }
+    const count = Object.keys(files).length;
+    const payload = JSON.stringify({ files, count, updated_at: new Date().toISOString() });
+    const b64 = Buffer.from(payload).toString("base64");
+    res.json({ success: true, count, b64_length: b64.length, b64 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/session/import", async (req, res) => {
+  try {
+    const { b64, files } = req.body || {};
+    let targetFiles = files;
+    if (!targetFiles && b64) {
+      const decoded = Buffer.from(b64, "base64").toString("utf-8");
+      const parsed = JSON.parse(decoded);
+      targetFiles = parsed.files || parsed;
+    }
+    if (!targetFiles || !Object.keys(targetFiles).length) {
+      return res.status(400).json({ error: "No se proporcionaron archivos de sesión válidos." });
+    }
+
+    fs.mkdirSync(AUTH_FOLDER, { recursive: true });
+    let count = 0;
+    for (const [name, content] of Object.entries(targetFiles)) {
+      fs.writeFileSync(path.join(AUTH_FOLDER, name), content, "utf-8");
+      count++;
+    }
+
+    backupSessionToDisk();
+    connectionState = "starting";
+    currentQR = null;
+    startWhatsApp();
+    res.json({ success: true, restored: count, message: "Sesión restaurada y reconectando..." });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -605,6 +743,7 @@ app.post("/send", async (req, res) => {
 });
 
 async function startWhatsApp() {
+  restoreSessionFromBackup();
   fs.mkdirSync(AUTH_FOLDER, { recursive: true });
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
   const { version } = await fetchLatestBaileysVersion();
@@ -624,7 +763,10 @@ async function startWhatsApp() {
     getMessage: async () => undefined
   });
 
-  sock.ev.on("creds.update", saveCreds);
+  sock.ev.on("creds.update", () => {
+    saveCreds();
+    backupSessionToDisk();
+  });
 
   sock.ev.on("connection.update", (update) => {
     const { connection, lastDisconnect, qr } = update;
@@ -654,6 +796,7 @@ async function startWhatsApp() {
         setTimeout(startWhatsApp, 2000);
       }
     } else if (connection === "open") {
+      backupSessionToDisk();
       connectionState = "open";
       currentQR = null;
       console.log("\n WhatsApp conectado exitosamente!");

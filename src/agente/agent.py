@@ -40,7 +40,8 @@ REGLAS DE OPERACIÓN:
   * send_daily_morning_report: envía el reporte consolidado actualizado directamente al WhatsApp de Sebastián.
   * toggle_autopilot, get_autopilot_config: control del piloto automático cada 30 minutos.
   * run_autonomous_campaign, search_business_leads, save_lead, list_leads, update_lead_status, generate_pitch
-  * add_appointment, list_appointments, update_appointment_status: gestión completa de citas y reuniones de negocios para Sebastián.
+  * schedule_smart_appointment, check_agenda_availability, suggest_available_slots, add_appointment, list_appointments, update_appointment_status: agendamiento inteligente de citas y llamadas con verificación de horarios libres y confirmación sin emojis tanto para el cliente como para Sebastián.
+  * run_followup_cycle: ejecuta la secuencia de seguimiento automático (toque 2 a 48h con propuesta de prototipo sin costo y toque 3 a 5 días con cierre elegante no invasivo).
   * send_whatsapp_message
   * run_command, read_file, write_file, list_directory
   * add_note_or_task, list_notes_and_tasks, delete_note_or_task

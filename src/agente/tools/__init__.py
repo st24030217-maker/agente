@@ -3,7 +3,7 @@ from agente.tools.files import read_file, write_file, list_directory
 from agente.tools.notes import add_note_or_task, list_notes_and_tasks, delete_note_or_task
 from agente.tools.web import search_web, fetch_web_content
 from agente.tools.whatsapp import send_whatsapp_message
-from agente.tools.agenda import add_appointment, list_appointments, update_appointment_status
+from agente.tools.agenda import add_appointment, list_appointments, update_appointment_status, schedule_smart_appointment, check_agenda_availability, suggest_available_slots
 from agente.tools.prospecting import (
     search_business_leads,
     save_lead,
@@ -17,7 +17,8 @@ from agente.tools.autopilot import (
     run_autopilot_cycle,
     send_daily_morning_report,
     toggle_autopilot,
-    get_autopilot_config
+    get_autopilot_config,
+    run_followup_cycle
 )
 
 # 1. HERRAMIENTAS COMERCIALES (Seguras para exposición pública y clientes)
@@ -44,6 +45,10 @@ COMMERCIAL_TOOLS = [
     send_daily_morning_report,
     toggle_autopilot,
     get_autopilot_config,
+    run_followup_cycle,
+    schedule_smart_appointment,
+    check_agenda_availability,
+    suggest_available_slots,
 ]
 
 # 2. HERRAMIENTAS ADMINISTRATIVAS COMPLETAS (Uso exclusivo de desarrollo local)

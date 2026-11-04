@@ -538,6 +538,86 @@ def run_autonomous_campaign(niche: str = "", city: str = "Torreón, Gómez Palac
 
     return summary_report
 
+def classify_lead_intent(message_text: str) -> dict:
+    """Clasifica la intención comercial del prospecto y detecta de inmediato si es un lead caliente (Hot Lead).
+    
+    Categorías detectadas:
+    - 'precio': Preguntas de costos, paquetes, cotización, presupuestos.
+    - 'cita': Solicitudes para agendar llamada, reunión, vernos, platicar, zoom, meet.
+    - 'interes': Demuestra interés comercial explícito, pide información de servicios, contratación.
+    - 'rechazo': Indica que no le interesa, pide baja o no enviar mensajes.
+    - 'general': Saludo o consulta general.
+    """
+    m = (message_text or "").lower().strip()
+
+    # 1. Rechazo / Descarte
+    rejection_keywords = [
+        "no me interesa", "no gracias", "baja", "eliminar", "dejen de molestar",
+        "ya tenemos", "no requerimos", "no ocupamos", "equivocado", "spam",
+        "no molestar", "quiten mi numero", "quiten mi número"
+    ]
+    if any(k in m for k in rejection_keywords):
+        return {
+            "intent": "rechazo",
+            "is_hot": False,
+            "intent_label": "No Interesado / Descarte",
+            "status": "descartado"
+        }
+
+    # 2. Cita / Reunión / Llamada (Prioridad máxima)
+    meeting_keywords = [
+        "cita", "citas", "llamada", "llamadas", "reunion", "reunión", "reunirnos",
+        "agendar", "agendamos", "vernos", "platicar", "zoom", "meet", "hora", "horario",
+        "mañana", "dia", "día", "disponibilidad", "marcar", "llamame", "llámame",
+        "cuando puedes", "cuándo puedes", "cuando nos vemos", "cuándo nos vemos"
+    ]
+
+    # 3. Precios / Cotizaciones / Paquetes
+    price_keywords = [
+        "precio", "precios", "costo", "costos", "cuanto", "cuánto", "cotizacion",
+        "cotización", "tarifa", "tarifas", "paquete", "paquetes", "presupuesto",
+        "cobran", "cobras", "valor", "mensualidad", "cuanto sale", "cuánto sale",
+        "cuanto cuesta", "cuánto cuesta", "planes", "inversion", "inversión"
+    ]
+
+    # 4. Interés explícito / Contratación
+    interest_keywords = [
+        "me interesa", "interesado", "interesada", "informacion", "información",
+        "detalles", "quiero una pagina", "quiero una página", "quiero un sitio",
+        "como funciona", "cómo funciona", "como se contrata", "cómo se contrata",
+        "contratar", "hacen paginas", "hacen páginas", "desarrollo", "servicios",
+        "trabajar", "catalogo", "catálogo", "muestras", "ejemplos", "portafolio",
+        "como le hacemos", "cómo le hacemos", "me gustaria", "me gustaría"
+    ]
+
+    is_meeting = any(k in m for k in meeting_keywords)
+    is_price = any(k in m for k in price_keywords)
+    is_interest = any(k in m for k in interest_keywords)
+
+    if is_meeting or is_price or is_interest:
+        labels = []
+        if is_meeting:
+            labels.append("Solicitud de Cita / Llamada")
+        if is_price:
+            labels.append("Consulta de Precios / Cotización")
+        if is_interest and not is_meeting and not is_price:
+            labels.append("Interés Comercial Alto")
+
+        intent_type = "cita" if is_meeting else ("precio" if is_price else "interes")
+        return {
+            "intent": intent_type,
+            "is_hot": True,
+            "intent_label": " | ".join(labels) or "Lead Caliente",
+            "status": "interesado"
+        }
+
+    return {
+        "intent": "general",
+        "is_hot": False,
+        "intent_label": "Respuesta General / Saludo",
+        "status": "respondio"
+    }
+
 async def generate_lead_reply(lead_name: str, lead_niche: str, incoming_message: str) -> str:
     """Genera una respuesta inteligente de Sebax para atender a un prospecto comercial que ha respondido en WhatsApp."""
     try:
@@ -587,13 +667,17 @@ def get_leads_stats() -> dict:
     leads = _load_leads()
     total = len(leads)
     contactados = sum(1 for l in leads if l.get("status") == "contactado")
-    respondieron = sum(1 for l in leads if l.get("status") == "respondio")
+    respondieron = sum(1 for l in leads if l.get("status") in ["respondio", "interesado"])
+    interesados = sum(1 for l in leads if l.get("status") == "interesado")
+    calientes = sum(1 for l in leads if l.get("is_hot") or l.get("status") == "interesado")
     nuevos = sum(1 for l in leads if l.get("status") == "nuevo")
 
     return {
         "total": total,
         "contactados": contactados,
         "respondieron": respondieron,
+        "interesados": interesados,
+        "calientes": calientes,
         "nuevos": nuevos,
         "leads": sorted(leads, key=lambda x: x.get("id", 0), reverse=True)
     }
