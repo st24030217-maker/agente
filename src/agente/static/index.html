@@ -2126,6 +2126,19 @@
         document.cookie = "admin_token=" + encodeURIComponent(t) + "; path=/; max-age=31536000; SameSite=Strict" +
           (location.protocol === "https:" ? "; Secure" : "");
       };
+      // Link de acceso: https://.../?token=XXXX guarda el token en este dispositivo
+      // y lo quita de la barra de direcciones para que no quede a la vista.
+      try {
+        const url = new URL(location.href);
+        const fromLink = (url.searchParams.get("token") || "").trim();
+        if (fromLink) {
+          try { localStorage.setItem(KEY, fromLink); } catch (e) {}
+          setCookie(fromLink);
+          url.searchParams.delete("token");
+          history.replaceState(null, "", url.pathname + url.search + url.hash);
+        }
+      } catch (e) {}
+
       const saved = readToken();
       if (saved) setCookie(saved);
 
