@@ -36,7 +36,9 @@ class Settings(BaseModel):
     server_port: int = int(os.getenv("PORT", "8000"))
     server_host: str = os.getenv("HOST", "0.0.0.0")
     bridge_port: int = int(os.getenv("BRIDGE_PORT", "3000"))
-    whatsapp_provider: str = "baileys"
+    # "cloud_api" = Meta WhatsApp Cloud API como canal principal; "baileys" = WhatsApp Web (QR).
+    # Cada uno usa al otro como respaldo para enviar si falla.
+    whatsapp_provider: str = os.getenv("WHATSAPP_PROVIDER", "baileys").strip().lower()
     whatsapp_auth_dir: str = str(WHATSAPP_AUTH_DIR)
     # Meta WhatsApp Cloud API: SOLO desde .env, nunca valores reales en el código
     meta_wa_token: str = os.getenv("META_WA_TOKEN", "")

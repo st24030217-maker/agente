@@ -224,15 +224,20 @@ async def whatsapp_webhook(request: Request):
                                 logger.info("Meta WA Cloud recibido de [%s]: %s", sender, text_body)
                                 is_admin = is_owner_number(sender)
                                 if not is_admin and not number_in(sender, settings.allowed_numbers):
-                                    logger.warning("Mensaje de Meta ignorado del remitente no autorizado: %s", sender)
+                                    # Prospectos y clientes: respuesta comercial automática (sin herramientas)
+                                    # y aviso a Sebastián, igual que el flujo de Baileys.
+                                    lead_result = await process_incoming_lead(sender, text_body)
+                                    lead_reply = lead_result.get("reply")
+                                    if lead_reply:
+                                        await asyncio.to_thread(send_whatsapp_message, to_number=sender, message=lead_reply)
                                     continue
                                 if text_body.lower() in ["/reset", "/reiniciar", "/clear"]:
                                     coordinator.reset_chat(sender)
-                                    send_whatsapp_message(to_number=sender, message="Conversación y contexto reiniciados exitosamente.")
+                                    await asyncio.to_thread(send_whatsapp_message, to_number=sender, message="Conversación y contexto reiniciados exitosamente.")
                                 else:
                                     reply = await coordinator.process_message(chat_id=sender, message=text_body, is_admin=is_admin)
                                     if reply:
-                                        send_whatsapp_message(to_number=sender, message=reply)
+                                        await asyncio.to_thread(send_whatsapp_message, to_number=sender, message=reply)
         except Exception as e:
             logger.error("Error al procesar evento de Meta WhatsApp Cloud: %s", e)
         return Response(content="EVENT_RECEIVED", status_code=200)
@@ -456,7 +461,18 @@ async def get_qr_page():
 
 @app.get("/api/bridge/status")
 async def get_bridge_status():
-    """Estado de conexión unificado del conector de WhatsApp (prioriza Baileys QR/código)."""
+    """Estado de conexión unificado: Meta Cloud API si es el proveedor activo; si no, Baileys (QR/código)."""
+    if settings.whatsapp_provider == "cloud_api":
+        cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
+        return {
+            "status": "cloud_api_configured" if cloud_configured else "cloud_api_unconfigured",
+            "provider": "cloud_api",
+            "user": {"id": settings.meta_wa_phone_number_id, "name": "Meta WhatsApp Cloud API"} if cloud_configured else None,
+            "cloud_api_configured": cloud_configured,
+            # Recibir mensajes requiere el verify token (registro) y el App Secret (firma de cada evento)
+            "webhook_configured": bool(settings.meta_wa_verify_token and settings.meta_app_secret),
+        }
+
     bridge_data = {}
     async with httpx.AsyncClient() as client:
         try:
@@ -753,7 +769,14 @@ async def send_lead_pitch_api(payload: LeadSendRequest):
 @app.post("/api/leads/incoming")
 async def check_incoming_lead_api(payload: LeadIncomingCheck):
     """Verifica si un mensaje entrante proviene de un prospecto de negocios o nuevo cliente, clasifica la intención (Hot Lead), responde y alerta de inmediato a Sebastián por WhatsApp."""
-    sender_digits = re.sub(r"\D", "", payload.sender)
+    return await process_incoming_lead(payload.sender, payload.message)
+
+
+async def process_incoming_lead(sender: str, message: str) -> dict:
+    """Registra/actualiza al prospecto, genera la respuesta comercial (sin herramientas) y avisa a Sebastián.
+    Lo usan el puente Baileys (vía /api/leads/incoming) y el webhook de Meta Cloud API."""
+    payload = LeadIncomingCheck(sender=sender, message=message)
+    sender_digits = re.sub(r"\D", "", payload.sender.split("@", 1)[0])
     if not sender_digits or len(sender_digits) < 8:
         return {"is_lead": False}
 

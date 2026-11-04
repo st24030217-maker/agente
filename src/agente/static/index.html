@@ -2727,13 +2727,19 @@
           label.textContent = isOnline ? "WhatsApp Conectado" : (isCloudApi ? "Meta Cloud API Conectada" : "Conectar WhatsApp");
         }
 
+        const isCloudUnconfigured = data.status === "cloud_api_unconfigured";
         if (connectedView && pairingView) {
           connectedView.style.display = isConnected ? "block" : "none";
-          pairingView.style.display = isConnected ? "none" : "block";
-          if (cloudView) cloudView.style.display = "none";
+          pairingView.style.display = (isConnected || isCloudUnconfigured) ? "none" : "block";
+          if (cloudView) cloudView.style.display = isCloudUnconfigured ? "block" : "none";
+          if (cloudDesc && isCloudUnconfigured) {
+            cloudDesc.textContent = "WHATSAPP_PROVIDER=cloud_api está activo, pero faltan META_WA_TOKEN y META_WA_PHONE_NUMBER_ID en las variables de entorno.";
+          }
           if (userDesc) {
             if (isCloudApi) {
-              userDesc.innerHTML = "<b>Meta WhatsApp Business Cloud API Oficial</b> conectada y operativa (+1 555-653-0368). Sebax está en línea 24/7 atendiendo clientes y prospectando negocios en La Laguna.";
+              userDesc.textContent = data.webhook_configured
+                ? "Meta WhatsApp Cloud API conectada. Sebax envía y recibe mensajes 24/7."
+                : "Meta WhatsApp Cloud API puede enviar, pero NO recibe mensajes: falta META_APP_SECRET (o META_WA_VERIFY_TOKEN) en las variables de entorno.";
             } else if (isOnline && data.user && data.user.id) {
               const cleanUser = data.user.id.split("@")[0].split(":")[0];
               userDesc.textContent = "Conectado al número " + cleanUser + ". Sebax está activo 24/7 en Torreón, Gómez y Lerdo.";
