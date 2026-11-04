@@ -15,7 +15,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --bg: #050505;
@@ -821,6 +820,9 @@
     }
 
     .sheet-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      font-family: inherit;
       padding: 6px 13px;
       border-radius: 9999px;
       font-size: 0.74rem;
@@ -1672,7 +1674,7 @@
     .app-shell:has(#leads-modal.active) #view-home { display: none; }
     .app-main .leads-sheet { max-width: none; max-height: none; background: none; border: none; border-radius: 0; box-shadow: none; overflow: visible; }
     .app-main .sheet-header, .app-main .sheet-tabs { display: none; }
-    .app-main .sheet-body { padding: 0; overflow: visible; max-width: 1000px; }
+    .app-main .sheet-body { padding: 0; overflow: visible; }
 
     @media (max-width: 1180px) {
       .app-main .agent-workspace-grid { grid-template-columns: 1fr; }
@@ -1762,7 +1764,7 @@
 
         <div class="thinking-orb-badge" id="thinking-orb-badge" title="Toca para alternar estado cognitivo">
           <canvas id="header-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
-          <span id="speech-orb-label" class="orb-state-label">breathing</span>
+          <span id="speech-orb-label" class="orb-state-label">En espera</span>
         </div>
 
         <select id="voice-select" class="voice-select-dark" title="Voz neuronal de Sebax">
@@ -1792,7 +1794,7 @@
           </div>
           <div class="exec-metric-val mono-time" id="laguna-live-time">17:00:00</div>
           <div class="exec-metric-footer">
-            <span id="laguna-live-date">Sábado, 31 de Octubre 2026</span> · Torreón · Gómez · Lerdo
+            <span><span id="laguna-live-date">Sábado, 31 de Octubre 2026</span> · Torreón · Gómez · Lerdo</span>
           </div>
         </div>
   
@@ -2128,7 +2130,6 @@
               <div style="text-align:center; padding:20px; color:var(--text-dim); font-size:0.8rem;">Cargando prospectos...</div>
             </div>
           </div>
-        </div>
 
         <!-- Pestaña Prototipos en Vivo -->
         <div class="tab-content" id="tab-content-demos">
@@ -2137,7 +2138,7 @@
             <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4; margin-bottom:10px;">
               Crea un prototipo interactivo real para cualquier negocio de La Laguna con catálogo y pedidos a WhatsApp.
             </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:7px; margin-bottom:8px;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:7px; margin-bottom:8px;">
               <input type="text" id="demo-name" placeholder="Nombre (ej. Café Central)" class="form-input">
               <select id="demo-niche" class="form-select">
                 <option value="cafeteria">Cafetería de Especialidad</option>
@@ -2254,7 +2255,7 @@
             <!-- Opción 1: Código de 8 dígitos -->
             <div id="wa-subtab-code">
               <div class="campaign-box" style="margin-bottom:0.8rem;">
-                <div class="form-row">
+                <div class="form-row" style="grid-template-columns:minmax(0,1fr) auto;">
                   <input type="tel" class="form-input" id="wa-sheet-phone" value="8719164677" placeholder="8719164677">
                   <button class="btn-launch" id="btn-sheet-pairing" onclick="requestSheetPairingCode()">
                     <span>Obtener Código</span>
@@ -2395,6 +2396,11 @@
     let speechOrb = null;
     const orbStatesList = ["breathing", "working", "searching", "listening", "solving", "connecting", "weaving", "composing", "shaping"];
     let currentOrbIndex = 0;
+    const ORB_STATE_LABELS = {
+      breathing: "En espera", working: "Trabajando", searching: "Buscando",
+      listening: "Escuchando", solving: "Resolviendo", connecting: "Conectando",
+      weaving: "Procesando", composing: "Redactando", shaping: "Preparando"
+    };
 
     function initThinkingOrbs() {
       if (typeof window.createThinkingOrb !== "function") return;
@@ -2434,7 +2440,7 @@
       if (speechOrb) speechOrb.setState(stateName);
       const label = document.getElementById("speech-orb-label");
       if (label) {
-        label.textContent = stateName;
+        label.textContent = ORB_STATE_LABELS[stateName] || stateName;
       }
     }
 
