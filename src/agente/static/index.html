@@ -7,6 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Sebax AI - SSSSolutions</title>
+  <link rel="icon" type="image/svg+xml" href="/sebax-avatar.svg">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#050505">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1414,13 +1415,7 @@
     }
 
     .side-brand { display: flex; align-items: center; gap: 11px; padding: 2px 8px; }
-    .side-brand-mark {
-      width: 34px; height: 34px; border-radius: 10px; flex: none;
-      display: grid; place-items: center;
-      background: linear-gradient(140deg, #b67cff, #6d28d9);
-      color: #fff; font-weight: 800; font-size: 0.95rem;
-      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
-    }
+    .side-brand-mark { width: 34px; height: 34px; flex: none; display: block; }
     .side-brand-text strong { display: block; font-size: 0.92rem; letter-spacing: -0.01em; }
     .side-brand-text span { font-size: 0.64rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
 
@@ -1464,10 +1459,23 @@
     .app-main .agent-workspace-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; min-height: 0; }
     .app-main .chat-card-panel { height: 560px; min-height: 560px; }
     .agent-header-brand { display: flex; align-items: center; gap: 10px; }
-    .chat-avatar-slot { position: relative; width: 46px; height: 46px; flex: none; }
-    .chat-avatar-slot .avatar-card-panel {
-      position: absolute; inset: 0; width: 46px;
-      height: 46px !important; min-height: 0 !important; animation: none;
+    .chat-avatar-slot { width: 42px; height: 42px; flex: none; }
+
+    /* Avatar de Sebax: parpadea en reposo, mira a los lados al pensar y mueve la boca al hablar */
+    .sebax-avatar, .sebax-avatar svg { display: block; width: 100%; height: 100%; }
+    .sebax-avatar .sx-eye { transform-box: fill-box; transform-origin: center; animation: sx-blink 5.2s infinite; }
+    .sebax-avatar .sx-eyes { transition: transform 0.3s ease; }
+    .sebax-avatar .sx-mouth { transform-box: fill-box; transform-origin: center top; }
+    .sebax-avatar .sx-dot { transition: fill 0.25s ease; }
+    .sebax-avatar.thinking .sx-eyes { animation: sx-look 1.6s ease-in-out infinite; }
+    .sebax-avatar.thinking .sx-dot { fill: #38bdf8; }
+    .sebax-avatar.speaking .sx-mouth { animation: sx-talk 0.32s ease-in-out infinite alternate; }
+    .sebax-avatar.speaking .sx-dot { fill: var(--accent-green); }
+    @keyframes sx-blink { 0%, 94%, 100% { transform: scaleY(1); } 97% { transform: scaleY(0.12); } }
+    @keyframes sx-look { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+    @keyframes sx-talk { from { transform: scaleY(1); } to { transform: scaleY(1.9); } }
+    @media (prefers-reduced-motion: reduce) {
+      .sebax-avatar .sx-eye, .sebax-avatar .sx-eyes, .sebax-avatar .sx-mouth { animation: none !important; }
     }
 
     .home-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -1582,7 +1590,7 @@
     <!-- Navegación: barra lateral en escritorio, barra inferior en celular -->
     <aside class="side-nav" aria-label="Navegación principal">
       <div class="side-brand">
-        <span class="side-brand-mark">S</span>
+        <img class="side-brand-mark" src="/sebax-avatar.svg" alt="Sebax" width="34" height="34">
         <div class="side-brand-text"><strong>Sebax AI</strong><span>SSSSolutions</span></div>
       </div>
       <nav class="nav-segmented-bar side-nav-list">
@@ -1685,9 +1693,17 @@
           <div class="chat-card-header">
             <div class="agent-header-brand">
               <div class="chat-avatar-slot">
-        <div class="avatar-card-panel" id="avatar-stage">
+        <div class="sebax-avatar" id="avatar-stage" title="Sebax">
           <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
-          <div id="canvas-container" class="crystalized-ball"></div>
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
+            <g class="sx-eyes">
+              <rect class="sx-eye" x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+              <rect class="sx-eye" x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+            </g>
+            <path class="sx-mouth" d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
+            <circle class="sx-dot" cx="51" cy="13" r="4" fill="#a855f7"/>
+          </svg>
         </div>
               </div>
               <span class="agent-brand-title">SEBAX AI</span>
@@ -2142,15 +2158,13 @@
   </script>
 
   <script>
-    // Fallback avatar state manager
-    window.avatar = window.avatar || {
+    // Estados del avatar de Sebax (pensando / hablando)
+    window.avatar = {
       setSpeaking: function(val) {
-        const dot = document.getElementById("pedestal-dot");
-        if (dot) dot.style.background = val ? "#32d466" : "#a855f7";
+        document.getElementById("avatar-stage")?.classList.toggle("speaking", !!val);
       },
       setThinking: function(val) {
-        const dot = document.getElementById("pedestal-dot");
-        if (dot) dot.style.background = val ? "#a855f7" : "#32d466";
+        document.getElementById("avatar-stage")?.classList.toggle("thinking", !!val);
       },
       setPreset: function(p) {}
     };
@@ -2170,7 +2184,6 @@
   </script>
 
   <script src="/thinking-orbs.js"></script>
-  <script type="module" src="/crystalized-ball.js"></script>
   <script type="module" src="/topography.js"></script>
   <script src="/prompt-bar.js"></script>
   <script src="/animated-list.js"></script>

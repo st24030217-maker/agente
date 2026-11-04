@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sebax">
+  <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
+  <rect x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+  <rect x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+  <path d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="51" cy="13" r="4" fill="#a855f7"/>
+</svg>
