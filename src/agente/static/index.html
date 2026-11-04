@@ -1541,8 +1541,9 @@
     .perf-range { display: inline-flex; padding: 3px; gap: 2px; background: #0d0d11; border: 1px solid var(--border); border-radius: 10px; }
     .perf-range button {
       padding: 6px 11px; border: none; border-radius: 7px; background: none; cursor: pointer;
-      color: var(--text-muted); font: 600 0.74rem var(--font);
+      color: var(--text-muted); font: 600 0.74rem var(--font); white-space: nowrap;
     }
+    .perf-range { flex: none; }
     .perf-range button.active { background: #1e1e26; color: #fff; }
     .perf-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: stretch; }
     .perf-hero { display: flex; flex-direction: column; gap: 4px; justify-content: center; }
@@ -3848,7 +3849,14 @@
         }
         return buckets;
       }
-      function niceMax(v) { if (v <= 4) return 4; const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p) * p; }
+      // Máximo "redondo" y par, para que la marca de en medio (max/2) siempre sea un entero.
+      function niceMax(v) {
+        if (v <= 10) return Math.max(2, Math.ceil(v / 2) * 2);
+        const p = Math.pow(10, Math.floor(Math.log10(v)));
+        let m = Math.ceil(v / p) * p;
+        if ((m / p) % 2) m += p;
+        return m;
+      }
       function renderPerf() {
         const host = document.getElementById("perf-chart");
         if (!host) return;
