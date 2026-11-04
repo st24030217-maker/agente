@@ -792,24 +792,11 @@ async def process_incoming_lead(sender: str, message: str) -> dict:
 
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Si es un número nuevo que contacta directamente a Sebax, registrarlo como nuevo prospecto
+    # Si NO es un prospecto ya registrado en data/leads.json, es un contacto personal o chat privado.
+    # NUNCA responder de forma automática a contactos personales o números no registrados como leads.
     if not matched_lead:
-        clean_phone = sender_digits
-        if clean_phone.startswith("521") and len(clean_phone) == 13:
-            clean_phone = "52" + clean_phone[3:]
-        new_id = len(leads) + 1
-        matched_lead = {
-            "id": new_id,
-            "name": f"Contacto WhatsApp {clean_phone[-10:]}",
-            "phone": clean_phone,
-            "city": "La Laguna",
-            "niche": "Prospecto Directo",
-            "source": "WhatsApp Inbound",
-            "notes": "Cliente potencial escribió directamente a WhatsApp",
-            "created_at": now_str,
-            "status": "respondio"
-        }
-        leads.append(matched_lead)
+        logger.info("Mensaje ignorado de %s: no es un prospecto registrado en leads.json (contacto personal).", sender_digits)
+        return {"is_lead": False, "reply": ""}
 
     # 1. Clasificación inteligente de intención comercial y detección de Lead Caliente
     intent_data = classify_lead_intent(payload.message)

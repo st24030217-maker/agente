@@ -867,6 +867,13 @@ async function startWhatsApp() {
         const isSelf = isSelfUser(remoteJid) || isSelfUser(recipientJid);
         if (msg.key.fromMe && !isSelf) continue;
 
+        // Ignorar mensajes sincronizados o con mas de 60 segundos de antiguedad
+        const msgTimestamp = Number(msg.messageTimestamp || 0);
+        if (msgTimestamp > 0) {
+          const nowSec = Math.floor(Date.now() / 1000);
+          if (nowSec - msgTimestamp > 60) continue;
+        }
+
         const mObj =
           msg.message?.ephemeralMessage?.message ||
           msg.message?.viewOnceMessage?.message ||
@@ -908,24 +915,15 @@ async function startWhatsApp() {
             console.error("Error al conectar con agente Python para chat personal:", err.message);
           }
         } else {
-          let leadReplied = false;
+          // Solo responder si es un prospecto comercial registrado que contesta a Sebax.
+          // NUNCA responder a contactos personales o personas fuera de leads.json.
           try {
             const data = await callFastAPI("/api/leads/incoming", { sender: recipientJid, message: incomingText });
             if (data && data.is_lead && data.reply) {
               replyText = data.reply;
-              leadReplied = true;
             }
           } catch (err) {
             console.error("Error al procesar mensaje de prospecto:", err.message);
-          }
-
-          if (!leadReplied) {
-            try {
-              const data = await callFastAPI("/webhook/whatsapp", { sender: recipientJid, message: incomingText });
-              replyText = data?.reply || "";
-            } catch (err) {
-              console.error("Error al obtener respuesta de Sebax para", recipientJid, err.message);
-            }
           }
         }
 
