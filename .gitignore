@@ -24,3 +24,6 @@ data/*.sqlite
 *.mp3
 
 scratch/
+
+# Datos de operación (leads, citas, notas, sesión, token): nunca al repo
+data/

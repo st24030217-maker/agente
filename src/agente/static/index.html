@@ -1897,6 +1897,47 @@
   </div>
 
   <script>
+    // Autenticación del panel: guarda ADMIN_TOKEN en este navegador y lo envía como cookie
+    // (SameSite=Strict) para que fetch, <audio src="/api/tts"> y /qr queden autenticados.
+    (function () {
+      const KEY = "sebax_admin_token";
+      const readToken = () => { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } };
+      const setCookie = (t) => {
+        document.cookie = "admin_token=" + encodeURIComponent(t) + "; path=/; max-age=31536000; SameSite=Strict" +
+          (location.protocol === "https:" ? "; Secure" : "");
+      };
+      const saved = readToken();
+      if (saved) setCookie(saved);
+
+      const originalFetch = window.fetch.bind(window);
+      let pending = null;
+      let declined = false;
+      const askToken = () => {
+        if (!pending) {
+          pending = Promise.resolve().then(() => {
+            const t = (window.prompt("Ingresa tu ADMIN_TOKEN para usar el panel de Sebax:") || "").trim();
+            if (!t) { declined = true; return ""; }
+            try { localStorage.setItem(KEY, t); } catch (e) {}
+            setCookie(t);
+            return t;
+          }).finally(() => { setTimeout(() => { pending = null; }, 0); });
+        }
+        return pending;
+      };
+      const isSameOrigin = (input) => {
+        try { return new URL(typeof input === "string" ? input : input.url, location.href).origin === location.origin; }
+        catch (e) { return false; }
+      };
+      window.fetch = async function (input, init) {
+        const res = await originalFetch(input, init);
+        if (res.status !== 401 || declined || !isSameOrigin(input)) return res;
+        const token = await askToken();
+        return token ? originalFetch(input, init) : res;
+      };
+    })();
+  </script>
+
+  <script>
     // Fallback avatar state manager
     window.avatar = window.avatar || {
       setSpeaking: function(val) {

@@ -1,5 +1,7 @@
+import os
 import sys
 import re
+import json
 import asyncio
 import logging
 import httpx
@@ -12,8 +14,15 @@ from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from agente.config import settings, BASE_DIR
+from agente.config import settings, BASE_DIR, DATA_DIR
 from agente.agent import coordinator
+from agente.security import (
+    is_admin_request,
+    is_bridge_request,
+    is_owner_number,
+    number_in,
+    verify_meta_signature,
+)
 from agente.tools.prospecting import (
     get_leads_stats,
     run_autonomous_campaign,
@@ -59,6 +68,34 @@ logging.basicConfig(
 logger = logging.getLogger("agente")
 
 app = FastAPI(title="Sebax - AI Personal Agent", version="1.0.0")
+
+# Rutas accesibles sin ADMIN_TOKEN (el webhook hace su propia verificación de origen).
+PUBLIC_PATHS = {"/health", "/webhook/whatsapp", "/api/webhook/whatsapp"}
+PUBLIC_PREFIXES = ("/demo/",)
+# Todo lo que empiece así requiere ADMIN_TOKEN, sin importar el método.
+PROTECTED_PREFIXES = ("/api/", "/apj/", "/chat", "/qr", "/pairing-code")
+
+
+def _requires_admin(request: Request) -> bool:
+    path = request.url.path
+    if path in PUBLIC_PATHS or path.startswith(PUBLIC_PREFIXES):
+        return False
+    if request.method not in ("GET", "HEAD"):
+        return True
+    return path.startswith(PROTECTED_PREFIXES)
+
+
+@app.middleware("http")
+async def require_admin_token(request: Request, call_next):
+    """Exige ADMIN_TOKEN en la API, el chat y el panel de vinculación de WhatsApp."""
+    if _requires_admin(request) and not is_admin_request(request):
+        return Response(
+            content=json.dumps({"detail": "No autorizado: falta ADMIN_TOKEN válido."}),
+            status_code=401,
+            media_type="application/json",
+        )
+    return await call_next(request)
+
 
 @app.middleware("http")
 async def add_no_cache_headers(request: Request, call_next):
@@ -135,8 +172,6 @@ def health_check():
         "status": "online",
         "gemini_model": settings.gemini_model,
         "api_key_configured": bool(settings.gemini_api_key),
-        "allowed_numbers": settings.allowed_numbers,
-        "workspace": settings.workspace_dir
     }
 
 @app.get("/webhook/whatsapp")
@@ -163,13 +198,19 @@ async def verify_meta_webhook(request: Request):
 @app.post("/api/webhook/whatsapp")
 async def whatsapp_webhook(request: Request):
     """Receptor unificado para Meta WhatsApp Cloud API y el conector Baileys."""
+    raw_body = await request.body()
     try:
-        data = await request.json()
+        data = json.loads(raw_body)
     except Exception:
         return Response(content="Invalid JSON", status_code=400)
+    if not isinstance(data, dict):
+        return Response(content="Invalid JSON", status_code=400)
 
-    # 1. Caso: Evento oficial de Meta WhatsApp Cloud API
+    # 1. Caso: Evento oficial de Meta WhatsApp Cloud API (firmado con META_APP_SECRET)
     if "object" in data and "entry" in data:
+        if not verify_meta_signature(raw_body, request.headers.get("x-hub-signature-256")):
+            logger.warning("Evento de Meta rechazado: firma X-Hub-Signature-256 inválida o ausente.")
+            return Response(content="Forbidden", status_code=403)
         try:
             for entry in data.get("entry", []):
                 for change in entry.get("changes", []):
@@ -181,11 +222,14 @@ async def whatsapp_webhook(request: Request):
                             text_body = msg.get("text", {}).get("body", "").strip()
                             if sender and text_body:
                                 logger.info("Meta WA Cloud recibido de [%s]: %s", sender, text_body)
+                                is_admin = is_owner_number(sender)
+                                if not is_admin and not number_in(sender, settings.allowed_numbers):
+                                    logger.warning("Mensaje de Meta ignorado del remitente no autorizado: %s", sender)
+                                    continue
                                 if text_body.lower() in ["/reset", "/reiniciar", "/clear"]:
                                     coordinator.reset_chat(sender)
                                     send_whatsapp_message(to_number=sender, message="Conversación y contexto reiniciados exitosamente.")
                                 else:
-                                    is_admin = "8718321968" in sender or "8719164677" in sender
                                     reply = await coordinator.process_message(chat_id=sender, message=text_body, is_admin=is_admin)
                                     if reply:
                                         send_whatsapp_message(to_number=sender, message=reply)
@@ -193,7 +237,11 @@ async def whatsapp_webhook(request: Request):
             logger.error("Error al procesar evento de Meta WhatsApp Cloud: %s", e)
         return Response(content="EVENT_RECEIVED", status_code=200)
 
-    # 2. Caso: Puente Baileys local
+    # 2. Caso: Puente Baileys local (autenticado con X-Bridge-Secret = ADMIN_TOKEN)
+    if not is_bridge_request(request):
+        logger.warning("Webhook Baileys rechazado: falta X-Bridge-Secret válido.")
+        return Response(content="Forbidden", status_code=403)
+
     sender = str(data.get("sender", "")).strip()
     message = str(data.get("message", "")).strip()
 
@@ -202,16 +250,10 @@ async def whatsapp_webhook(request: Request):
 
     logger.info("Mensaje Baileys recibido de [%s]: %s", sender, message)
 
-    is_self = sender.lower() in ["self", "self_user", "yo", "mismo"] or ("8719164677" in sender or "8718321968" in sender)
-    if settings.allowed_numbers and not is_self:
-        sender_digits = "".join(filter(str.isdigit, sender))
-        is_allowed = any(
-            "".join(filter(str.isdigit, allowed)) in sender_digits
-            for allowed in settings.allowed_numbers
-        )
-        if not is_allowed:
-            logger.warning("Mensaje ignorado del remitente no autorizado: %s", sender)
-            return {"reply": ""}
+    is_self = is_owner_number(sender)
+    if not is_self and not number_in(sender, settings.allowed_numbers):
+        logger.warning("Mensaje ignorado del remitente no autorizado: %s", sender)
+        return {"reply": ""}
 
     if message.lower() in ["/reset", "/reiniciar", "/clear"]:
         coordinator.reset_chat(sender)
@@ -337,7 +379,7 @@ async def chat_direct(payload: DirectChatRequest):
     quick = await handle_voice_quick_intent(payload.message)
     if quick:
         return {"reply": quick}
-    is_admin = payload.chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+    is_admin = True  # el middleware ya exigió ADMIN_TOKEN
     reply = await coordinator.process_message(chat_id=payload.chat_id, message=payload.message, is_admin=is_admin)
     return {"reply": reply}
 
@@ -353,7 +395,7 @@ async def chat_direct_get(message: str = "", chat_id: str = "shortcuts"):
     quick = await handle_voice_quick_intent(message)
     if quick:
         return {"reply": quick}
-    is_admin = chat_id.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+    is_admin = True  # el middleware ya exigió ADMIN_TOKEN
     reply = await coordinator.process_message(chat_id=chat_id, message=message, is_admin=is_admin)
     return {"reply": reply}
 
@@ -368,7 +410,7 @@ async def root_post_chat(request: Request):
             quick = await handle_voice_quick_intent(msg)
             if quick:
                 return {"reply": quick}
-            is_admin = cid.lower() in ["admin", "self", "salinas", "widget", "shortcuts", "avatar_web_user"]
+            is_admin = True  # el middleware ya exigió ADMIN_TOKEN
             reply = await coordinator.process_message(chat_id=cid, message=msg, is_admin=is_admin)
             return {"reply": reply}
     except Exception:

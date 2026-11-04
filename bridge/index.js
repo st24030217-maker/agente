@@ -120,7 +120,22 @@ function backupSessionToDisk() {
 }
 
 
+// Token compartido con el agente: ADMIN_TOKEN del .env o el generado en data/.admin_token.
+function getAdminToken() {
+  const envToken = (process.env.ADMIN_TOKEN || "").trim();
+  if (envToken) return envToken;
+  try {
+    return fs.readFileSync(path.resolve(PROJECT_ROOT, process.env.DATA_DIR || "data", ".admin_token"), "utf-8").trim();
+  } catch {
+    return "";
+  }
+}
+
 async function callFastAPI(endpoint, body) {
+  const adminToken = getAdminToken();
+  if (!adminToken) {
+    console.warn("[callFastAPI] No hay ADMIN_TOKEN disponible; el agente rechazará la petición.");
+  }
   const candidatePorts = [
     process.env.PORT ? Number(process.env.PORT) : null,
     8000,
@@ -134,7 +149,11 @@ async function callFastAPI(endpoint, body) {
       console.log(`[callFastAPI] POST a ${url}...`);
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Bridge-Secret": adminToken,
+          "X-Admin-Token": adminToken
+        },
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(180000)
       });
@@ -945,7 +964,10 @@ async function startWhatsApp() {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(` Servidor WhatsApp Bridge iniciado en http://localhost:${PORT}`);
+// Solo escucha en loopback: /send, /session/export, /reset, etc. no tienen autenticación propia.
+// El panel accede a través de los proxys autenticados del agente (puerto 8000).
+const BRIDGE_HOST = process.env.BRIDGE_HOST || "127.0.0.1";
+app.listen(PORT, BRIDGE_HOST, () => {
+  console.log(` Servidor WhatsApp Bridge iniciado en http://${BRIDGE_HOST}:${PORT}`);
   startWhatsApp();
 });
