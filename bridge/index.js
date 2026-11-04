@@ -29,8 +29,13 @@ const AUTH_FOLDER = path.isAbsolute(authFolderSetting)
   : path.resolve(PROJECT_ROOT, authFolderSetting);
 const SESSION_BACKUP_PATH = path.resolve(PROJECT_ROOT, "data", "baileys_session.json");
 const SESSION_B64_PATH = path.resolve(PROJECT_ROOT, "data", "session_b64.txt");
+let sessionInvalidated = false;
 
 function restoreSessionFromBackup() {
+  if (sessionInvalidated) {
+    console.log("[Auth State] Sesion previa cerrada o invalidada (401). Esperando nuevo QR o codigo...");
+    return false;
+  }
   try {
     const credsPath = path.join(AUTH_FOLDER, "creds.json");
     if (fs.existsSync(credsPath)) {
@@ -787,15 +792,23 @@ async function startWhatsApp() {
       if (shouldReconnect) {
         setTimeout(startWhatsApp, 3000);
       } else {
-        console.log("Sesion cerrada (Logged Out). Limpiando credenciales y generando nuevo QR...");
+        sessionInvalidated = true;
+        console.log("Sesion cerrada (Logged Out 401). Limpiando credenciales y generando nuevo QR / codigo...");
         try {
           fs.rmSync(AUTH_FOLDER, { recursive: true, force: true });
+          if (fs.existsSync(SESSION_BACKUP_PATH)) {
+            fs.rmSync(SESSION_BACKUP_PATH, { force: true });
+          }
+          if (fs.existsSync(SESSION_B64_PATH)) {
+            fs.rmSync(SESSION_B64_PATH, { force: true });
+          }
         } catch (e) {
           console.error("Error al limpiar authFolder:", e);
         }
         setTimeout(startWhatsApp, 2000);
       }
     } else if (connection === "open") {
+      sessionInvalidated = false;
       backupSessionToDisk();
       connectionState = "open";
       currentQR = null;
