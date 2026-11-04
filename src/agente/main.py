@@ -461,17 +461,18 @@ async def get_qr_page():
 
 @app.get("/api/bridge/status")
 async def get_bridge_status():
-    """Estado de conexión unificado: Meta Cloud API si es el proveedor activo; si no, Baileys (QR/código)."""
+    """Estado de conexión unificado: Meta Cloud API si está configurado; si no, Baileys (QR/código)."""
     if settings.whatsapp_provider == "cloud_api":
         cloud_configured = bool(settings.meta_wa_token and settings.meta_wa_phone_number_id)
-        return {
-            "status": "cloud_api_configured" if cloud_configured else "cloud_api_unconfigured",
-            "provider": "cloud_api",
-            "user": {"id": settings.meta_wa_phone_number_id, "name": "Meta WhatsApp Cloud API"} if cloud_configured else None,
-            "cloud_api_configured": cloud_configured,
-            # Recibir mensajes requiere el verify token (registro) y el App Secret (firma de cada evento)
-            "webhook_configured": bool(settings.meta_wa_verify_token and settings.meta_app_secret),
-        }
+        if cloud_configured:
+            return {
+                "status": "cloud_api_configured",
+                "provider": "cloud_api",
+                "user": {"id": settings.meta_wa_phone_number_id, "name": "Meta WhatsApp Cloud API"},
+                "cloud_api_configured": True,
+                # Recibir mensajes requiere el verify token (registro) y el App Secret (firma de cada evento)
+                "webhook_configured": bool(settings.meta_wa_verify_token and settings.meta_app_secret),
+            }
 
     bridge_data = {}
     async with httpx.AsyncClient() as client:

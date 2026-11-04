@@ -2880,9 +2880,15 @@
         const data = await res.json();
         const img = document.getElementById("wa-sheet-qr-img");
         const loader = document.getElementById("wa-sheet-qr-loader");
-        if (data.status === "cloud_api_configured" || data.status === "cloud_api_unconfigured") {
+        if (data.qr) {
+          img.src = data.qr;
+          img.style.display = "block";
+          loader.style.display = "none";
+          return;
+        }
+        if (data.status === "cloud_api_configured") {
           img.style.display = "none";
-          loader.textContent = "Cloud API seleccionada. No se requiere código QR; revisa la configuración de Meta y Render.";
+          loader.textContent = "Cloud API de Meta conectada. No se requiere código QR.";
           loader.style.display = "block";
           if (qrPollTimer) clearInterval(qrPollTimer);
           return;
