@@ -726,6 +726,15 @@ def get_leads_report_api():
     """Devuelve un reporte ejecutivo con análisis inteligente de prospectos, tasas de respuesta y leads calientes."""
     return get_leads_analytics()
 
+class LeadsImportRequest(BaseModel):
+    leads: list[dict]
+
+@app.post("/api/leads/import")
+def import_leads_api(payload: LeadsImportRequest):
+    """Importa o sincroniza prospectos limpios en la base de datos."""
+    _save_leads(payload.leads)
+    return {"success": True, "count": len(payload.leads), "stats": get_leads_stats()}
+
 @app.post("/api/leads/status")
 def update_lead_status_api(payload: LeadStatusUpdateRequest):
     """Actualiza manualmente el estado de un lead (ej. 'respondio', 'no_contesto', 'contactado', 'cita_agendada')."""

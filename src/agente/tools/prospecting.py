@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import time
@@ -6,6 +7,11 @@ from datetime import datetime
 from pathlib import Path
 from bs4 import BeautifulSoup
 import httpx
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except Exception:
+    pass
 from ddgs import DDGS
 
 from agente.config import DATA_DIR, settings
@@ -142,7 +148,7 @@ def search_google_maps_serper(niche: str = "", city: str = "Torreón, Gómez Pal
                 "hl": "es"
             }
             try:
-                with httpx.Client(timeout=10.0, verify=False) as client:
+                with httpx.Client(timeout=25.0) as client:
                     resp = client.post("https://google.serper.dev/maps", headers=headers, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
@@ -156,6 +162,7 @@ def search_google_maps_serper(niche: str = "", city: str = "Torreón, Gómez Pal
                             continue
 
                         name = p.get("title", "").strip()
+                        name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", name).strip()
                         address = p.get("address", "")
                         category = p.get("type") or (p.get("types", [n])[0] if p.get("types") else n)
 
@@ -339,48 +346,41 @@ def search_business_leads(niche: str = "", city: str = "Torreón, Gómez Palacio
     return "\n".join(lines)
 
 def generate_pitch(business_name: str, niche: str = "", contact_name: str = "") -> str:
-    """Genera una propuesta personalizada y elegante adaptada específicamente al giro de CUALQUIER negocio, mostrando exclusivamente el portafolio y el Instagram oficial de SSSSolutions.
-    
-    Args:
-        business_name: Nombre del negocio prospecto.
-        niche: Giro o actividad del negocio (ej. 'restaurante', 'taller mecánico', 'arquitectura', 'gimnasio', 'abogados', 'mueblería', 'clínica').
-        contact_name: Opcional, nombre de la persona o encargado si se conoce.
-    """
-    greeting = f"Hola {contact_name}," if contact_name else f"Hola equipo de {business_name},"
+    """Genera una propuesta personalizada, concisa y de alta conversión adaptada al giro del negocio en La Laguna."""
+    clean_name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", business_name).strip()
+    clean_name = re.sub(r"(?i)\b(calle|av|avenida|blvd|bulevar|col|colonia|torreon|gomez|lerdo|coahuila|durango)\b.*$", "", clean_name).strip()
+    if not clean_name:
+        clean_name = business_name.strip()
+
+    greeting = f"Hola {contact_name}," if contact_name else f"Qué tal, buen día equipo de {clean_name},"
     niche_lower = (niche or "").lower()
 
-    # Personalización del beneficio según la industria del negocio
     if any(k in niche_lower for k in ["cafe", "cafeter", "coffee"]):
-        benefit = "atraer nuevos clientes, exhibir sus bebidas y especialidades de forma visual y recibir pedidos para llevar o a domicilio directamente en su WhatsApp"
-    elif any(k in niche_lower for k in ["dulce", "dulcer", "confiter", "botan", "snack"]):
-        benefit = "mostrar su catálogo de dulces, botanas y paquetes para fiestas y recibir pedidos por mayoreo o menudeo directamente en su WhatsApp"
-    elif any(k in niche_lower for k in ["flor", "florer", "arreglo", "ramo", "planta"]):
-        benefit = "exhibir su catálogo de ramos y arreglos florales de temporada, facilitando que los clientes elijan y coordinen envíos a domicilio al instante"
-    elif any(k in niche_lower for k in ["pastel", "reposter", "panader", "horno", "pan"]):
-        benefit = "mostrar su galería de pasteles personalizados y repostería artesanal, permitiendo a los clientes cotizar y encargar sus pedidos para eventos fácilmente"
-    elif any(k in niche_lower for k in ["nieve", "helad", "palet", "postre"]):
-        benefit = "exhibir sus sabores de temporada, promociones y especialidades de forma visual y atractiva para atraer clientes locales"
+        benefit = "recibir pedidos y reservas directo a su WhatsApp sin pagar comisiones de apps intermediarias"
     elif any(k in niche_lower for k in ["restauran", "comida", "bar", "pizza", "taco", "hamburgues", "gastronom", "cocina"]):
-        benefit = "atraer nuevos comensales, exhibir su menú interactivo de forma visual y recibir reservaciones o pedidos directamente en su WhatsApp"
-    elif any(k in niche_lower for k in ["boutique", "regalo", "tienda", "ropa", "joyer", "accesorio"]):
-        benefit = "contar con un catálogo visual digital donde los clientes puedan explorar sus colecciones y consultar disponibilidad y precios al instante"
+        benefit = "recibir pedidos directos a su WhatsApp con un menú digital ultra rápido, ahorrándose comisiones de delivery"
+    elif any(k in niche_lower for k in ["pastel", "reposter", "panader", "horno", "pan"]):
+        benefit = "mostrar su catálogo de repostería y pasteles para que sus clientes coticen y aparten fechas fácilmente por WhatsApp"
+    elif any(k in niche_lower for k in ["flor", "florer", "arreglo", "ramo"]):
+        benefit = "exhibir sus ramos y arreglos de temporada y coordinar pedidos y entregas directo por WhatsApp"
     elif any(k in niche_lower for k in ["salon", "evento", "banquet", "fiesta"]):
-        benefit = "exhibir sus paquetes para eventos, galerías de montajes y recibir solicitudes de cotización y fechas disponibles directamente en su WhatsApp"
+        benefit = "mostrar sus paquetes de eventos y disponibilidad para recibir solicitudes de cotización al instante"
+    elif any(k in niche_lower for k in ["dulce", "dulcer", "confiter", "botan", "snack"]):
+        benefit = "mostrar su catálogo de paquetes y productos para recibir pedidos por mayoreo o menudeo en WhatsApp"
     else:
-        benefit = "contar con una plataforma web profesional, ultra rápida y optimizada para dispositivos móviles que posicione su marca e impulse sus ventas y pedidos por WhatsApp"
+        benefit = "contar con una plataforma web rápida y moderna que posicione su negocio en Google e impulse sus ventas por WhatsApp"
 
     portfolio_url = PORTFOLIO_LINKS["portfolio"]
     ig_url = PORTFOLIO_LINKS["instagram"]
 
     pitch = (
         f"{greeting}\n\n"
-        f"Les escribe Sebastián Salinas, fundador de la agencia de desarrollo web y software SSSSolutions (@ssss.olutions).\n\n"
-        f"Estuvimos revisando la presencia digital de los negocios del sector en su zona y notamos una excelente "
-        f"oportunidad para que {business_name} cuente con una plataforma web propia de alto impacto que les permita {benefit}.\n\n"
-        f"En SSSSolutions nos especializamos en diseño web moderno, desarrollo de software a medida y páginas de alta conversión:\n"
+        f"Les escribe Sebastián Salinas de SSSSolutions (@ssss.olutions) aquí en La Laguna. "
+        f"Estuve revisando su negocio y les preparé una muestra de cómo pueden {benefit}.\n\n"
+        f"Les comparto nuestro trabajo para que conozcan nuestros desarrollos:\n"
         f"• Portafolio: {portfolio_url}\n"
         f"• Instagram: {ig_url}\n\n"
-        f"¿Les gustaría agendar una breve llamada para comentar cómo podemos impulsar la presencia digital de {business_name}?"
+        f"¿Me permiten compartirles la propuesta visual para que la vean en su celular sin ningún compromiso?"
     )
     return pitch
 
