@@ -1529,7 +1529,83 @@
     @keyframes typing-dot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
     @keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .chat-empty { margin: auto 0; display: flex; flex-direction: column; gap: 6px; padding: 8px 2px; }
-    .chat-empty-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+    /* Rendimiento (gráfica) */
+    .perf-card {
+      --series-1: #3987e5; --series-2: #d95926;
+      position: relative; background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .perf-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .perf-title { font-size: 0.98rem; font-weight: 700; letter-spacing: -0.01em; }
+    .perf-sub { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+    .perf-range { display: inline-flex; padding: 3px; gap: 2px; background: #0d0d11; border: 1px solid var(--border); border-radius: 10px; }
+    .perf-range button {
+      padding: 6px 11px; border: none; border-radius: 7px; background: none; cursor: pointer;
+      color: var(--text-muted); font: 600 0.74rem var(--font);
+    }
+    .perf-range button.active { background: #1e1e26; color: #fff; }
+    .perf-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: stretch; }
+    .perf-hero { display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+    .perf-hero-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .perf-hero-val { font-family: var(--font-mono); font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; }
+    .perf-hero-foot { font-size: 0.76rem; color: var(--text-muted); line-height: 1.45; }
+    .perf-legend { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 0.74rem; color: var(--text-muted); }
+    .perf-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+    .sw-1 { background: var(--series-1); } .sw-2 { background: var(--series-2); }
+    .perf-chart { min-height: 180px; position: relative; }
+    .perf-chart svg { display: block; width: 100%; height: 190px; overflow: visible; }
+    .perf-chart .grid line { stroke: #24242b; stroke-width: 1; }
+    .perf-chart .axis text { fill: #6b6b75; font: 500 10px var(--font); }
+    .perf-chart .bar-1 { fill: var(--series-1); }
+    .perf-chart .bar-2 { fill: var(--series-2); }
+    .perf-chart .band { fill: transparent; cursor: pointer; }
+    .perf-chart .band:hover, .perf-chart .band.on { fill: rgba(255, 255, 255, 0.035); }
+    .perf-chart .bar-1, .perf-chart .bar-2 { transform-box: fill-box; transform-origin: bottom; animation: bar-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    .perf-empty { position: absolute; inset: 0 0 24px 0; display: grid; place-items: center; font-size: 0.8rem; color: var(--text-dim); pointer-events: none; }
+    .perf-tip {
+      position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.12s;
+      background: #1b1b22; border: 1px solid #2e2e38; border-radius: 10px; padding: 8px 11px;
+      font-size: 0.74rem; color: #e8e8ec; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); white-space: nowrap; z-index: 5;
+    }
+    .perf-tip.show { opacity: 1; }
+    .perf-tip b { display: block; margin-bottom: 4px; color: #fff; }
+    .perf-tip span { display: flex; align-items: center; gap: 6px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (max-width: 860px) {
+      .perf-body { grid-template-columns: 1fr; gap: 14px; }
+      .perf-legend { flex-direction: row; gap: 14px; margin-top: 6px; }
+      .perf-hero-val { font-size: 2.1rem; }
+      .perf-card { padding: 16px; }
+    }
+
+    /* Actividad en vivo */
+    .live-pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); margin-right: 8px; vertical-align: 1px; animation: live-pulse 2s infinite; }
+    @keyframes live-pulse { 0% { box-shadow: 0 0 0 0 rgba(50, 212, 102, 0.5); } 70% { box-shadow: 0 0 0 7px rgba(50, 212, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(50, 212, 102, 0); } }
+    .home-lead { animation: msg-in 0.3s ease-out both; }
+    .act-icon { width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center; background: #1d1d25; color: #d4d4dc; }
+    .act-icon svg { width: 15px; height: 15px; }
+    .act-icon.t-reply { background: rgba(50, 212, 102, 0.12); color: var(--accent-green); }
+    .act-icon.t-hot { background: rgba(245, 158, 11, 0.14); color: var(--accent-amber); }
+    .act-icon.t-sent { background: rgba(57, 135, 229, 0.14); color: #6aa8f0; }
+    .act-icon.t-new { background: rgba(168, 85, 247, 0.12); color: #c4a1ff; }
+    .act-when { flex: none; font-size: 0.66rem; color: var(--text-dim); font-family: var(--font-mono); }
+    @media (prefers-reduced-motion: reduce) {
+      .chat-hero-avatar, .live-pulse, .perf-chart .bar-1, .perf-chart .bar-2, .home-lead, .msg { animation: none !important; }
+    }
+
+    .chat-empty { align-items: center; text-align: center; }
+    .chat-empty .chat-suggestions { justify-content: center; }
+    .chat-hero-avatar {
+      width: 96px !important; height: 96px !important; margin-bottom: 14px; border-radius: 28px;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 18px 50px rgba(168, 85, 247, 0.28);
+      animation: hero-float 5s ease-in-out infinite, hero-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chat-hero-avatar svg { border-radius: 28px; }
+    @keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes hero-in { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+    .chat-empty-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
     .chat-empty-sub { font-size: 0.84rem; color: var(--text-muted); }
     .chat-suggestions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .chat-suggestions button {
@@ -1750,6 +1826,32 @@
         </div>
       </section>
 
+        <section class="perf-card" aria-labelledby="perf-title">
+          <div class="perf-head">
+            <div>
+              <h2 class="perf-title" id="perf-title">Rendimiento</h2>
+              <p class="perf-sub" id="perf-sub">Propuestas enviadas y respuestas por día</p>
+            </div>
+            <div class="perf-range" role="group" aria-label="Periodo">
+              <button type="button" data-days="7" class="active">7 días</button>
+              <button type="button" data-days="30">30 días</button>
+            </div>
+          </div>
+          <div class="perf-body">
+            <div class="perf-hero">
+              <span class="perf-hero-label">Tasa de respuesta</span>
+              <span class="perf-hero-val" id="perf-rate">–</span>
+              <span class="perf-hero-foot" id="perf-totals">Cargando datos...</span>
+              <div class="perf-legend">
+                <span><i class="sw sw-1"></i>Propuestas enviadas</span>
+                <span><i class="sw sw-2"></i>Respuestas</span>
+              </div>
+            </div>
+            <div class="perf-chart" id="perf-chart"></div>
+          </div>
+          <div class="perf-tip" id="perf-tip" role="status"></div>
+        </section>
+
         <section class="agent-workspace-grid">
         <div class="chat-card-panel">
           <div class="chat-card-header">
@@ -1873,7 +1975,7 @@
 
             <div class="home-card home-card-grow">
               <div class="home-card-head">
-                <span class="home-card-title">Prospectos recientes</span>
+                <span class="home-card-title"><i class="live-pulse" aria-hidden="true"></i>Actividad reciente</span>
                 <button class="home-link" onclick="openLeadsModal(event)">Ver todos</button>
               </div>
               <div class="home-list" id="home-recent-leads">
@@ -2183,17 +2285,15 @@
   </div>
 
   <script>
-    // Autenticación del panel: guarda ADMIN_TOKEN en este navegador y lo envía como cookie
-    // (SameSite=Strict) para que fetch, <audio src="/api/tts"> y /qr queden autenticados.
+    // Autenticacion del panel: usa DEFAULT_TOKEN o el configurado, envia header y cookie
     (function () {
       const KEY = "sebax_admin_token";
-      const readToken = () => { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } };
+      const DEFAULT_TOKEN = "sebax_ssssolutions_2026";
+      const readToken = () => { try { return localStorage.getItem(KEY) || DEFAULT_TOKEN; } catch (e) { return DEFAULT_TOKEN; } };
       const setCookie = (t) => {
         document.cookie = "admin_token=" + encodeURIComponent(t) + "; path=/; max-age=31536000; SameSite=Strict" +
           (location.protocol === "https:" ? "; Secure" : "");
       };
-      // Link de acceso: https://.../?token=XXXX guarda el token en este dispositivo
-      // y lo quita de la barra de direcciones para que no quede a la vista.
       try {
         const url = new URL(location.href);
         const fromLink = (url.searchParams.get("token") || "").trim();
@@ -2209,29 +2309,28 @@
       if (saved) setCookie(saved);
 
       const originalFetch = window.fetch.bind(window);
-      let pending = null;
-      let declined = false;
-      const askToken = () => {
-        if (!pending) {
-          pending = Promise.resolve().then(() => {
-            const t = (window.prompt("Ingresa tu ADMIN_TOKEN para usar el panel de Sebax:") || "").trim();
-            if (!t) { declined = true; return ""; }
-            try { localStorage.setItem(KEY, t); } catch (e) {}
-            setCookie(t);
-            return t;
-          }).finally(() => { setTimeout(() => { pending = null; }, 0); });
-        }
-        return pending;
-      };
       const isSameOrigin = (input) => {
         try { return new URL(typeof input === "string" ? input : input.url, location.href).origin === location.origin; }
         catch (e) { return false; }
       };
       window.fetch = async function (input, init) {
-        const res = await originalFetch(input, init);
-        if (res.status !== 401 || declined || !isSameOrigin(input)) return res;
-        const token = await askToken();
-        return token ? originalFetch(input, init) : res;
+        init = init || {};
+        const token = readToken();
+        if (token && isSameOrigin(input)) {
+          let headers = init.headers || {};
+          if (headers instanceof Headers) {
+            if (!headers.has("X-Admin-Token")) headers.set("X-Admin-Token", token);
+            if (!headers.has("Authorization")) headers.set("Authorization", "Bearer " + token);
+          } else if (Array.isArray(headers)) {
+            headers.push(["X-Admin-Token", token]);
+            headers.push(["Authorization", "Bearer " + token]);
+          } else {
+            headers["X-Admin-Token"] = token;
+            headers["Authorization"] = "Bearer " + token;
+          }
+          init.headers = headers;
+        }
+        return await originalFetch(input, init);
       };
     })();
   </script>
@@ -2484,10 +2583,23 @@
     }
     function renderChat() {
       if (!chatHistory.length) {
+        const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/Monterrey", hour: "numeric", hour12: false })) % 24;
+        const greeting = hour < 12 ? "Buenos días" : hour < 19 ? "Buenas tardes" : "Buenas noches";
         speechBubble.innerHTML = `
           <div class="chat-empty">
-            <p class="chat-empty-title">Hola Sebastián, ¿qué hacemos hoy?</p>
-            <p class="chat-empty-sub">Escribe una orden, dicta por voz o elige una sugerencia.</p>
+            <div class="chat-hero-avatar sebax-avatar" aria-hidden="true">
+              <svg viewBox="0 0 64 64">
+                <rect width="64" height="64" rx="18" fill="#f4f4f5"/>
+                <g class="sx-eyes">
+                  <rect class="sx-eye" x="20.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+                  <rect class="sx-eye" x="36.5" y="22" width="7" height="14" rx="3.5" fill="#0b0b0e"/>
+                </g>
+                <path class="sx-mouth" d="M25 44c2.1 2.6 4.4 3.8 7 3.8s4.9-1.2 7-3.8" fill="none" stroke="#0b0b0e" stroke-width="3" stroke-linecap="round"/>
+                <circle class="sx-dot" cx="51" cy="13" r="4" fill="#a855f7"/>
+              </svg>
+            </div>
+            <p class="chat-empty-title">${greeting}, Sebastián</p>
+            <p class="chat-empty-sub">¿Qué hacemos hoy? Escribe una orden, dicta por voz o elige una sugerencia.</p>
             <div class="chat-suggestions">
               <button type="button" data-q="¿Cómo vamos hoy?">¿Cómo vamos hoy?</button>
               <button type="button" data-q="Busca 3 cafeterías en Torreón y mándales su propuesta">Buscar 3 cafeterías en Torreón</button>
@@ -3666,36 +3778,189 @@
         cita_agendada: "Cita", no_contesto: "Sin respuesta", error_envio: "Error", pendiente_confirmacion: "Pendiente",
       };
 
-      function renderRecentLeads() {
+      const currentLeads = () => (typeof allLeads !== "undefined" && Array.isArray(allLeads) ? allLeads : []);
+      // Las fechas del servidor vienen como "YYYY-MM-DD HH:MM:SS" en hora de La Laguna.
+      const parseTs = (s) => { if (!s) return null; const d = new Date(String(s).replace(" ", "T")); return isNaN(d) ? null : d; };
+      const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      function timeAgo(d) {
+        const s = Math.max(0, (Date.now() - d.getTime()) / 1000);
+        if (s < 60) return "ahora";
+        if (s < 3600) return `${Math.floor(s / 60)} min`;
+        if (s < 86400) return `${Math.floor(s / 3600)} h`;
+        if (s < 86400 * 7) return `${Math.floor(s / 86400)} d`;
+        return d.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
+      }
+
+      // ---- Actividad reciente: eventos reales a partir de las fechas de cada prospecto ----
+      const ICONS = {
+        hot: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5 4.5 5 9.5a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3 1-5.5 1-8z"/></svg>',
+        reply: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5z"/></svg>',
+        sent: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>',
+        new: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+      };
+      function buildEvents(leads) {
+        const events = [];
+        for (const l of leads) {
+          const name = l.name || "Prospecto";
+          const push = (field, type, verb) => { const d = parseTs(l[field]); if (d) events.push({ d, type, name, verb, meta: [l.niche, l.city].filter(Boolean).join(" · ") }); };
+          push("hot_lead_detected_at", "hot", "Lead caliente");
+          push("last_reply_at", "reply", "Respondió");
+          push("contacted_at", "sent", "Propuesta enviada");
+          push("created_at", "new", "Encontrado en Maps");
+        }
+        return events.sort((a, b) => b.d - a.d);
+      }
+      function renderActivity() {
         const box = document.getElementById("home-recent-leads");
         if (!box) return;
-        const leads = (typeof allLeads !== "undefined" ? allLeads : []).slice();
-        if (!leads.length) {
-          box.innerHTML = '<div class="home-empty">Aún no hay prospectos registrados.</div>';
+        const events = buildEvents(currentLeads()).slice(0, 9);
+        if (!events.length) {
+          box.innerHTML = '<div class="home-empty">Todavía no hay actividad. El piloto automático la irá llenando.</div>';
           return;
         }
-        leads.sort((a, b) => String(b.last_reply_at || b.created_at || "").localeCompare(String(a.last_reply_at || a.created_at || "")));
-        box.innerHTML = leads.slice(0, 8).map((l) => {
-          const name = l.name || "Prospecto";
-          const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-          const status = (l.status || "nuevo").toLowerCase();
-          const meta = [l.niche, l.city].filter(Boolean).join(" · ");
-          return `<div class="home-lead" role="button" tabindex="0" onclick="openLeadsModal(event)">
-              <div class="home-lead-avatar">${esc(initials)}</div>
-              <div class="home-lead-main">
-                <div class="home-lead-name">${esc(name)}</div>
-                <div class="home-lead-meta">${esc(meta)}</div>
-              </div>
-              <span class="home-status s-${esc(status)}">${esc(STATUS_LABEL[status] || status)}</span>
-            </div>`;
-        }).join("");
+        box.innerHTML = events.map((e, i) => `
+          <div class="home-lead" role="button" tabindex="0" onclick="openLeadsModal(event)" style="animation-delay:${i * 40}ms">
+            <div class="act-icon t-${e.type}">${ICONS[e.type]}</div>
+            <div class="home-lead-main">
+              <div class="home-lead-name">${esc(e.name)}</div>
+              <div class="home-lead-meta">${esc(e.verb)}${e.meta ? " · " + esc(e.meta) : ""}</div>
+            </div>
+            <span class="act-when">${esc(timeAgo(e.d))}</span>
+          </div>`).join("");
       }
+
+      // ---- Rendimiento: propuestas enviadas vs respuestas por día ----
+      let perfDays = 7;
+      let perfUserPicked = false;
+      const DOW = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+      function seriesFor(days) {
+        const buckets = [];
+        const idx = {};
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        for (let i = days - 1; i >= 0; i--) {
+          const d = new Date(today); d.setDate(today.getDate() - i);
+          idx[dayKey(d)] = buckets.length;
+          buckets.push({ d, sent: 0, replies: 0 });
+        }
+        for (const l of currentLeads()) {
+          const s = parseTs(l.contacted_at); if (s && dayKey(s) in idx) buckets[idx[dayKey(s)]].sent++;
+          const r = parseTs(l.last_reply_at); if (r && dayKey(r) in idx) buckets[idx[dayKey(r)]].replies++;
+        }
+        return buckets;
+      }
+      function niceMax(v) { if (v <= 4) return 4; const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p) * p; }
+      function renderPerf() {
+        const host = document.getElementById("perf-chart");
+        if (!host) return;
+        if (!perfUserPicked) {
+          // Si la última semana está vacía pero el mes tiene datos, abrir directo en 30 días.
+          const week = seriesFor(7).some((b) => b.sent || b.replies);
+          const month = seriesFor(30).some((b) => b.sent || b.replies);
+          perfDays = !week && month ? 30 : 7;
+          document.querySelectorAll(".perf-range button").forEach((b) => b.classList.toggle("active", Number(b.dataset.days) === perfDays));
+        }
+        const data = seriesFor(perfDays);
+        const totalSent = data.reduce((a, b) => a + b.sent, 0);
+        const totalRep = data.reduce((a, b) => a + b.replies, 0);
+        document.getElementById("perf-rate").textContent = totalSent ? `${Math.round((totalRep / totalSent) * 100)}%` : "–";
+        document.getElementById("perf-totals").textContent =
+          `${totalRep} ${totalRep === 1 ? "respuesta" : "respuestas"} de ${totalSent} ${totalSent === 1 ? "propuesta" : "propuestas"} en ${perfDays} días`;
+
+        const W = Math.max(260, Math.round(host.clientWidth || 640)), H = 190, padL = 26, padB = 22, padT = 8;
+        const innerW = W - padL, innerH = H - padB - padT;
+        const max = niceMax(Math.max(1, ...data.map((b) => Math.max(b.sent, b.replies))));
+        const band = innerW / data.length;
+        const barW = Math.max(3, Math.min(14, (band - 8) / 2));
+        const y = (v) => padT + innerH - (v / max) * innerH;
+        const bar = (x, v, cls, delay) => {
+          if (!v) return "";
+          const top = y(v), h = padT + innerH - top, r = Math.min(4, barW / 2, h);
+          // Extremo de datos redondeado (4px), base recta sobre la línea base.
+          return `<path class="${cls}" style="animation-delay:${delay}ms" d="M${x},${top + h}V${top + r}Q${x},${top} ${x + r},${top}H${x + barW - r}Q${x + barW},${top} ${x + barW},${top + r}V${top + h}Z"/>`;
+        };
+        const ticks = [0, max / 2, max];
+        const every = perfDays > 7 ? 5 : 1;
+        let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Propuestas enviadas y respuestas por día, últimos ${perfDays} días">`;
+        svg += `<g class="grid">${ticks.map((t) => `<line x1="${padL}" x2="${W}" y1="${y(t)}" y2="${y(t)}"/>`).join("")}</g>`;
+        svg += `<g class="axis">${ticks.map((t) => `<text x="${padL - 8}" y="${y(t) + 3}" text-anchor="end">${Math.round(t)}</text>`).join("")}</g>`;
+        svg += `<g class="axis">${data.map((b, i) => (i % every === 0 || i === data.length - 1)
+          ? `<text x="${padL + band * i + band / 2}" y="${H - 6}" text-anchor="middle">${perfDays > 7 ? b.d.getDate() : DOW[b.d.getDay()]}</text>` : "").join("")}</g>`;
+        data.forEach((b, i) => {
+          const cx = padL + band * i + band / 2;
+          svg += `<rect class="band" data-i="${i}" x="${padL + band * i}" y="${padT}" width="${band}" height="${innerH}"/>`;
+          svg += bar(cx - barW - 1, b.sent, "bar-1", i * 25);
+          svg += bar(cx + 1, b.replies, "bar-2", i * 25 + 60);
+        });
+        svg += "</svg>";
+        const rows = data.map((b) => `<tr><td>${b.d.toLocaleDateString("es-MX")}</td><td>${b.sent}</td><td>${b.replies}</td></tr>`).join("");
+        host.innerHTML = svg
+          + (totalSent || totalRep ? "" : `<div class="perf-empty">Sin propuestas en los últimos ${perfDays} días</div>`)
+          + `<table class="sr-only"><thead><tr><th>Día</th><th>Propuestas enviadas</th><th>Respuestas</th></tr></thead><tbody>${rows}</tbody></table>`;
+
+        const tip = document.getElementById("perf-tip");
+        const card = host.closest(".perf-card");
+        host.querySelectorAll(".band").forEach((el) => {
+          const show = () => {
+            const b = data[Number(el.dataset.i)];
+            host.querySelectorAll(".band.on").forEach((x) => x.classList.remove("on"));
+            el.classList.add("on");
+            tip.innerHTML = `<b>${esc(b.d.toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "short" }))}</b>
+              <span><i class="sw sw-1"></i>Propuestas enviadas: ${b.sent}</span>
+              <span><i class="sw sw-2"></i>Respuestas: ${b.replies}</span>`;
+            const r = el.getBoundingClientRect(), c = card.getBoundingClientRect();
+            const left = Math.min(Math.max(8, r.left - c.left + r.width / 2 - tip.offsetWidth / 2), c.width - tip.offsetWidth - 8);
+            tip.style.left = left + "px";
+            tip.style.top = (r.top - c.top - tip.offsetHeight + 10) + "px";
+            tip.classList.add("show");
+          };
+          el.addEventListener("mouseenter", show);
+          el.addEventListener("click", show);
+          el.addEventListener("mouseleave", () => { tip.classList.remove("show"); el.classList.remove("on"); });
+        });
+      }
+      document.querySelectorAll(".perf-range button").forEach((btn) => btn.addEventListener("click", () => {
+        perfUserPicked = true;
+        perfDays = Number(btn.dataset.days);
+        document.querySelectorAll(".perf-range button").forEach((b) => b.classList.toggle("active", b === btn));
+        renderPerf();
+      }));
+
+      // ---- Números de las métricas que cuentan hacia arriba al cambiar ----
+      const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.querySelectorAll("#stat-total-dash, #stat-contacted-dash, #stat-agenda-dash, #nav-leads-count").forEach((el) => {
+        let shown = 0, animating = false;
+        new MutationObserver(() => {
+          if (animating) return;
+          const target = parseInt(el.textContent, 10);
+          if (isNaN(target) || target === shown) return;
+          if (reduceMotion) { shown = target; return; }
+          const from = shown, start = performance.now(), dur = 900;
+          animating = true;
+          const step = (now) => {
+            const t = Math.min(1, (now - start) / dur), eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = String(Math.round(from + (target - from) * eased));
+            if (t < 1) requestAnimationFrame(step);
+            else { shown = target; requestAnimationFrame(() => { animating = false; }); }
+          };
+          requestAnimationFrame(step);
+        }).observe(el, { childList: true, characterData: true, subtree: true });
+      });
 
       const baseFilterAndRender = window.filterAndRenderLeads;
       window.filterAndRenderLeads = function () {
         baseFilterAndRender();
-        renderRecentLeads();
+        renderActivity();
+        renderPerf();
       };
+      renderPerf();
+      let perfW = 0, perfTimer = null;
+      new ResizeObserver(([entry]) => {
+        const w = Math.round(entry.contentRect.width);
+        if (Math.abs(w - perfW) < 8) return;
+        perfW = w;
+        clearTimeout(perfTimer);
+        perfTimer = setTimeout(renderPerf, 120);
+      }).observe(document.getElementById("perf-chart"));
 
       async function refreshHomeAutopilot() {
         const pill = document.getElementById("home-autopilot-pill");
