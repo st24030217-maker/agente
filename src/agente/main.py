@@ -629,6 +629,67 @@ def export_bridge_session():
         "backup_file": str(session_file)
     }
 
+@app.get("/api/bridge/session/copy", response_class=Response)
+def copy_bridge_session_page():
+    """Página con botón de 1 clic para copiar la clave permanente WHATSAPP_SESSION_B64."""
+    exp = export_bridge_session()
+    b64_str = exp.get("b64", "")
+    if not b64_str:
+        return Response(content="<h3>No hay sesión activa para copiar. Primero vincula tu WhatsApp.</h3>", media_type="text/html")
+
+    html_page = f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copiar Sesión Permanente de WhatsApp</title>
+  <style>
+    body {{ font-family: sans-serif; background: #0f172a; color: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; text-align: center; }}
+    .card {{ background: #1e293b; padding: 32px 24px; border-radius: 16px; border: 1px solid #334155; max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }}
+    h2 {{ margin-bottom: 12px; color: #38bdf8; }}
+    p {{ color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin-bottom: 24px; }}
+    button {{ background: #22c55e; color: #000; border: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; width: 100%; }}
+    button:hover {{ background: #16a34a; transform: scale(1.02); }}
+    .copied {{ background: #38bdf8 !important; color: #000 !important; }}
+    .step {{ text-align: left; background: #0f172a; padding: 14px; border-radius: 10px; font-size: 0.8rem; color: #cbd5e1; margin-top: 20px; }}
+    .step code {{ color: #38bdf8; font-weight: 700; }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔑 Sesión Permanente de WhatsApp</h2>
+    <p>Haz clic en el botón de abajo para copiar tu clave de sesión directamente al portapapeles de tu celular o computadora.</p>
+    <button id="copyBtn" onclick="copyToken()">📋 Copiar Clave Permanente</button>
+    <div class="step">
+      <strong>Paso siguiente en Render:</strong><br>
+      1. Entra a <code>dashboard.render.com</code> &gt; tu servicio <code>agente-hgba</code> &gt; <code>Environment</code>.<br>
+      2. Agrega la variable:<br>
+         Key: <code>WHATSAPP_SESSION_B64</code><br>
+         Value: <em>(Pega lo que copiaste)</em><br>
+      3. Guarda cambios. ¡Y listo! WhatsApp nunca más se desconectará.
+    </div>
+  </div>
+  <textarea id="tokenBox" style="position:absolute;left:-9999px;">{b64_str}</textarea>
+  <script>
+    function copyToken() {{
+      const copyText = document.getElementById("tokenBox");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyText.value).then(() => {{
+        const btn = document.getElementById("copyBtn");
+        btn.textContent = "✓ ¡Copiado al portapapeles!";
+        btn.classList.add("copied");
+        setTimeout(() => {{
+          btn.textContent = "📋 Copiar Clave Permanente";
+          btn.classList.remove("copied");
+        }}, 3000);
+      }});
+    }}
+  </script>
+</body>
+</html>"""
+    return Response(content=html_page, media_type="text/html")
+
 @app.post("/api/bridge/session/import")
 async def import_bridge_session(request: Request):
     """Importa y activa una sesión de Baileys desde Base64 o payload JSON."""
