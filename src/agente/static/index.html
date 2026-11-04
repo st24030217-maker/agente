@@ -1387,6 +1387,184 @@
         padding: 16px;
       }
     }
+
+    /* =========================================================
+       REDISEÑO · PANEL DE CONTROL (barra lateral + vistas)
+       ========================================================= */
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .side-nav {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      padding: 22px 14px;
+      border-right: 1px solid var(--border);
+      background: rgba(9, 9, 12, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .side-brand { display: flex; align-items: center; gap: 11px; padding: 2px 8px; }
+    .side-brand-mark {
+      width: 34px; height: 34px; border-radius: 10px; flex: none;
+      display: grid; place-items: center;
+      background: linear-gradient(140deg, #b67cff, #6d28d9);
+      color: #fff; font-weight: 800; font-size: 0.95rem;
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+    }
+    .side-brand-text strong { display: block; font-size: 0.92rem; letter-spacing: -0.01em; }
+    .side-brand-text span { font-size: 0.64rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; }
+
+    .side-nav .side-nav-list {
+      display: flex; flex-direction: column; align-items: stretch; gap: 3px;
+      width: auto; padding: 0; background: none; border: none; border-radius: 0;
+      box-shadow: none; overflow: visible;
+    }
+    .side-nav .nav-segmented-btn {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600; text-align: left;
+      color: var(--text-muted); border: 1px solid transparent; box-shadow: none;
+    }
+    .side-nav .nav-segmented-btn svg { width: 18px; height: 18px; flex: none; }
+    .side-nav .nav-segmented-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.04); }
+    .side-nav .nav-segmented-btn.active { color: #fff; background: #17171e; border-color: #292932; box-shadow: none; }
+    .side-nav .nav-segmented-btn.active svg { color: var(--accent-violet); }
+    .nav-count {
+      margin-left: auto; font-style: normal; font-family: var(--font-mono);
+      font-size: 0.68rem; padding: 1px 7px; border-radius: 999px;
+      background: #1f1f28; color: var(--text-muted);
+    }
+    .side-foot { margin-top: auto; padding: 0 8px; font-size: 0.68rem; color: var(--text-dim); line-height: 1.5; }
+
+    .app-main {
+      min-width: 0; width: 100%; max-width: 1360px;
+      padding: 24px 32px 48px;
+      display: flex; flex-direction: column; gap: 22px;
+    }
+    .app-main .top-utility-strip { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; height: auto; }
+    .page-heading h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+    .page-heading p { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+    .app-main .workspace-frame { max-width: none; margin: 0; padding: 0; gap: 20px; }
+
+    /* Inicio: chat + columna de actividad */
+    .app-main .executive-metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 1040px) {
+      .app-main .executive-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    .app-main .agent-workspace-grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; min-height: 0; }
+    .app-main .chat-card-panel { height: 560px; min-height: 560px; }
+    .agent-header-brand { display: flex; align-items: center; gap: 10px; }
+    .chat-avatar-slot { position: relative; width: 46px; height: 46px; flex: none; }
+    .chat-avatar-slot .avatar-card-panel {
+      position: absolute; inset: 0; width: 46px;
+      height: 46px !important; min-height: 0 !important; animation: none;
+    }
+
+    .home-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .home-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .home-card-grow { flex: 1; min-height: 0; }
+    .home-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .home-card-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+    .home-pill { font-size: 0.64rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #1f1f28; color: var(--text-muted); }
+    .home-pill.on { background: rgba(50, 212, 102, 0.14); color: var(--accent-green); }
+    .home-pill.off { background: rgba(245, 158, 11, 0.14); color: var(--accent-amber); }
+    .home-card-text { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+    .home-actions { display: flex; gap: 8px; }
+    .home-btn {
+      flex: 1; padding: 9px 10px; border-radius: 10px; cursor: pointer;
+      border: 1px solid var(--border-hover); background: #17171e; color: #fff;
+      font: 600 0.76rem var(--font); transition: var(--transition);
+    }
+    .home-btn:hover { background: #1e1e27; }
+    .home-btn.primary { background: #fff; color: #0a0a0a; border-color: #fff; }
+    .home-btn.primary:hover { background: #e6e6ea; }
+    .home-link { background: none; border: none; cursor: pointer; color: #c4a1ff; font: 600 0.75rem var(--font); }
+    .home-list { display: flex; flex-direction: column; overflow-y: auto; max-height: 372px; margin: 0 -6px; scrollbar-width: thin; scrollbar-color: #2e2e38 transparent; }
+    .home-lead { display: flex; align-items: center; gap: 10px; padding: 9px 6px; border-radius: 10px; cursor: pointer; }
+    .home-lead:hover { background: #17171e; }
+    .home-lead-avatar {
+      width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center;
+      background: #1d1d25; color: #d4d4dc; font-weight: 700; font-size: 0.72rem;
+    }
+    .home-lead-main { min-width: 0; flex: 1; }
+    .home-lead-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .home-lead-meta { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .home-status { flex: none; font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #1f1f28; color: var(--text-muted); }
+    .home-status.s-contactado { color: #38bdf8; background: rgba(56, 189, 248, 0.12); }
+    .home-status.s-respondio, .home-status.s-interesado, .home-status.s-cita_agendada { color: var(--accent-green); background: rgba(50, 212, 102, 0.12); }
+    .home-status.s-nuevo { color: #c4a1ff; background: rgba(168, 85, 247, 0.12); }
+    .home-status.s-error_envio { color: #f87171; background: rgba(248, 113, 113, 0.12); }
+    .home-empty { font-size: 0.78rem; color: var(--text-dim); padding: 14px 6px; text-align: center; }
+
+    /* Las secciones (antes un modal encima del chat) ahora son vistas en línea */
+    .app-main .leads-modal {
+      position: static; width: auto; height: auto; padding: 0; z-index: auto;
+      background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+      display: none; opacity: 1;
+    }
+    .app-main .leads-modal.active { display: block !important; }
+    .app-shell:has(#leads-modal.active) #view-home { display: none; }
+    .app-main .leads-sheet { max-width: none; max-height: none; background: none; border: none; border-radius: 0; box-shadow: none; overflow: visible; }
+    .app-main .sheet-header, .app-main .sheet-tabs { display: none; }
+    .app-main .sheet-body { padding: 0; overflow: visible; max-width: 1000px; }
+
+    @media (max-width: 1180px) {
+      .app-main .agent-workspace-grid { grid-template-columns: 1fr; }
+      .home-side { display: grid; grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Celular: barra de navegación inferior tipo app */
+    @media (max-width: 860px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .side-nav {
+        position: fixed; top: auto; bottom: 0; left: 0; right: 0; height: auto; z-index: 60;
+        flex-direction: row; gap: 0; padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+        border-right: none; border-top: 1px solid var(--border); background: rgba(9, 9, 12, 0.95);
+      }
+      .side-brand, .side-foot { display: none; }
+      .side-nav .side-nav-list { flex-direction: row; width: 100%; justify-content: space-around; gap: 0; }
+      .side-nav .nav-segmented-btn {
+        position: relative; flex: 1; flex-direction: column; gap: 3px;
+        padding: 6px 2px; font-size: 0.64rem; text-align: center;
+        background: none !important; border: none !important;
+      }
+      .side-nav .nav-segmented-btn svg { width: 21px; height: 21px; }
+      .nav-count {
+        position: absolute; top: 1px; left: calc(50% + 5px); margin: 0;
+        font-size: 0.56rem; padding: 0 5px; background: var(--accent-violet); color: #fff;
+      }
+      .app-main { padding: 16px 14px calc(88px + env(safe-area-inset-bottom)); gap: 16px; }
+      .app-main .top-utility-strip { flex-direction: column; align-items: stretch; gap: 12px; }
+      .app-main .utility-controls { justify-content: flex-start; }
+      .page-heading h1 { font-size: 1.2rem; }
+      .app-main .top-utility-strip .utility-controls { flex-wrap: nowrap; gap: 6px; }
+      .app-main #thinking-orb-badge { display: none; }
+      .app-main .voice-select-dark { min-width: 0; flex: 1; }
+      .side-nav .nav-segmented-btn:hover:not(.active) { color: var(--text-muted); }
+      /* Métricas compactas en 3 columnas; el reloj sobra en el celular */
+      .app-main #card-laguna-time { display: none; }
+      .app-main .executive-metrics-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .app-main .exec-metric-card { min-height: 0; padding: 12px; gap: 4px; }
+      .app-main .exec-accent-pill, .app-main .exec-metric-footer { display: none; }
+      .app-main .exec-metric-tag { font-size: 0.58rem; line-height: 1.3; }
+      .app-main .exec-metric-val { font-size: 1.6rem; }
+      .app-main .chat-card-panel { height: auto; min-height: 440px; padding: 18px 16px; }
+      .home-side { display: flex; }
+      .home-list { max-height: none; }
+    }
   </style>
   <link rel="stylesheet" href="/prompt-bar.css">
   <link rel="stylesheet" href="/AnimatedList.css">
@@ -1400,15 +1578,29 @@
   <!-- Audio persistente para voz TTS -->
   <audio id="voice-player" playsinline preload="auto"></audio>
 
-  <div class="workspace-frame">
-    <!-- 1. TOP BAR -->
-    <header class="top-utility-strip">
-      <div class="status-badge-live">
-        <span class="live-dot"></span>
-        <span class="status-badge-text">SEBAX AI</span>
-        <span class="status-badge-sub">SSSSOLUTIONS</span>
+  <div class="app-shell">
+    <!-- Navegación: barra lateral en escritorio, barra inferior en celular -->
+    <aside class="side-nav" aria-label="Navegación principal">
+      <div class="side-brand">
+        <span class="side-brand-mark">S</span>
+        <div class="side-brand-text"><strong>Sebax AI</strong><span>SSSSolutions</span></div>
       </div>
+      <nav class="nav-segmented-bar side-nav-list">
+        <button class="nav-segmented-btn active" id="nav-btn-chat" onclick="openChatTab()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span>Inicio</span></button>
+        <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Prospectos</span><em class="nav-count" id="nav-leads-count">–</em></button>
+        <button class="nav-segmented-btn" id="btn-open-demos" onclick="openDemosTab(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Prototipos</span></button>
+        <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M16 3v3M8 3v3M3 10h18"/></svg><span>Agenda</span></button>
+        <button class="nav-segmented-btn" id="btn-open-wa" onclick="openWhatsAppTab(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5z"/></svg><span>WhatsApp</span></button>
+      </nav>
+      <div class="side-foot">Torreón · Gómez Palacio · Lerdo</div>
+    </aside>
 
+    <main class="app-main">
+      <header class="top-utility-strip">
+        <div class="page-heading">
+          <h1 id="page-title">Inicio</h1>
+          <p id="page-sub">Resumen comercial de La Laguna</p>
+        </div>
       <div class="utility-controls">
         <button id="wa-status-btn" onclick="openWhatsAppTab()" title="Conexión de WhatsApp">
           <span class="wa-status-dot" id="wa-status-dot"></span>
@@ -1435,171 +1627,181 @@
           </svg>
         </button>
       </div>
-    </header>
+      </header>
 
-    <!-- 2. NAVIGATION ROW -->
-    <nav class="nav-workspace-row">
-      <div class="nav-segmented-bar">
-        <button class="nav-segmented-btn active" id="nav-btn-chat" onclick="openChatTab()">Chat &amp; Asistente</button>
-        <button class="nav-segmented-btn" id="btn-open-leads" onclick="openLeadsModal(event)">Prospectos (<span id="nav-leads-count">77</span>)</button>
-        <button class="nav-segmented-btn" id="btn-open-demos" onclick="openDemosTab(event)">Prototipos Web</button>
-        <button class="nav-segmented-btn" id="btn-open-agenda" onclick="openAgendaModal(event)">Citas y Agenda</button>
-        <button class="nav-segmented-btn" id="btn-open-wa" onclick="openWhatsAppTab(event)">Conectar WhatsApp</button>
-      </div>
-    </nav>
+      <div class="workspace-frame" id="view-home">
+      <section class="executive-metrics-grid">
+        <!-- Card 1: Reloj Laguna -->
+        <div class="exec-metric-card" id="card-laguna-time">
+          <div class="exec-metric-header">
+            <span class="exec-metric-tag">HORA LOCAL · LA LAGUNA</span>
+            <span class="exec-accent-pill">UTC-6</span>
+          </div>
+          <div class="exec-metric-val mono-time" id="laguna-live-time">17:00:00</div>
+          <div class="exec-metric-footer">
+            <span id="laguna-live-date">Sábado, 31 de Octubre 2026</span> · Torreón · Gómez · Lerdo
+          </div>
+        </div>
+  
+        <!-- Card 2: Total Prospectos -->
+        <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver tabla de prospectos">
+          <div class="exec-metric-header">
+            <span class="exec-metric-tag">TOTAL PROSPECTOS</span>
+            <span class="exec-accent-pill green">EN VIVO</span>
+          </div>
+          <div class="exec-metric-val mono-val" id="stat-total-dash">–</div>
+          <div class="exec-metric-footer">
+            <span class="accent-green-tag">▲ Activos</span> en Torreón, Gómez y Lerdo
+          </div>
+        </div>
+  
+        <!-- Card 3: Propuestas Enviadas -->
+        <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver contactados">
+          <div class="exec-metric-header">
+            <span class="exec-metric-tag">PROPUESTAS ENVIADAS</span>
+            <span class="exec-accent-pill blue">WHATSAPP</span>
+          </div>
+          <div class="exec-metric-val mono-val" id="stat-contacted-dash">–</div>
+          <div class="exec-metric-footer">
+            <span>Portafolio oficial e Instagram SSSSolutions</span>
+          </div>
+        </div>
+  
+        <!-- Card 4: Reuniones Comerciales -->
+        <div class="exec-metric-card clickable" onclick="openAgendaModal()" title="Ver agenda de citas">
+          <div class="exec-metric-header">
+            <span class="exec-metric-tag">REUNIONES COMERCIALES</span>
+            <span class="exec-accent-pill violet">AGENDA</span>
+          </div>
+          <div class="exec-metric-val mono-val" id="stat-agenda-dash">–</div>
+          <div class="exec-metric-footer">
+            <span class="accent-green-tag">Confirmada</span> en agenda para llamada
+          </div>
+        </div>
+      </section>
 
-    <!-- 3. HERO INTERACTION (3D Head + Chat) -->
-    <section class="agent-workspace-grid">
-      <!-- Columna Avatar Oficial Sebax AI - Crystalized Ball Core Unit (React Bits) -->
-      <div class="avatar-card-panel" id="avatar-stage">
-        <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
-        <div id="canvas-container" class="crystalized-ball"></div>
-      </div>
-
-      <!-- Columna Diálogo y Entrada -->
-      <div class="chat-card-panel">
-        <div class="chat-card-header">
-          <div class="agent-header-brand">
-            <span class="agent-brand-title">SEBAX AI</span>
-            <div class="thinking-orb-badge" title="Estado cognitivo">
-              <canvas id="speech-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
+        <section class="agent-workspace-grid">
+        <div class="chat-card-panel">
+          <div class="chat-card-header">
+            <div class="agent-header-brand">
+              <div class="chat-avatar-slot">
+        <div class="avatar-card-panel" id="avatar-stage">
+          <span id="agent-state" class="avatar-panel-status" style="display:none;">Listo</span>
+          <div id="canvas-container" class="crystalized-ball"></div>
+        </div>
+              </div>
+              <span class="agent-brand-title">SEBAX AI</span>
+              <div class="thinking-orb-badge" title="Estado cognitivo">
+                <canvas id="speech-thinking-orb" width="14" height="14" style="border-radius:50%;"></canvas>
+              </div>
+            </div>
+  
+            <div class="audio-waveform" id="panel-waveform" title="Monitor de voz neuronal">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
             </div>
           </div>
-
-          <div class="audio-waveform" id="panel-waveform" title="Monitor de voz neuronal">
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
-            <span class="wave-bar"></span>
+  
+          <!-- Speech Bubble -->
+          <div class="speech-bubble" id="speech-bubble">
+            Sebax en línea. Soy tu agente comercial y técnico de SSSSolutions. Escribe una orden, consulta prospectos o dicta por voz.
           </div>
-        </div>
-
-        <!-- Speech Bubble -->
-        <div class="speech-bubble" id="speech-bubble">
-          Sebax en línea. Soy tu agente comercial y técnico de SSSSolutions. Escribe una orden, consulta prospectos o dicta por voz.
-        </div>
-
-        <div class="speech-footer">
-          <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            </svg>
-            <span class="btn-text">Escuchar voz</span>
-          </button>
-        </div>
-
-        <!-- React Bits PromptBar (@react-bits/PromptBar-JS-CSS) -->
-        <div class="prompt-bar" id="prompt-bar-root">
-          <!-- Floating Command / Model Menu -->
-          <div class="prompt-bar__menu" id="prompt-menu" style="display:none;"></div>
-
-          <div class="prompt-bar__field" id="prompt-field">
-            <canvas id="prompt-sparks" class="prompt-bar__sparks"></canvas>
-            
-            <textarea
-              id="user-input"
-              class="prompt-bar__input"
-              rows="1"
-              placeholder="Escribe una orden o escribe / para comandos..."
-              autocomplete="off"
-            ></textarea>
-
-            <div class="prompt-bar__bar">
-              <button type="button" class="prompt-bar__tool" id="prompt-plus-btn" title="Comandos y fuentes">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-              </button>
-
-              <button type="button" class="prompt-bar__pick" id="prompt-model-btn" title="Modelo cognitivo">
-                <span>Gemini 3.5 Flash</span>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </button>
-
-              <div class="prompt-bar__spacer"></div>
-
-              <button type="button" class="prompt-bar__tool" id="mic-btn" title="Dictar por voz">
-                <svg id="mic-idle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="23"/>
-                  <line x1="8" y1="23" x2="16" y2="23"/>
-                </svg>
-                <div id="mic-eq-icon" class="prompt-bar__eq" style="display:none;">
-                  <i></i><i></i><i></i>
-                </div>
-              </button>
-
-              <button type="button" class="prompt-bar__send" id="send-btn" title="Enviar orden">
-                <svg class="prompt-bar__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="12" y1="19" x2="12" y2="5"></line>
-                  <polyline points="5 12 12 5 19 12"></polyline>
-                </svg>
-              </button>
+  
+          <div class="speech-footer">
+            <button id="replay-voice-btn" class="mini-voice-btn" onclick="toggleReplayVoice()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+              <span class="btn-text">Escuchar voz</span>
+            </button>
+          </div>
+  
+          <!-- React Bits PromptBar (@react-bits/PromptBar-JS-CSS) -->
+          <div class="prompt-bar" id="prompt-bar-root">
+            <!-- Floating Command / Model Menu -->
+            <div class="prompt-bar__menu" id="prompt-menu" style="display:none;"></div>
+  
+            <div class="prompt-bar__field" id="prompt-field">
+              <canvas id="prompt-sparks" class="prompt-bar__sparks"></canvas>
+              
+              <textarea
+                id="user-input"
+                class="prompt-bar__input"
+                rows="1"
+                placeholder="Escribe una orden o escribe / para comandos..."
+                autocomplete="off"
+              ></textarea>
+  
+              <div class="prompt-bar__bar">
+                <button type="button" class="prompt-bar__tool" id="prompt-plus-btn" title="Comandos y fuentes">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+  
+                <button type="button" class="prompt-bar__pick" id="prompt-model-btn" title="Modelo cognitivo">
+                  <span>Gemini 3.5 Flash</span>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+  
+                <div class="prompt-bar__spacer"></div>
+  
+                <button type="button" class="prompt-bar__tool" id="mic-btn" title="Dictar por voz">
+                  <svg id="mic-idle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  <div id="mic-eq-icon" class="prompt-bar__eq" style="display:none;">
+                    <i></i><i></i><i></i>
+                  </div>
+                </button>
+  
+                <button type="button" class="prompt-bar__send" id="send-btn" title="Enviar orden">
+                  <svg class="prompt-bar__glyph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- 4. EXECUTIVE METRICS GRID (4 Symmetrical Panels) -->
-    <section class="executive-metrics-grid">
-      <!-- Card 1: Reloj Laguna -->
-      <div class="exec-metric-card" id="card-laguna-time">
-        <div class="exec-metric-header">
-          <span class="exec-metric-tag">HORA LOCAL · LA LAGUNA</span>
-          <span class="exec-accent-pill">UTC-6</span>
-        </div>
-        <div class="exec-metric-val mono-time" id="laguna-live-time">17:00:00</div>
-        <div class="exec-metric-footer">
-          <span id="laguna-live-date">Sábado, 31 de Octubre 2026</span> · Torreón · Gómez · Lerdo
-        </div>
-      </div>
+          <aside class="home-side">
+            <div class="home-card">
+              <div class="home-card-head">
+                <span class="home-card-title">Piloto automático</span>
+                <span class="home-pill" id="home-autopilot-pill">–</span>
+              </div>
+              <p class="home-card-text" id="home-autopilot-text">Cargando estado...</p>
+              <div class="home-actions">
+                <button class="home-btn primary" onclick="triggerAutopilotNowUi()">Buscar ahora</button>
+                <button class="home-btn" onclick="requestDailyReportUi()">Enviar reporte</button>
+              </div>
+            </div>
 
-      <!-- Card 2: Total Prospectos -->
-      <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver tabla de prospectos">
-        <div class="exec-metric-header">
-          <span class="exec-metric-tag">TOTAL PROSPECTOS</span>
-          <span class="exec-accent-pill green">EN VIVO</span>
-        </div>
-        <div class="exec-metric-val mono-val" id="stat-total-dash">109</div>
-        <div class="exec-metric-footer">
-          <span class="accent-green-tag">▲ Activos</span> en Torreón, Gómez y Lerdo
-        </div>
+            <div class="home-card home-card-grow">
+              <div class="home-card-head">
+                <span class="home-card-title">Prospectos recientes</span>
+                <button class="home-link" onclick="openLeadsModal(event)">Ver todos</button>
+              </div>
+              <div class="home-list" id="home-recent-leads">
+                <div class="home-empty">Cargando prospectos...</div>
+              </div>
+            </div>
+          </aside>
+        </section>
       </div>
 
-      <!-- Card 3: Propuestas Enviadas -->
-      <div class="exec-metric-card clickable" onclick="openLeadsModal()" title="Ver contactados">
-        <div class="exec-metric-header">
-          <span class="exec-metric-tag">PROPUESTAS ENVIADAS</span>
-          <span class="exec-accent-pill blue">WHATSAPP</span>
-        </div>
-        <div class="exec-metric-val mono-val" id="stat-contacted-dash">7</div>
-        <div class="exec-metric-footer">
-          <span>Portafolio oficial e Instagram SSSSolutions</span>
-        </div>
-      </div>
-
-      <!-- Card 4: Reuniones Comerciales -->
-      <div class="exec-metric-card clickable" onclick="openAgendaModal()" title="Ver agenda de citas">
-        <div class="exec-metric-header">
-          <span class="exec-metric-tag">REUNIONES COMERCIALES</span>
-          <span class="exec-accent-pill violet">AGENDA</span>
-        </div>
-        <div class="exec-metric-val mono-val" id="stat-agenda-dash">1</div>
-        <div class="exec-metric-footer">
-          <span class="accent-green-tag">Confirmada</span> en agenda para llamada
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- MODAL / DRAWER -->
   <div class="leads-modal" id="leads-modal">
     <div class="leads-sheet" onclick="event.stopPropagation()">
       <div class="sheet-header">
@@ -1894,6 +2096,8 @@
         </div>
       </div>
     </div>
+  </div>
+    </main>
   </div>
 
   <script>
@@ -3267,6 +3471,94 @@
         });
       });
     }
+  </script>
+
+  <script>
+    // Rediseño: título de cada vista, inicio con actividad real y datos cargados al abrir.
+    (function () {
+      const VIEWS = {
+        chat: ["Inicio", "Resumen comercial de La Laguna"],
+        leads: ["Prospectos", "Piloto automático, campañas y registro de negocios"],
+        demos: ["Prototipos web", "Demos interactivos para mostrar a clientes"],
+        agenda: ["Agenda", "Citas y llamadas con prospectos"],
+        whatsapp: ["WhatsApp", "Conexión del número que usa Sebax"],
+      };
+      const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+      const baseUpdateNav = window.updateNavButtons;
+      window.updateNavButtons = function (tab) {
+        baseUpdateNav(tab);
+        const [title, sub] = VIEWS[tab] || VIEWS.chat;
+        document.getElementById("page-title").textContent = title;
+        document.getElementById("page-sub").textContent = sub;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      const STATUS_LABEL = {
+        nuevo: "Nuevo", contactado: "Contactado", respondio: "Respondió", interesado: "Interesado",
+        cita_agendada: "Cita", no_contesto: "Sin respuesta", error_envio: "Error", pendiente_confirmacion: "Pendiente",
+      };
+
+      function renderRecentLeads() {
+        const box = document.getElementById("home-recent-leads");
+        if (!box) return;
+        const leads = (typeof allLeads !== "undefined" ? allLeads : []).slice();
+        if (!leads.length) {
+          box.innerHTML = '<div class="home-empty">Aún no hay prospectos registrados.</div>';
+          return;
+        }
+        leads.sort((a, b) => String(b.last_reply_at || b.created_at || "").localeCompare(String(a.last_reply_at || a.created_at || "")));
+        box.innerHTML = leads.slice(0, 8).map((l) => {
+          const name = l.name || "Prospecto";
+          const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+          const status = (l.status || "nuevo").toLowerCase();
+          const meta = [l.niche, l.city].filter(Boolean).join(" · ");
+          return `<div class="home-lead" role="button" tabindex="0" onclick="openLeadsModal(event)">
+              <div class="home-lead-avatar">${esc(initials)}</div>
+              <div class="home-lead-main">
+                <div class="home-lead-name">${esc(name)}</div>
+                <div class="home-lead-meta">${esc(meta)}</div>
+              </div>
+              <span class="home-status s-${esc(status)}">${esc(STATUS_LABEL[status] || status)}</span>
+            </div>`;
+        }).join("");
+      }
+
+      const baseFilterAndRender = window.filterAndRenderLeads;
+      window.filterAndRenderLeads = function () {
+        baseFilterAndRender();
+        renderRecentLeads();
+      };
+
+      async function refreshHomeAutopilot() {
+        const pill = document.getElementById("home-autopilot-pill");
+        const text = document.getElementById("home-autopilot-text");
+        try {
+          const res = await fetch("/api/autopilot");
+          if (!res.ok) throw new Error(res.status);
+          const cfg = await res.json();
+          pill.textContent = cfg.enabled ? "Activo" : "En pausa";
+          pill.className = "home-pill " + (cfg.enabled ? "on" : "off");
+          text.textContent = cfg.enabled
+            ? `Busca negocios cada ${cfg.interval_minutes || 30} min. Contactados hoy: ${cfg.sent_today || 0}.` + (cfg.last_run ? ` Última ronda: ${cfg.last_run}.` : "")
+            : "En pausa. Reanúdalo desde Prospectos cuando quieras.";
+        } catch (e) {
+          pill.textContent = "Sin conexión";
+          pill.className = "home-pill";
+          text.textContent = "No se pudo leer el estado del piloto automático.";
+        }
+      }
+
+      function refreshHome() {
+        if (document.getElementById("leads-modal").classList.contains("active")) return;
+        loadLeadsData();
+        loadAppointmentsData();
+        refreshHomeAutopilot();
+      }
+
+      refreshHome();
+      setInterval(refreshHome, 30000);
+    })();
   </script>
 </body>
 </html>
