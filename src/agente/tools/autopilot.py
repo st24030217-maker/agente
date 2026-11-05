@@ -125,7 +125,7 @@ def run_autopilot_cycle() -> dict:
             if not _is_excluded_business(item.get("name", ""), item.get("niche", ""), item.get("notes", "")):
                 lead_id = len(existing_leads) + 1
                 item_niche = item.get("niche", niche)
-                pitch = generate_pitch(business_name=item["name"], niche=item_niche)
+                pitch = generate_pitch(business_name=item["name"], niche=item_niche, demo_slug=item.get("demo_slug", ""), phone=item.get("phone", ""))
                 new_rec = {
                     "id": lead_id,
                     "name": item["name"],
@@ -153,7 +153,7 @@ def run_autopilot_cycle() -> dict:
         item_niche = item.get("niche", niche)
         pitch = item.get("pitch")
         if not pitch:
-            pitch = generate_pitch(business_name=item["name"], niche=item_niche)
+            pitch = generate_pitch(business_name=item["name"], niche=item_niche, demo_slug=item.get("demo_slug", ""), phone=item.get("phone", ""))
             item["pitch"] = pitch
 
         send_result = send_whatsapp_message(to_number=item["phone"], message=pitch)
@@ -290,11 +290,14 @@ def run_followup_cycle(max_followups: int = 1) -> dict:
         phone = l.get("phone", "")
 
         if target_stage == 1:
-            # Toque 2: 48 horas sin respuesta
+            # Toque 2: 48 horas sin respuesta con demo directa
+            demo_slug = l.get("demo_slug", "")
+            demo_url = f"https://agente-hgba.onrender.com/demo/{demo_slug}" if demo_slug else "https://st24030217-maker.github.io/cv-salinas/"
             msg = (
-                f"Hola buen dia. Le escribo brevemente de SSSSolutions para dar seguimiento a la propuesta que le comparti para {name}. "
-                f"¿Tuvieron oportunidad de revisar nuestro portafolio oficial (https://st24030217-maker.github.io/cv-salinas/)? "
-                f"Con gusto podemos prepararles un prototipo visual exclusivo sin costo si desean ver como luciria su sitio web."
+                f"¡Hola! Buenas tardes equipo de {name}. Les escribe de nuevo Sebastián de SSSSolutions. "
+                f"¿Tuvieron oportunidad de abrir la muestra que les preparé en su celular?\n\n"
+                f"👉 {demo_url}\n\n"
+                f"Con gusto podemos ajustarle platillos, fotos o colores sin ningún costo para que vean cómo funcionaría con sus clientes."
             )
             res = send_whatsapp_message(to_number=phone, message=msg)
             if is_delivery_confirmed(res) or is_delivery_pending(res):
@@ -304,11 +307,12 @@ def run_followup_cycle(max_followups: int = 1) -> dict:
                 sent_count += 1
                 sent_details.append(f"{name} ({phone}) [Touch 2 - 48h]")
         elif target_stage == 2:
-            # Toque 3: 5 días sin respuesta (cierre elegante)
+            # Toque 3: 5 días sin respuesta (cierre elegante con demo guardada)
+            demo_slug = l.get("demo_slug", "")
+            demo_url = f"https://agente-hgba.onrender.com/demo/{demo_slug}" if demo_slug else "https://st24030217-maker.github.io/cv-salinas/"
             msg = (
-                f"Hola buen dia. Entiendo que pueden estar con agenda ocupada en {name}. "
-                f"No deseo insistir ni saturar su WhatsApp, solo queria dejarles a la mano nuestro contacto por si mas adelante deciden renovar su presencia digital o requieren apoyo en diseño y desarrollo web. "
-                f"Pueden ver nuestros proyectos en https://st24030217-maker.github.io/cv-salinas/ o escribirnos por Instagram https://www.instagram.com/ssss.olutions. Mucho exito con sus proyectos."
+                f"¡Hola! Buen día equipo de {name}. Entiendo que andan ocupados en el negocio y no deseo saturar su WhatsApp. "
+                f"Solo quería dejarles a la mano su demo ({demo_url}) y nuestro Instagram (@ssss.olutions) por si más adelante deciden renovar su menú y recibir pedidos directos sin pagar comisiones de apps. ¡Mucho éxito con las ventas!"
             )
             res = send_whatsapp_message(to_number=phone, message=msg)
             if is_delivery_confirmed(res) or is_delivery_pending(res):

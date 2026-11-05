@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 import uvicorn
 import edge_tts
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -422,14 +422,45 @@ async def root_post_chat(request: Request):
         pass
     return {"detail": "Endpoint de chat activo en /api/chat"}
 
+_DEMO_VIEW_ALERT_CACHE = {}
+
+def _alert_demo_viewed(slug: str, demo: dict):
+    """Notifica a Sebastián cuando un prospecto abre su demo en vivo (Radar de Visitas)."""
+    import time
+    now = time.time()
+    last = _DEMO_VIEW_ALERT_CACHE.get(slug, 0)
+    # Debounce de 30 min por negocio
+    if now - last < 1800:
+        return
+    _DEMO_VIEW_ALERT_CACHE[slug] = now
+
+    b_name = demo.get("business_name", slug)
+    phone = demo.get("phone", "N/A")
+    alert = (
+        f"🔥 ¡ALERTA CALIENTE DE PROSPECTO!\n\n"
+        f"El negocio '{b_name}' ({phone}) acaba de abrir su demo interactiva en su celular.\n"
+        f"Demo: https://agente-hgba.onrender.com/demo/{slug}\n\n"
+        f"💡 Tip: Está viendo el prototipo en este momento. Es el momento perfecto para escribirle por WhatsApp y cerrar la llamada."
+    )
+    try:
+        from agente.tools.whatsapp import send_whatsapp_message
+        send_whatsapp_message(to_number="5218719164677", message=alert)
+    except Exception as e:
+        logger.warning("No se pudo enviar alerta de demo vista: %s", e)
+
 @app.get("/demo/{slug}", response_class=Response)
-async def view_demo(slug: str):
-    """Visualizador público del prototipo web interactivo generado para el prospecto."""
+async def view_demo(slug: str, background_tasks: BackgroundTasks):
+    """Visualizador público del prototipo web interactivo generado para el prospecto con Radar de Visitas."""
     demo = get_demo(slug)
     if not demo:
         clean_name = slug.replace("-", " ").title()
         demo_res = generate_business_demo(business_name=clean_name, niche="cafeteria", city="Torreón, Coahuila")
         demo = get_demo(demo_res["slug"])
+    
+    # Disparar alerta en segundo plano
+    if demo:
+        background_tasks.add_task(_alert_demo_viewed, slug, demo)
+
     html_content = render_demo_html(demo)
     return Response(content=html_content, media_type="text/html")
 

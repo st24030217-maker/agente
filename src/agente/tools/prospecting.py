@@ -345,42 +345,47 @@ def search_business_leads(niche: str = "", city: str = "Torreón, Gómez Palacio
     lines.append("\nPuedes guardar estos prospectos con save_lead o ejecutar run_autonomous_campaign para contactarlos automáticamente por WhatsApp.")
     return "\n".join(lines)
 
-def generate_pitch(business_name: str, niche: str = "", contact_name: str = "") -> str:
-    """Genera una propuesta personalizada, concisa y de alta conversión adaptada al giro del negocio en La Laguna."""
+def generate_pitch(business_name: str, niche: str = "", contact_name: str = "", demo_slug: str = "", phone: str = "") -> str:
+    """Genera una propuesta personalizada, concisa y de alta conversión con enlace directo al prototipo interactivo del negocio."""
     clean_name = re.sub(r"\s*[-|–|—|•|/|\|].*$", "", business_name).strip()
     clean_name = re.sub(r"(?i)\b(calle|av|avenida|blvd|bulevar|col|colonia|torreon|gomez|lerdo|coahuila|durango)\b.*$", "", clean_name).strip()
     if not clean_name:
         clean_name = business_name.strip()
 
-    greeting = f"Hola {contact_name}," if contact_name else f"Qué tal, buen día equipo de {clean_name},"
+    greeting = f"Hola {contact_name}," if contact_name else f"¡Hola! Buenas tardes equipo de {clean_name},"
     niche_lower = (niche or "").lower()
 
     if any(k in niche_lower for k in ["cafe", "cafeter", "coffee"]):
-        benefit = "recibir pedidos y reservas directo a su WhatsApp sin pagar comisiones de apps intermediarias"
+        benefit = "recibir pedidos y reservas directos a este WhatsApp sin pagar comisiones de apps intermediarias"
     elif any(k in niche_lower for k in ["restauran", "comida", "bar", "pizza", "taco", "hamburgues", "gastronom", "cocina"]):
-        benefit = "recibir pedidos directos a su WhatsApp con un menú digital ultra rápido, ahorrándose comisiones de delivery"
+        benefit = "recibir pedidos directos a su WhatsApp con un menú interactivo ultra rápido sin regalarle comisiones a apps"
     elif any(k in niche_lower for k in ["pastel", "reposter", "panader", "horno", "pan"]):
-        benefit = "mostrar su catálogo de repostería y pasteles para que sus clientes coticen y aparten fechas fácilmente por WhatsApp"
+        benefit = "mostrar su catálogo para que sus clientes coticen y aparten pedidos fácil por WhatsApp"
     elif any(k in niche_lower for k in ["flor", "florer", "arreglo", "ramo"]):
-        benefit = "exhibir sus ramos y arreglos de temporada y coordinar pedidos y entregas directo por WhatsApp"
+        benefit = "exhibir sus arreglos y coordinar pedidos y entregas directo por WhatsApp"
     elif any(k in niche_lower for k in ["salon", "evento", "banquet", "fiesta"]):
-        benefit = "mostrar sus paquetes de eventos y disponibilidad para recibir solicitudes de cotización al instante"
+        benefit = "mostrar sus paquetes y recibir solicitudes de cotización al instante"
     elif any(k in niche_lower for k in ["dulce", "dulcer", "confiter", "botan", "snack"]):
-        benefit = "mostrar su catálogo de paquetes y productos para recibir pedidos por mayoreo o menudeo en WhatsApp"
+        benefit = "mostrar su catálogo para recibir pedidos directos a WhatsApp"
     else:
-        benefit = "contar con una plataforma web rápida y moderna que posicione su negocio en Google e impulse sus ventas por WhatsApp"
+        benefit = "impulsar sus pedidos y ventas directas por WhatsApp con una plataforma moderna"
 
-    portfolio_url = PORTFOLIO_LINKS["portfolio"]
-    ig_url = PORTFOLIO_LINKS["instagram"]
+    # Generar o resolver la demo interactiva específica para este negocio
+    if not demo_slug:
+        try:
+            from agente.tools.demo_generator import generate_business_demo
+            d = generate_business_demo(business_name=clean_name, niche=niche, city="Torreón", phone=phone)
+            demo_slug = d.get("slug", "")
+        except Exception as e:
+            logger.warning("No se pudo generar demo automática para %s: %s", clean_name, e)
+
+    demo_url = f"https://agente-hgba.onrender.com/demo/{demo_slug}" if demo_slug else "https://st24030217-maker.github.io/cv-salinas/"
 
     pitch = (
-        f"{greeting}\n\n"
-        f"Les escribe Sebastián Salinas de SSSSolutions (@ssss.olutions) aquí en La Laguna. "
-        f"Estuve revisando su negocio y les preparé una muestra de cómo pueden {benefit}.\n\n"
-        f"Les comparto nuestro trabajo para que conozcan nuestros desarrollos:\n"
-        f"• Portafolio: {portfolio_url}\n"
-        f"• Instagram: {ig_url}\n\n"
-        f"¿Me permiten compartirles la propuesta visual para que la vean en su celular sin ningún compromiso?"
+        f"{greeting} Les escribe Sebastián Salinas de SSSSolutions (@ssss.olutions) aquí en Torreón.\n\n"
+        f"Me gustó mucho el concepto de {clean_name} y les preparé una muestra interactiva rápida de cómo se vería su menú digital para {benefit}:\n\n"
+        f"👉 {demo_url}\n\n"
+        f"Échenle un ojo en su celular, no tiene ningún costo ni compromiso. ¿Qué les parece el diseño?"
     )
     return pitch
 
