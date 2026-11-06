@@ -902,9 +902,16 @@ async function startWhatsApp() {
           }, null, 2));
           console.log(`[MUSE VINCULADO] Chat guardado como destino de Muse: ${remoteJid}`);
           try {
+            // Confirmar vinculación
             await sock.sendMessage(remoteJid, {
-              text: "✅ ¡Chat s.solutions vinculado con éxito! A partir de ahora, Sebax enviará a este chat los reportes de todos los números y prospectos que entren."
+              text: "✅ ¡Conexión establecida con Muse (s.solutions)! Sebax ha vinculado esta terminal. Compilando reporte inicial..."
             });
+            // Solicitar a FastAPI que genere y envíe el reporte completo a este chat
+            try {
+              await callFastAPI("/api/muse/send-report", { jid: remoteJid });
+            } catch (err) {
+              console.error("Error al disparar reporte inicial de FastAPI:", err.message);
+            }
           } catch (e) {
             console.error("Error al confirmar vinculación a Muse:", e.message);
           }

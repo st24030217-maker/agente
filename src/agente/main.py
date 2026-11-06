@@ -1229,3 +1229,67 @@ def start():
 
 if __name__ == "__main__":
     start()
+
+
+class MuseReportRequest(BaseModel):
+    jid: str = ""
+
+@app.post("/api/muse/send-report")
+async def send_muse_report_api(payload: MuseReportRequest):
+    """Genera y envía el reporte comercial completo a Muse (s.solutions) por WhatsApp."""
+    target_jid = payload.jid.strip()
+    if not target_jid:
+        muse_file = DATA_DIR / "muse_config.json"
+        if muse_file.exists():
+            try:
+                muse_data = json.loads(muse_file.read_text(encoding="utf-8"))
+                target_jid = muse_data.get("muse_jid", "")
+            except Exception:
+                pass
+
+    if not target_jid:
+        return {"error": "No hay JID de Muse configurado."}
+
+    leads = _load_leads()
+    now_str = datetime.now().strftime("%d/%m/%Y %H:%M")
+    
+    total = len(leads)
+    contactados = sum(1 for l in leads if l.get("status") == "contactado")
+    respondieron = sum(1 for l in leads if l.get("status") in ["respondio", "interesado"])
+    nuevos = sum(1 for l in leads if l.get("status") == "nuevo")
+
+    report_lines = [
+        "📊 *REPORTE EJECUTIVO PARA MUSE (s.solutions)*",
+        "AGENCIA: SSSSolutions (@ssss.olutions)",
+        f"📅 Fecha: {now_str}",
+        "─────────────────────────────────",
+        f"📈 *Métricas del Embudo en La Laguna:*",
+        f"• Total Negocios Registrados: {total}",
+        f"• Contactados con Propuesta: {contactados}",
+        f"• Respondieron / Interesados: {respondieron}",
+        f"• Nuevos en Cola con Prototipo: {nuevos}",
+        "─────────────────────────────────",
+        "🎯 *Últimos Números y Prospectos Activos:*"
+    ]
+
+    for i, l in enumerate(leads[:8]):
+        bname = l.get("name") or l.get("business_name") or "Negocio Local"
+        phone = l.get("phone") or "N/A"
+        st = l.get("status", "nuevo").upper()
+        slug = l.get("demo_slug")
+        demo_txt = f" (Demo: /demo/{slug})" if slug else ""
+        report_lines.append(f"{i+1}. *{bname}* | +{phone} [{st}]{demo_txt}")
+
+    report_lines.extend([
+        "─────────────────────────────────",
+        "🚀 *Estado del Agente:*",
+        "• WhatsApp: Baileys Permanente Conectado",
+        "• Radar de Visitas: Activo en demos interactivas",
+        "• Prospección: Comarca Lagunera (Torreón, Gómez, Lerdo)",
+        "─────────────────────────────────",
+        "Reporte compilado y transmitido automáticamente por Sebax."
+    ])
+
+    report_msg = "\n".join(report_lines)
+    await asyncio.to_thread(send_whatsapp_message, to_number=target_jid, message=report_msg)
+    return {"success": True, "target": target_jid}
