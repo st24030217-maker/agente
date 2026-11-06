@@ -890,6 +890,27 @@ async function startWhatsApp() {
         ).trim();
         if (!incomingText) continue;
 
+        // Detector de vinculación de chat Muse / s.solutions
+        const lowerText = incomingText.toLowerCase();
+        if (lowerText.includes("#muse") || lowerText.includes("vincular muse")) {
+          const MUSE_FILE = path.resolve(PROJECT_ROOT, "data", "muse_config.json");
+          fs.mkdirSync(path.dirname(MUSE_FILE), { recursive: true });
+          fs.writeFileSync(MUSE_FILE, JSON.stringify({
+            muse_jid: remoteJid,
+            linked_at: new Date().toISOString(),
+            linked_by_text: incomingText
+          }, null, 2));
+          console.log(`[MUSE VINCULADO] Chat guardado como destino de Muse: ${remoteJid}`);
+          try {
+            await sock.sendMessage(remoteJid, {
+              text: "✅ ¡Chat s.solutions vinculado con éxito! A partir de ahora, Sebax enviará a este chat los reportes de todos los números y prospectos que entren."
+            });
+          } catch (e) {
+            console.error("Error al confirmar vinculación a Muse:", e.message);
+          }
+          continue;
+        }
+
         const messageKey = `${remoteJid}:${msg.key.id || incomingText}`;
         if (processedIncomingMessageIds.has(messageKey)) continue;
         processedIncomingMessageIds.add(messageKey);

@@ -893,11 +893,32 @@ async def process_incoming_lead(sender: str, message: str) -> dict:
 
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Si NO es un prospecto ya registrado en data/leads.json, es un contacto personal o chat privado.
-    # NUNCA responder de forma automática a contactos personales o números no registrados como leads.
+    # Si NO es un prospecto registrado, verificar si es un nuevo cliente preguntando por servicios comerciales
     if not matched_lead:
-        logger.info("Mensaje ignorado de %s: no es un prospecto registrado en leads.json (contacto personal).", sender_digits)
-        return {"is_lead": False, "reply": ""}
+        commercial_keywords = [
+            "precio", "cotiz", "costo", "cuanto", "cuánto", "página", "pagina", "web",
+            "menú", "menu", "bot", "agente", "servicio", "paquete", "ssssolutions",
+            "informes", "informacion", "información", "presupuesto", "catalogo", "catálogo"
+        ]
+        is_commercial_inquiry = any(k in payload.message.lower() for k in commercial_keywords)
+
+        if is_commercial_inquiry:
+            logger.info("¡Nuevo prospecto entrante detectado de %s con consulta comercial!", sender_digits)
+            lead_id = len(leads) + 1
+            matched_lead = {
+                "id": lead_id,
+                "name": f"Inbound {sender_digits[-4:]}",
+                "phone": sender_digits,
+                "city": "La Laguna",
+                "niche": "inbound comercial",
+                "notes": f"Llegó directo preguntando: '{payload.message}'",
+                "created_at": now_str,
+                "status": "nuevo"
+            }
+            leads.append(matched_lead)
+        else:
+            logger.info("Mensaje ignorado de %s: no es un prospecto registrado ni consulta comercial (contacto personal).", sender_digits)
+            return {"is_lead": False, "reply": ""}
 
     # 1. Clasificación inteligente de intención comercial y detección de Lead Caliente
     intent_data = classify_lead_intent(payload.message)
@@ -980,6 +1001,30 @@ async def process_incoming_lead(sender: str, message: str) -> dict:
         await asyncio.to_thread(send_whatsapp_message, to_number="8719164677", message=notice)
     except Exception as e:
         logger.warning("Fallo al enviar alerta de lead a Sebastián: %s", e)
+
+    # Envío automático de Reporte a Muse (chat s.solutions)
+    muse_file = DATA_DIR / "muse_config.json"
+    if muse_file.exists():
+        try:
+            muse_data = json.loads(muse_file.read_text(encoding="utf-8"))
+            muse_jid = muse_data.get("muse_jid")
+            if muse_jid:
+                muse_report = (
+                    f"📊 REPORTE DE PROSPECTO PARA MUSE (s.solutions)\n"
+                    f"─────────────────────────────────\n"
+                    f"📱 Número: +{matched_lead.get('phone', sender_digits)}\n"
+                    f"🏢 Nombre: {matched_lead.get('name', 'Inbound')}\n"
+                    f"⏰ Fecha y hora: {now_str}\n"
+                    f"💬 Mensaje del cliente: '{payload.message}'\n"
+                    f"🎯 Intención: {intent_label} ({'🔥 CALIENTE' if is_hot else 'Normal'})\n"
+                    f"🤖 Respuesta de Sebax: '{ai_reply}'\n"
+                    f"─────────────────────────────────\n"
+                    f"📋 Estado: Registrado en CRM de SSSSolutions"
+                )
+                await asyncio.to_thread(send_whatsapp_message, to_number=muse_jid, message=muse_report)
+                logger.info("Reporte enviado exitosamente a Muse en chat %s", muse_jid)
+        except Exception as e:
+            logger.warning("Fallo al enviar reporte a Muse: %s", e)
 
     return {"is_lead": True, "reply": ai_reply, "lead": matched_lead, "is_hot": is_hot}
 
