@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from agente.config import settings, BASE_DIR, DATA_DIR
 from agente.agent import coordinator
+from agente import kapso
 from agente.security import (
     is_admin_request,
     is_bridge_request,
@@ -70,7 +71,7 @@ logger = logging.getLogger("agente")
 app = FastAPI(title="Sebax - AI Personal Agent", version="1.0.0")
 
 # Rutas accesibles sin ADMIN_TOKEN (el webhook hace su propia verificación de origen).
-PUBLIC_PATHS = {"/health", "/webhook/whatsapp", "/api/webhook/whatsapp"}
+PUBLIC_PATHS = {"/health", "/webhook/whatsapp", "/api/webhook/whatsapp", "/webhook/kapso"}
 PUBLIC_PREFIXES = ("/demo/",)
 # Todo lo que empiece así requiere ADMIN_TOKEN, sin importar el método.
 PROTECTED_PREFIXES = ("/api/", "/apj/", "/chat", "/qr", "/pairing-code")
@@ -264,8 +265,99 @@ async def whatsapp_webhook(request: Request):
         coordinator.reset_chat(sender)
         return {"reply": "Conversacion y contexto reiniciados exitosamente."}
 
+    if is_self:
+        handoff_reply = kapso.handle_owner_command(message)
+        if handoff_reply:
+            return {"reply": handoff_reply}
+
     reply = await coordinator.process_message(chat_id=sender, message=message, is_admin=is_self)
     return {"reply": reply}
+
+@app.post("/webhook/kapso")
+async def kapso_webhook(request: Request, background_tasks: BackgroundTasks):
+    """Mensajes de clientes que llegan al número de WhatsApp conectado en Kapso."""
+    raw_body = await request.body()
+    if not kapso.verify_signature(raw_body, request.headers.get("x-webhook-signature")):
+        logger.warning("Webhook de Kapso rechazado: firma X-Webhook-Signature inválida o ausente.")
+        return Response(content="Invalid signature", status_code=401)
+    try:
+        event = json.loads(raw_body)
+    except Exception:
+        return Response(content="Invalid JSON", status_code=400)
+    if not isinstance(event, dict):
+        return Response(content="Invalid JSON", status_code=400)
+
+    event_name = request.headers.get("x-webhook-event", "")
+    if event_name and event_name != "whatsapp.message.received":
+        return Response(content="OK", status_code=200)
+    if kapso.already_processed(request.headers.get("x-idempotency-key")):
+        return Response(content="Already processed", status_code=200)
+
+    for msg in kapso.extract_messages(event):
+        if kapso.already_processed(msg.get("id")):
+            continue
+        # Responder 200 de inmediato; la IA trabaja en segundo plano (Kapso espera <10 s).
+        background_tasks.add_task(handle_kapso_message, msg)
+    return Response(content="OK", status_code=200)
+
+
+async def handle_kapso_message(msg: dict) -> None:
+    sender, text = msg["sender"], msg["text"]
+    is_owner = is_owner_number(sender)
+    logger.info("Kapso recibido de [%s]: %s", sender, text)
+    try:
+        if is_owner:
+            command_reply = kapso.handle_owner_command(text)
+            if command_reply:
+                await asyncio.to_thread(kapso.send_text, sender, command_reply)
+                return
+
+        if not kapso.auto_reply_allowed(sender, is_owner):
+            logger.info("Kapso: respuesta automática desactivada para %s (KAPSO_AUTO_REPLY=%s).", sender, settings.kapso_auto_reply)
+            return
+
+        if kapso.is_paused(sender):
+            logger.info("Kapso: chat de %s en modo humano; la IA no responde.", sender)
+            return
+
+        trigger = kapso.needs_human(text)
+        if trigger:
+            kapso.pause(sender, trigger)
+            await asyncio.to_thread(kapso.send_text, sender, kapso.CUSTOMER_HANDOFF_REPLY)
+            owner = settings.owner_numbers[0] if settings.owner_numbers else ""
+            if owner:
+                notice = (
+                    "TRASPASO A HUMANO (WhatsApp de clientes)\n\n"
+                    f"Cliente: {msg.get('name') or 'Sin nombre'} (+{sender})\n"
+                    f"Motivo: \"{trigger}\"\n"
+                    f"Mensaje: \"{text}\"\n\n"
+                    "Sebax dejó de responder en ese chat. Contesta desde la bandeja de Kapso.\n"
+                    f"Para que Sebax vuelva a responder: /bot {sender}"
+                )
+                await asyncio.to_thread(send_whatsapp_message, to_number=owner, message=notice)
+            return
+
+        result = await process_incoming_lead(sender, text, force_inbound=True, contact_name=msg.get("name", ""))
+        reply = result.get("reply")
+        if reply:
+            ok, detail = await asyncio.to_thread(kapso.send_text, sender, reply)
+            (logger.info if ok else logger.error)("Kapso respuesta a %s: %s", sender, detail)
+    except Exception as e:
+        logger.error("Error al procesar mensaje de Kapso de %s: %s", sender, e)
+
+
+@app.get("/api/kapso/status")
+def kapso_status():
+    return {
+        "configured": bool(settings.kapso_api_key and settings.kapso_phone_number_id),
+        "webhook_secret_configured": bool(settings.kapso_webhook_secret),
+        "phone_number_id": settings.kapso_phone_number_id,
+        "auto_reply": settings.kapso_auto_reply,
+        "test_numbers": settings.kapso_test_numbers,
+        "handoff_hours": settings.kapso_handoff_hours,
+        "paused_chats": kapso.list_paused(),
+    }
+
 
 async def handle_voice_quick_intent(message: str) -> str | None:
     """Interpreta intenciones directas por voz para el widget de iOS / Siri y devuelve respuesta ágil, humana y concisa."""
@@ -874,7 +966,7 @@ async def check_incoming_lead_api(payload: LeadIncomingCheck):
     return await process_incoming_lead(payload.sender, payload.message)
 
 
-async def process_incoming_lead(sender: str, message: str) -> dict:
+async def process_incoming_lead(sender: str, message: str, force_inbound: bool = False, contact_name: str = "") -> dict:
     """Registra/actualiza al prospecto, genera la respuesta comercial (sin herramientas) y avisa a Sebastián.
     Lo usan el puente Baileys (vía /api/leads/incoming) y el webhook de Meta Cloud API."""
     payload = LeadIncomingCheck(sender=sender, message=message)
@@ -900,14 +992,15 @@ async def process_incoming_lead(sender: str, message: str) -> dict:
             "menú", "menu", "bot", "agente", "servicio", "paquete", "ssssolutions",
             "informes", "informacion", "información", "presupuesto", "catalogo", "catálogo"
         ]
-        is_commercial_inquiry = any(k in payload.message.lower() for k in commercial_keywords)
+        # En el número de clientes (Kapso) todo mensaje se trata como consulta comercial.
+        is_commercial_inquiry = force_inbound or any(k in payload.message.lower() for k in commercial_keywords)
 
         if is_commercial_inquiry:
             logger.info("¡Nuevo prospecto entrante detectado de %s con consulta comercial!", sender_digits)
             lead_id = len(leads) + 1
             matched_lead = {
                 "id": lead_id,
-                "name": f"Inbound {sender_digits[-4:]}",
+                "name": contact_name or f"Inbound {sender_digits[-4:]}",
                 "phone": sender_digits,
                 "city": "La Laguna",
                 "niche": "inbound comercial",
