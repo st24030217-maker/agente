@@ -46,6 +46,16 @@ class Settings(BaseModel):
     meta_wa_verify_token: str = os.getenv("META_WA_VERIFY_TOKEN", "")
     # App Secret de Meta para validar la firma X-Hub-Signature-256 del webhook
     meta_app_secret: str = os.getenv("META_APP_SECRET", "")
+    # Kapso (canal de clientes). La API key SOLO desde el entorno, nunca en el código.
+    kapso_api_key: str = os.getenv("KAPSO_API_KEY", "")
+    kapso_phone_number_id: str = os.getenv("KAPSO_PHONE_NUMBER_ID", "")
+    kapso_webhook_secret: str = os.getenv("KAPSO_WEBHOOK_SECRET", "")
+    kapso_api_base: str = os.getenv("KAPSO_API_BASE", "https://api.kapso.ai/meta/whatsapp/v24.0")
+    # off = no responde | test = solo KAPSO_TEST_NUMBERS y el dueño | on = todos los clientes
+    kapso_auto_reply: str = os.getenv("KAPSO_AUTO_REPLY", "test").strip().lower()
+    kapso_test_numbers: list[str] = _csv_env("KAPSO_TEST_NUMBERS")
+    # Horas que la IA permanece en silencio tras un traspaso a humano (0 = hasta /bot <numero>)
+    kapso_handoff_hours: float = float(os.getenv("KAPSO_HANDOFF_HOURS", "24"))
     # Google Maps / Places API vía Serper
     serper_api_key: str = os.getenv("SERPER_API_KEY", "")
 

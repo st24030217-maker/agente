@@ -625,6 +625,9 @@ def classify_lead_intent(message_text: str) -> dict:
 
 async def generate_lead_reply(lead_name: str, lead_niche: str, incoming_message: str) -> str:
     """Genera una respuesta inteligente de Sebax para atender a un prospecto comercial que ha respondido en WhatsApp."""
+    # Prospectos entrantes sin nombre conocido ("Inbound 1234"): no mostrar el identificador interno al cliente.
+    if not lead_name or lead_name.startswith("Inbound "):
+        lead_name = "su negocio"
     try:
         import asyncio
         from google import genai
