@@ -256,7 +256,8 @@ async def whatsapp_webhook(request: Request):
 
     logger.info("Mensaje Baileys recibido de [%s]: %s", sender, message)
 
-    is_self = is_owner_number(sender)
+    # El puente envía tu chat personal como "self_user"; la petición ya se autenticó con X-Bridge-Secret.
+    is_self = sender.lower() in ("self", "self_user", "yo", "mismo") or is_owner_number(sender)
     if not is_self and not number_in(sender, settings.allowed_numbers):
         logger.warning("Mensaje ignorado del remitente no autorizado: %s", sender)
         return {"reply": ""}
